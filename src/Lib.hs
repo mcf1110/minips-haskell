@@ -2,5 +2,9 @@ module Lib
     ( someFunc
     ) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import qualified Data.ByteString as B
+
+someFunc :: FilePath -> IO ()
+someFunc path = do
+  contents <- B.readFile path
+  print $ B.unpack contents

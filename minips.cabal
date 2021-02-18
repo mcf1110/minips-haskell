@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e6fa5ea1a5445e4861c4d29da6ddc78233cf53e5adcdd1b5a4dc6859296662be
+-- hash: a85e4e0efc34dc74eeaeb9f2b666667b0a70104ed4eb2ccb88d84afe2e9e8ba0
 
 name:           minips
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , bytestring
   default-language: Haskell2010
 
 executable minips-exe
@@ -45,6 +46,7 @@ executable minips-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , minips
   default-language: Haskell2010
 
@@ -58,5 +60,7 @@ test-suite minips-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , minips
+    , tasty
   default-language: Haskell2010
