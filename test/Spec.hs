@@ -38,6 +38,9 @@ iTests = [ ("Add Immediate",
               [(0x10000006, "beq $zero, $zero, 0x00000006", (IInstr Beq 0 0 6))
               ,(0x11310012, "beq $t1, $s1, 0x00000012", (IInstr Beq 9 17 18))
               ,(0x12200002, "beq $s1, $zero, 0x00000002", (IInstr Beq 17 0 2))])
+          ,("Branch on Not Equal", 
+              [(0x1531000e, "bne $t1, $s1, 0x0000000e", (IInstr Bne 9 17 14))
+              ,(0x15310005, "bne $t1, $s1, 0x00000005", (IInstr Bne 9 17 5))])
           ,("Load Upper Immediate", 
               [(0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))])
           ,("Or Immediate", 

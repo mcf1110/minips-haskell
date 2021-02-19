@@ -86,7 +86,7 @@ showInstruction ins@(RInstr funct rs rt rd _) =
     (toLower <$> show funct) <> " " <> intercalate ", " [regNumberToName rd, regNumberToName rs, regNumberToName rt]
 showInstruction ins@(IInstr op rs rt rd) 
     | op `elem` [Lui] = mkIns [regNumberToName rt, hx rd]
-    | op `elem` [Beq]  = mkIns [regNumberToName rs, regNumberToName rt, hx rd]
+    | op `elem` [Beq, Bne]  = mkIns [regNumberToName rs, regNumberToName rt, hx rd]
     | otherwise = mkIns [regNumberToName rt, regNumberToName rs, show $ BV.int rd]
     where 
         mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
