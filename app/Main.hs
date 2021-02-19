@@ -14,6 +14,5 @@ type Segment = [W.Word32]
 
 main :: IO ()
 main = do
-    (reg, mem) <- Lib.loadProgram "./inputs/03.input"
-    showMemory mem
-    print reg
+    state <- Lib.loadProgram "./inputs/03.input"
+    printState state
