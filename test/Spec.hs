@@ -26,12 +26,15 @@ rTests = [ ("Add", [
           ]
 jTests = []
 iTests = [ ("Add Immediate", [ 
-            (0x20080003, "addi $t0, $zero, 3", (IInstr AddI 0 8 3)),
-            (0x20090004, "addi $t1, $zero, 4", (IInstr AddI 0 9 4)),
-            (0x20020001, "addi $v0, $zero, 1", (IInstr AddI 0 2 1)),
-            (0x2002000a, "addi $v0, $zero, 10", (IInstr AddI 0 2 10))
+              (0x20080003, "addi $t0, $zero, 3", (IInstr AddI 0 8 3)),
+              (0x20090004, "addi $t1, $zero, 4", (IInstr AddI 0 9 4)),
+              (0x20020001, "addi $v0, $zero, 1", (IInstr AddI 0 2 1)),
+              (0x2002000a, "addi $v0, $zero, 10", (IInstr AddI 0 2 10))
+            ]),
+            ("Load Upper Immediate", [ 
+              (0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))
             ])
-          ]
+         ]
 
 
 decodingTests = [

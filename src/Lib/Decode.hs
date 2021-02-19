@@ -14,7 +14,7 @@ data Instr =
 
 
 data Funct = Add | AddU | And | Jr | Nor | Or | Slt | Sltu | Sll | Srl | Sub | Subu deriving (Show, Eq)
-data IOp = AddI deriving (Show, Eq)
+data IOp = AddI | Lui deriving (Show, Eq)
 data JOp = J | Jal deriving (Show, Eq)
 
 type Program = [Instr]
@@ -45,23 +45,24 @@ decodeRFormat = fromList . getFields [6,5,5,5,5,6]
         fromList [_ ,s,t,d,shamt, f] = if f == 0x0c then Syscall else RInstr (decodeFunct f) s t d shamt
         decodeFunct :: BV.BitVector -> Funct
         decodeFunct 0x20 = Add
-        -- decodeFunct 0x21 = AddU
-        -- decodeFunct 0x24 = And
-        -- decodeFunct 0x08 = Jr
-        -- decodeFunct 0x27 = Nor
-        -- decodeFunct 0x25 = Or
-        -- decodeFunct 0x2a = Slt
-        -- decodeFunct 0x2b = Sltu
-        -- decodeFunct 0x00 = Sll
-        -- decodeFunct 0x02 = Srl
-        -- decodeFunct 0x22 = Sub
-        -- decodeFunct 0x23 = Subu
+        decodeFunct 0x21 = AddU
+        decodeFunct 0x24 = And
+        decodeFunct 0x08 = Jr
+        decodeFunct 0x27 = Nor
+        decodeFunct 0x25 = Or
+        decodeFunct 0x2a = Slt
+        decodeFunct 0x2b = Sltu
+        decodeFunct 0x00 = Sll
+        decodeFunct 0x02 = Srl
+        decodeFunct 0x22 = Sub
+        decodeFunct 0x23 = Subu
 
 decodeIFormat :: BV.BitVector -> Instr
 decodeIFormat =  fromList . getFields [6,5,5,16]
     where 
         fromList [op, s, t, i] = IInstr (decodeOp op) s t i
         decodeOp 0x8 = AddI
+        decodeOp 0xf = Lui
 
 decodeJFormat :: BV.BitVector -> Instr
 decodeJFormat _ = undefined

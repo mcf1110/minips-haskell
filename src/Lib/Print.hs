@@ -84,7 +84,9 @@ printProgram = mapM_ (putStrLn . showInstruction)
 showInstruction :: Instr -> String
 showInstruction ins@(RInstr funct rs rt rd _) = 
     (toLower <$> show funct) <> " " <> intercalate ", " [regNumberToName rd, regNumberToName rs, regNumberToName rt]
-showInstruction ins@(IInstr op rs rt rd) = 
-    (toLower <$> show op) <> " " <> intercalate ", " [regNumberToName rt, regNumberToName rs, show $ BV.int rd]
+showInstruction ins@(IInstr op rs rt rd) 
+    | op `elem` [Lui] = mkIns [regNumberToName rt, (printf "0x%08x" $ BV.int rd)]
+    | otherwise = mkIns [regNumberToName rt, regNumberToName rs, show $ BV.int rd]
+    where mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
 showInstruction ins@(JInstr _ _ ) = "J"
 showInstruction Syscall = "syscall"
