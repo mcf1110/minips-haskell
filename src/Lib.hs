@@ -1,20 +1,16 @@
-module Lib (showFile, readFromFile) where
+module Lib (loadProgram) where
 
-import qualified Data.ByteString as B
-import qualified Data.List.Split as S
-import qualified Data.Word as W
-import Numeric (showHex)
+import qualified Data.IntMap.Lazy as IM
+import Lib.Registers
+import Lib.Memory
+import Lib.Segment
+import qualified Lib.File as F
 
-toWord32 :: [W.Word8] -> W.Word32
-toWord32 ws = toEnum $ sum $ zipWith (*) is [2^(x*8) | x <- [3,2..0]]
-  where is = reverse $ fromEnum <$> ws
+type Program = (Registers, Memory)
 
-readFromFile :: FilePath -> IO [W.Word32]
-readFromFile path = do
-  contents <- B.readFile path
-  return $ map toWord32 $ S.chunksOf 4 $ B.unpack contents
-
-showFile :: FilePath -> IO ()
-showFile path = do
-  ws <- readFromFile path
-  mapM_ (putStrLn . (flip showHex "")) ws
+loadProgram :: FilePath -> IO Program
+loadProgram fp = do
+    textSegment <- F.readFile $ fp <> ".text"
+    dataSegment <- F.readFile $ fp <> ".data"
+    let memory =  IM.filter (/= 0) $ loadSegment 0x10010000 dataSegment <> loadSegment 0x00400000 textSegment
+    return (startingRegisters, memory)
