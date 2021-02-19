@@ -8,6 +8,9 @@ import qualified Data.BitVector as BV
 main :: IO ()
 main = defaultMain tests
 
+-- TODO
+-- JR, SLT
+
 tests = testGroup "Unit tests"
   [ testCase "wordToBV" $
       assertEqual "" (wordToBV 0x00af8020) (BV.fromBits b),
@@ -27,6 +30,9 @@ rTests = [ ("Add",
 jTests = [("Jump", 
           [(0x08100022, "j 0x00400088", (JInstr J 0x00400088))
           ,(0x08100026, "j 0x00400098", (JInstr J 0x00400098))
+          ])
+         ,("Jump and Link", 
+          [(0x0c10001d, "jal 0x00400074", (JInstr Jal 0x00400074))
           ])
          ]
 iTests = [ ("Add Immediate", 

@@ -73,3 +73,4 @@ decodeJFormat = fromList . getFields [6, 26]
     where 
         fromList [op, tgt] = JInstr (decodeOp op) (4*tgt)
         decodeOp 0x2 = J
+        decodeOp 0x3 = Jal
