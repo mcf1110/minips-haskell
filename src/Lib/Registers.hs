@@ -24,6 +24,8 @@ numberToName = IM.fromAscList $ zip [0..] $
                 ,"$gp" ,"$sp" ,"$fp" ,"$ra"
                 ,"pc" ,"hi" ,"lo"
                 ]
+
+
 showRegisters :: Registers -> [String]
 showRegisters r = 
     ["\t┌──────────────────────────┐"

@@ -25,6 +25,7 @@ dependencies:
 - containers
 - split
 - vector
+- bv
 
 library:
   source-dirs: src
@@ -51,3 +52,4 @@ tests:
     dependencies:
     - minips
     - tasty
+    - tasty-hunit
