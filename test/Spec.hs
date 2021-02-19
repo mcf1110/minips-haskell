@@ -25,21 +25,19 @@ rTests = [ ("Add", [
             ])
           ]
 jTests = []
-iTests = [ ("Add Immediate", [ 
-              (0x20080003, "addi $t0, $zero, 3", (IInstr Addi 0 8 3)),
-              (0x20090004, "addi $t1, $zero, 4", (IInstr Addi 0 9 4)),
-              (0x20020001, "addi $v0, $zero, 1", (IInstr Addi 0 2 1)),
-              (0x2002000a, "addi $v0, $zero, 10", (IInstr Addi 0 2 10))
-            ]),
-            ("Add Immediate Unsigned", [ 
-              (0x24020004, "addiu $v0, $zero, 4", (IInstr Addiu 0 2 4))
-            ]),
-            ("Load Upper Immediate", [ 
-              (0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))
-            ]),
-            ("Or Immediate", [ 
-              (0x34240000, "ori $a0, $at, 0", (IInstr Ori 1 4 0))
-            ])
+iTests = [ ("Add Immediate", 
+              [(0x20080003, "addi $t0, $zero, 3", (IInstr Addi 0 8 3))
+              ,(0x20090004, "addi $t1, $zero, 4", (IInstr Addi 0 9 4))
+              ,(0x20020001, "addi $v0, $zero, 1", (IInstr Addi 0 2 1))
+              ,(0x2002000a, "addi $v0, $zero, 10", (IInstr Addi 0 2 10))])
+          ,("Add Immediate Unsigned", 
+              [(0x24020004, "addiu $v0, $zero, 4", (IInstr Addiu 0 2 4))
+              ,(0x2404000a, "addiu $a0, $zero, 10", (IInstr Addiu 0 4 10))
+              ,(0x2402000b, "addiu $v0, $zero, 11", (IInstr Addiu 0 2 11))])
+          ,("Load Upper Immediate", 
+              [(0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))])
+          ,("Or Immediate", 
+              [(0x34240000, "ori $a0, $at, 0", (IInstr Ori 1 4 0))])
          ]
 
 
