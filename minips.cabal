@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b79e5484c44597a36632b40e40419c0c6a26349c92a4e9aab56d38ad6331efbb
+-- hash: 354b2af169874bd0fc056f547e7ec560295662db0cdea5a87b6b3ea47174c9a2
 
 name:           minips
 version:        0.1.0.0
@@ -32,8 +32,10 @@ library
       Lib.File
       Lib.Memory
       Lib.Operations
+      Lib.Print
       Lib.Registers
       Lib.Segment
+      Lib.State
   other-modules:
       Paths_minips
   hs-source-dirs:

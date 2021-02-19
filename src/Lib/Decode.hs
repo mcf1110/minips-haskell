@@ -1,10 +1,29 @@
 module Lib.Decode where
+
 import qualified Data.Word as W
 import qualified Data.BitVector as BV
 
+import Lib.Segment
+
+
+data Instr = 
+    RInstr { funct :: Funct, rs:: BV.BitVector, rt :: BV.BitVector, rd :: BV.BitVector, shamt :: BV.BitVector} |
+    IInstr { iop :: IOp, rs:: BV.BitVector, rt :: BV.BitVector, immediate :: BV.BitVector } | 
+    JInstr { jop :: JOp, tgt:: BV.BitVector} |
+    Syscall deriving (Show, Eq)
+
+
+data Funct = Add | AddU | And | Jr | Nor | Or | Slt | Sltu | Sll | Srl | Sub | Subu deriving (Show, Eq)
+data IOp = AddI deriving (Show, Eq)
+data JOp = J | Jal deriving (Show, Eq)
+
+type Program = [Instr]
+
+decodeProgram :: Segment -> Program
+decodeProgram = map (decode . wordToBV)
+
 wordToBV :: W.Word32 -> BV.BitVector
 wordToBV = BV.bitVec 32
-
 
 getFields :: [Int] -> BV.BitVector -> [BV.BitVector]
 getFields sizes bv = map get offsets
@@ -19,17 +38,6 @@ decode bv = case (BV.extract 31 26 bv) of
     2 -> decodeJFormat bv
     3 -> decodeJFormat bv
     _ -> decodeIFormat bv
-
-data Instr = 
-    RInstr { funct :: Funct, rs:: BV.BitVector, rt :: BV.BitVector, rd :: BV.BitVector, shamt :: BV.BitVector} |
-    IInstr { iop :: IOp, rs:: BV.BitVector, rt :: BV.BitVector, immediate :: BV.BitVector } | 
-    JInstr { jop :: JOp, rs:: BV.BitVector, rt :: BV.BitVector, immediate :: BV.BitVector } |
-    Syscall deriving (Show, Eq)
-
-
-data Funct = Add | AddU | And | Jr | Nor | Or | Slt | Sltu | Sll | Srl | Sub | Subu deriving (Show, Eq)
-data IOp = AddI deriving (Show, Eq)
-data JOp = J | Jal deriving (Show, Eq)
 
 decodeRFormat :: BV.BitVector -> Instr
 decodeRFormat = fromList . getFields [6,5,5,5,5,6]
@@ -57,5 +65,3 @@ decodeIFormat =  fromList . getFields [6,5,5,16]
 
 decodeJFormat :: BV.BitVector -> Instr
 decodeJFormat _ = undefined
-
-x = wordToBV 0x20080003
