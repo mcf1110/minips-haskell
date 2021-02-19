@@ -31,11 +31,14 @@ iTests = [ ("Add Immediate", [
               (0x20020001, "addi $v0, $zero, 1", (IInstr Addi 0 2 1)),
               (0x2002000a, "addi $v0, $zero, 10", (IInstr Addi 0 2 10))
             ]),
+            ("Add Immediate Unsigned", [ 
+              (0x24020004, "addiu $v0, $zero, 4", (IInstr Addiu 0 2 4))
+            ]),
             ("Load Upper Immediate", [ 
               (0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))
             ]),
             ("Or Immediate", [ 
-              (0x34240000, "ori $a0, $at, 0x00000000", (IInstr Ori 1 4 0))
+              (0x34240000, "ori $a0, $at, 0", (IInstr Ori 1 4 0))
             ])
          ]
 
