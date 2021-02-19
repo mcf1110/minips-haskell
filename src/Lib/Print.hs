@@ -85,8 +85,11 @@ showInstruction :: Instr -> String
 showInstruction ins@(RInstr funct rs rt rd _) = 
     (toLower <$> show funct) <> " " <> intercalate ", " [regNumberToName rd, regNumberToName rs, regNumberToName rt]
 showInstruction ins@(IInstr op rs rt rd) 
-    | op `elem` [Lui] = mkIns [regNumberToName rt, (printf "0x%08x" $ BV.int rd)]
+    | op `elem` [Lui] = mkIns [regNumberToName rt, hx rd]
+    | op `elem` [Ori]  = mkIns [regNumberToName rt, regNumberToName rs, hx rd]
     | otherwise = mkIns [regNumberToName rt, regNumberToName rs, show $ BV.int rd]
-    where mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
+    where 
+        mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
+        hx = printf "0x%08x" . BV.int
 showInstruction ins@(JInstr _ _ ) = "J"
 showInstruction Syscall = "syscall"
