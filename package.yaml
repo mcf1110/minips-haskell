@@ -24,6 +24,7 @@ dependencies:
 - bytestring
 - containers
 - split
+- vector
 
 library:
   source-dirs: src
