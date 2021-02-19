@@ -14,7 +14,7 @@ data Instr =
 
 
 data Funct = Add | Addu | And | Jr | Nor | Or | Slt | Sltu | Sll | Srl | Sub | Subu deriving (Show, Eq)
-data IOp = Addi | Addiu | Lui | Ori deriving (Show, Eq)
+data IOp = Addi | Addiu | Lui | Ori | Beq deriving (Show, Eq)
 data JOp = J | Jal deriving (Show, Eq)
 
 type Program = [Instr]
@@ -63,6 +63,7 @@ decodeIFormat =  fromList . getFields [6,5,5,16]
         fromList [op, s, t, i] = IInstr (decodeOp op) s t i
         decodeOp 0x8 = Addi
         decodeOp 0x9 = Addiu
+        decodeOp 0x4 = Beq
         decodeOp 0xf = Lui
         decodeOp 0xd = Ori
 

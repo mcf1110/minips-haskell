@@ -34,6 +34,10 @@ iTests = [ ("Add Immediate",
               [(0x24020004, "addiu $v0, $zero, 4", (IInstr Addiu 0 2 4))
               ,(0x2404000a, "addiu $a0, $zero, 10", (IInstr Addiu 0 4 10))
               ,(0x2402000b, "addiu $v0, $zero, 11", (IInstr Addiu 0 2 11))])
+          ,("Branch on Equal", 
+              [(0x10000006, "beq $zero, $zero, 0x00000006", (IInstr Beq 0 0 6))
+              ,(0x11310012, "beq $t1, $s1, 0x00000012", (IInstr Beq 9 17 18))
+              ,(0x12200002, "beq $s1, $zero, 0x00000002", (IInstr Beq 17 0 2))])
           ,("Load Upper Immediate", 
               [(0x3c011001, "lui $at, 0x00001001", (IInstr Lui 0 1 4097))])
           ,("Or Immediate", 
