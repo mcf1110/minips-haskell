@@ -69,4 +69,7 @@ decodeIFormat =  fromList . getFields [6,5,5,16]
         decodeOp 0xd = Ori
 
 decodeJFormat :: BV.BitVector -> Instr
-decodeJFormat _ = undefined
+decodeJFormat = fromList . getFields [6, 26]
+    where 
+        fromList [op, tgt] = JInstr (decodeOp op) (4*tgt)
+        decodeOp 0x2 = J

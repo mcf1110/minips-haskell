@@ -19,12 +19,16 @@ tests = testGroup "Unit tests"
               replicate 9 False <> [True] <>
               replicate 5 False
 
-rTests = [ ("Add", [ 
-            (0x01098020, "add $s0, $t0, $t1", (RInstr Add 8 9 16 0)),
-            (0x00102020, "add $a0, $zero, $s0", (RInstr Add 0 16 4 0))
-            ])
+rTests = [ ("Add", 
+          [(0x01098020, "add $s0, $t0, $t1", (RInstr Add 8 9 16 0))
+          ,(0x00102020, "add $a0, $zero, $s0", (RInstr Add 0 16 4 0))
+          ])
           ]
-jTests = []
+jTests = [("Jump", 
+          [(0x08100022, "j 0x00400088", (JInstr J 0x00400088))
+          ,(0x08100026, "j 0x00400098", (JInstr J 0x00400098))
+          ])
+         ]
 iTests = [ ("Add Immediate", 
               [(0x20080003, "addi $t0, $zero, 3", (IInstr Addi 0 8 3))
               ,(0x20090004, "addi $t1, $zero, 4", (IInstr Addi 0 9 4))

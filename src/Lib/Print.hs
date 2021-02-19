@@ -91,5 +91,5 @@ showInstruction ins@(IInstr op rs rt rd)
     where 
         mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
         hx = printf "0x%08x" . BV.int
-showInstruction ins@(JInstr _ _ ) = "J"
+showInstruction ins@(JInstr op tgt ) = (toLower <$> show op) <> " " <> (printf "0x%08x" $ BV.int tgt)
 showInstruction Syscall = "syscall"
