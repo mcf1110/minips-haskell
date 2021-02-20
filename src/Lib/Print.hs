@@ -82,8 +82,11 @@ printProgram :: Program -> IO ()
 printProgram = mapM_ (putStrLn . showInstruction)
 
 showInstruction :: Instr -> String
-showInstruction ins@(RInstr funct rs rt rd _) = 
-    (toLower <$> show funct) <> " " <> intercalate ", " [regNumberToName rd, regNumberToName rs, regNumberToName rt]
+showInstruction ins@(RInstr funct rs rt rd _)
+    | funct `elem` [Jr]  = mkIns [regNumberToName rs]
+    | otherwise = (toLower <$> show funct) <> " " <> intercalate ", " [regNumberToName rd, regNumberToName rs, regNumberToName rt]
+    where 
+        mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
 showInstruction ins@(IInstr op rs rt rd) 
     | op `elem` [Lui] = mkIns [regNumberToName rt, hx rd]
     | op `elem` [Beq, Bne]  = mkIns [regNumberToName rs, regNumberToName rt, hx rd]
