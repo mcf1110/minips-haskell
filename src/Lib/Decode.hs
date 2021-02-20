@@ -50,6 +50,7 @@ data IOp
   | Lui
   | Ori
   | Lw
+  | Sw
   deriving (Show, Eq)
 
 data JOp
@@ -113,6 +114,7 @@ decodeIFormat = fromList . getFields [6, 5, 5, 16]
     decodeOp 0xf  = Lui
     decodeOp 0xd  = Ori
     decodeOp 0x23 = Lw
+    decodeOp 0x2b = Sw
 
 decodeJFormat :: BV.BitVector -> Instr
 decodeJFormat = fromList . getFields [6, 26]

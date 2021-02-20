@@ -85,6 +85,7 @@ iTests =
       , (0x8d840000, "lw $a0, 0($t4)", i Lw 12 4 0)
       , (0x8d8d0000, "lw $t5, 0($t4)", i Lw 12 13 0)
       ])
+  , ("Store Word", [(0xad8d0000, "sw $t5, 0($t4)", i Sw 12 13 0)])
   ]
 
 decodingTests =

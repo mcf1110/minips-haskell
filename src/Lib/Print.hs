@@ -116,13 +116,13 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
 showInstruction ins@(IInstr op rs rt rd)
   | op `elem` [Lui] = mkIns [rName rt, hx rd]
-  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, show $ BV.int rd]
-  | op `elem` [Lw] =
-    mkIns [rName rt, (show $ BV.int rd) <> "(" <> rName rs <> ")"]
-  | otherwise = mkIns [rName rt, rName rs, show $ BV.int rd]
+  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, dec rd]
+  | op `elem` [Lw, Sw] = mkIns [rName rt, (dec rd) <> "(" <> rName rs <> ")"]
+  | otherwise = mkIns [rName rt, rName rs, dec rd]
   where
     mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
     hx = printf "0x%08x" . BV.int
+    dec = show . BV.int
 showInstruction ins@(JInstr op tgt) =
   (toLower <$> show op) <> " " <> (printf "0x%08x" $ BV.int tgt)
 showInstruction Syscall = "syscall"
