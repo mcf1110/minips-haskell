@@ -33,6 +33,7 @@ library
       Lib.Memory
       Lib.Print
       Lib.Registers
+      Lib.Run
       Lib.Segment
       Lib.State
   other-modules:

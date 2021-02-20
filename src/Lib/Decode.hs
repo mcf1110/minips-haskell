@@ -61,7 +61,10 @@ data JOp
 type Program = [Instr]
 
 decodeProgram :: Segment -> Program
-decodeProgram = map (decode . wordToBV)
+decodeProgram = map decodeInstruction
+
+decodeInstruction :: W.Word32 -> Instr
+decodeInstruction = decode . wordToBV
 
 wordToBV :: W.Word32 -> BV.BitVector
 wordToBV = BV.bitVec 32

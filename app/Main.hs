@@ -2,8 +2,9 @@ module Main where
 
 import           Lib
 import           Lib.Print
+import           Lib.Run
 
 main :: IO ()
 main = do
-  pgm <- Lib.loadProgram "./inputs/08.sort"
-  printProgram pgm
+  st <- Lib.loadState "./inputs/01.soma"
+  runState st

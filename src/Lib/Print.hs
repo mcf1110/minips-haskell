@@ -18,15 +18,15 @@ import           Text.Printf      (printf)
 -- MEMORY
 showMemory :: Memory -> [String]
 showMemory m =
-  [ "\t┌─────────────────────────┐"
-  , "\t│          Memory         │"
-  , "\t├────────────┬────────────┤"
-  , "\t│    Addr    │    Code    │"
-  , "\t╞════════════╪════════════╡"
+  [ "┌─────────────────────────┐"
+  , "│          Memory         │"
+  , "├────────────┬────────────┤"
+  , "│    Addr    │    Code    │"
+  , "╞════════════╪════════════╡"
   ] <>
-  (map line $ IM.assocs m) <> ["\t└────────────┴────────────┘"]
+  (map line $ IM.assocs m) <> ["└────────────┴────────────┘"]
   where
-    line (addr, val) = printf "\t│ 0x%08x │ 0x%08x │" addr val
+    line (addr, val) = printf "│ 0x%08x │ 0x%08x │" addr val
 
 printMemory :: Memory -> IO ()
 printMemory = (mapM_ putStrLn) . showMemory
@@ -97,7 +97,7 @@ printState (r, m) = do
   mapM_ putStrLn $ zipWithDefault (showMemory m) (showRegisters r)
   -- based on https://stackoverflow.com/a/21350444
   where
-    memSpacing = '\t' : (replicate 23 ' ') <> "\t"
+    memSpacing = (replicate 23 ' ') <> "\t"
     infPad ls = (map Just ls) <> (repeat Nothing)
     zipWithDefault xs ys =
       map (\(x, y) -> (fromMaybe memSpacing x <> fromMaybe "" y)) $

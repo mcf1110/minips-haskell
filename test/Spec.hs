@@ -4,6 +4,9 @@ import           Test.Tasty.HUnit
 import qualified Data.BitVector   as BV
 import           Lib.Decode
 import           Lib.Print
+import qualified Lib.Registers    as R
+import           Lib.Run
+import           Lib.State
 
 main :: IO ()
 main = defaultMain tests
@@ -15,6 +18,7 @@ tests =
       assertEqual "" (wordToBV 0x00af8020) (BV.fromBits bits)
     , testGroup "Decoding" decodingTests
     , testGroup "Printing" printingTests
+    , testGroup "Running" runningTests
     ]
   where
     bits =
@@ -108,3 +112,15 @@ printingTests =
     makePrintTest (title, ts) = testGroup title $ map dt ts
     dt (_, src, instr) =
       testCase src $ assertEqual "" src (showInstruction instr)
+
+-- IInstr {iop = Addi, rs = [5]0, rt = [5]8, immediate = [16]3}
+runInstrInitial i = runInstruction i $ initialState [] []
+
+regAt ix = (R.get ix) . fst
+
+runningTests =
+  [ testCase "addi $t0, $zero, 3" $
+    assertEqual "" 3 (regAt 8 $ runInstrInitial $ i Addi 0 8 3)
+  , testCase "addi $t1, $zero, 4" $
+    assertEqual "" 4 (regAt 9 $ runInstrInitial $ i Addi 0 9 4)
+  ]
