@@ -110,7 +110,7 @@ printProgram = mapM_ (putStrLn . showInstruction)
 showInstruction :: Instr -> String
 showInstruction ins@(RInstr funct rs rt rd shamt)
   | funct `elem` [Jr] = mkIns [rName rs]
-  | funct `elem` [Srl, Sll] = mkIns [rName rd, rName rt, show $ BV.int shamt]
+  | funct `elem` [Srl, Sll] = mkIns [rName rd, rName rt, show $ BV.nat shamt]
   | otherwise = mkIns [rName rd, rName rs, rName rt]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
