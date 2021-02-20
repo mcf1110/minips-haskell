@@ -73,8 +73,8 @@ regNumberToNameMap =
   , "lo"
   ]
 
-regNumberToName :: Enum a => a -> String
-regNumberToName = (IM.!) regNumberToNameMap . fromEnum
+rName :: Enum a => a -> String
+rName = (IM.!) regNumberToNameMap . fromEnum
 
 showRegisters :: Registers -> [String]
 showRegisters r =
@@ -86,8 +86,7 @@ showRegisters r =
   ] <>
   (map line $ V.toList $ V.indexed r) <> ["\t└────────┴────┴────────────┘"]
   where
-    line (num, val) =
-      printf "\t│ %6s │ %02d │ 0x%08x │" (regNumberToName num) num val
+    line (num, val) = printf "\t│ %6s │ %02d │ 0x%08x │" (rName num) num val
 
 printRegisters :: Registers -> IO ()
 printRegisters = (mapM_ putStrLn) . showRegisters
@@ -109,20 +108,16 @@ printProgram :: Program -> IO ()
 printProgram = mapM_ (putStrLn . showInstruction)
 
 showInstruction :: Instr -> String
-showInstruction ins@(RInstr funct rs rt rd _)
-  | funct `elem` [Jr] = mkIns [regNumberToName rs]
-  | otherwise =
-    (toLower <$> show funct) <>
-    " " <>
-    intercalate
-      ", "
-      [regNumberToName rd, regNumberToName rs, regNumberToName rt]
+showInstruction ins@(RInstr funct rs rt rd shamt)
+  | funct `elem` [Jr] = mkIns [rName rs]
+  | funct `elem` [Srl, Sll] = mkIns [rName rd, rName rt, show $ BV.int shamt]
+  | otherwise = mkIns [rName rd, rName rs, rName rt]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
 showInstruction ins@(IInstr op rs rt rd)
-  | op `elem` [Lui] = mkIns [regNumberToName rt, hx rd]
-  | op `elem` [Beq, Bne] = mkIns [regNumberToName rs, regNumberToName rt, hx rd]
-  | otherwise = mkIns [regNumberToName rt, regNumberToName rs, show $ BV.int rd]
+  | op `elem` [Lui] = mkIns [rName rt, hx rd]
+  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, hx rd]
+  | otherwise = mkIns [rName rt, rName rs, show $ BV.int rd]
   where
     mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
     hx = printf "0x%08x" . BV.int
