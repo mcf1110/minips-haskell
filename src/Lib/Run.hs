@@ -22,12 +22,15 @@ runState st = do
       (st', sc) = runInstruction ins st
   mi <- runSc sc
   let st'' =
-        if isJust mi
-          then st'
-          else st'
+        case mi of
+          Just i  -> setInput st' i
+          Nothing -> st'
   if sc == Die
     then (putStrLn "--- Program Finished ---")
     else (runState st'') -- (printState st'')
+
+setInput :: State -> Int -> State
+setInput (r, m) i = (R.set 2 (toEnum i) r, m)
 
 runSc :: SC -> IO (Maybe Int)
 runSc GetInt = do
@@ -78,18 +81,19 @@ runInstruction ins (r, m) = (eval ins, NoOp)
     infixr 1 $=
     ($=) ad v = R.set ad v r
     ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
-    ($+::) ra im = addEnum (R.get ra r) (BV.nat im)
+    ($+:.) ra im = addEnum (R.get ra r) (BV.nat im)
     ($+:) ra im = addEnum (R.get ra r) (BV.int im)
     ($|:) ra im =
       toEnum $
       fromEnum $ (BV.bitVec 32 $ R.get ra r) BV..|. (BV.zeroExtend 32 im)
     ------
     eval (IInstr Addi rs rt im) = (incPC $ rt $= rs $+: im, m)
-    eval (IInstr Addiu rs rt im) = (incPC $ rt $= rs $+:: im, m)
+    eval (IInstr Addiu rs rt im) = (incPC $ rt $= rs $+:. im, m)
     eval (IInstr Lui rs rt im) =
       (incPC $ rt $= (toEnum $ fromEnum $ (BV.zeroExtend 32 im) BV.<<. 0x10), m)
     eval (IInstr Ori rs rt im) = (incPC $ rt $= rs $|: im, m)
     eval (RInstr Add rs rt rd _) = (incPC $ rd $= rs $+$ rt, m)
+    eval (RInstr Addu rs rt rd _) = (incPC $ rd $= rs $+$ rt, m)
     eval a = error $ "Falta implementar: " <> show a
 
 incPC :: R.Registers -> R.Registers

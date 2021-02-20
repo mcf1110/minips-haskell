@@ -163,4 +163,5 @@ runningTests =
       (getSC
          [0x20616c4f, 0x646e756d, 8559]
          [0x3c011001, 0x34240000, 0x24020004, 0xc])
+  , testCase "getint" $ assertEqual "" (GetInt) (getSC [] [0x24020005, 0xc])
   ]

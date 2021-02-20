@@ -6,6 +6,6 @@ import           Lib.Run
 
 main :: IO ()
 main = do
-  st <- Lib.loadState "./inputs/02.hello"
-  -- printState st
+  st <- Lib.loadState "./inputs/03.input"
+  printState st
   runState st
