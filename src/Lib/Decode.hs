@@ -88,16 +88,16 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeFunct :: BV.BitVector -> Funct
     decodeFunct 0x20 = Add
     decodeFunct 0x21 = Addu
-    decodeFunct 0x24 = And
+    -- decodeFunct 0x24 = And
     decodeFunct 0x08 = Jr
-    decodeFunct 0x27 = Nor
-    decodeFunct 0x25 = Or
+    -- decodeFunct 0x27 = Nor
+    -- decodeFunct 0x25 = Or
     decodeFunct 0x2a = Slt
-    decodeFunct 0x2b = Sltu
+    -- decodeFunct 0x2b = Sltu
     decodeFunct 0x00 = Sll
     decodeFunct 0x02 = Srl
-    decodeFunct 0x22 = Sub
-    decodeFunct 0x23 = Subu
+    -- decodeFunct 0x22 = Sub
+    -- decodeFunct 0x23 = Subu
 
 decodeIFormat :: BV.BitVector -> Instr
 decodeIFormat = fromList . getFields [6, 5, 5, 16]
