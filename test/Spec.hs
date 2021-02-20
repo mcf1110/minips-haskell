@@ -18,8 +18,8 @@ tests =
     "Unit tests"
     [ testCase "wordToBV" $
       assertEqual "" (wordToBV 0x00af8020) (BV.fromBits bits)
-    , testGroup "Decoding" decodingTests
-    , testGroup "Printing" printingTests
+    -- , testGroup "Decoding" decodingTests
+    -- , testGroup "Printing" printingTests
     , testGroup "Running" runningTests
     ]
   where
@@ -169,6 +169,6 @@ runningTests =
       ""
       (PutStr "")
       (getSC
-         [0, 0, 0x5600203a, 0x20ea636f]
+         [0, 0, 0x203a, 0x20ea636f]
          [0x3c011001, 0x3424000b, 0x24020004, 0xc])
   ]
