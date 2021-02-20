@@ -1,22 +1,22 @@
 module Lib.Decode where
 
 import qualified Data.BitVector as BV
-import qualified Data.Word as W
+import qualified Data.Word      as W
 
-import Lib.Segment
+import           Lib.Segment
 
 data Instr
   = RInstr
       { funct :: Funct
-      , rs :: BV.BitVector
-      , rt :: BV.BitVector
-      , rd :: BV.BitVector
+      , rs    :: BV.BitVector
+      , rt    :: BV.BitVector
+      , rd    :: BV.BitVector
       , shamt :: BV.BitVector
       }
   | IInstr
-      { iop :: IOp
-      , rs :: BV.BitVector
-      , rt :: BV.BitVector
+      { iop       :: IOp
+      , rs        :: BV.BitVector
+      , rt        :: BV.BitVector
       , immediate :: BV.BitVector
       }
   | JInstr

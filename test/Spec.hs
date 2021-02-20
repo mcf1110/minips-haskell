@@ -1,9 +1,9 @@
-import Test.Tasty
-import Test.Tasty.HUnit
+import           Test.Tasty
+import           Test.Tasty.HUnit
 
-import qualified Data.BitVector as BV
-import Lib.Decode
-import Lib.Print
+import qualified Data.BitVector   as BV
+import           Lib.Decode
+import           Lib.Print
 
 main :: IO ()
 main = defaultMain tests

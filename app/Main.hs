@@ -1,7 +1,7 @@
 module Main where
 
-import Lib
-import Lib.Print
+import           Lib
+import           Lib.Print
 
 main :: IO ()
 main = do

@@ -1,19 +1,19 @@
 module Lib.Print where
 
-import Lib.Decode
-import Lib.Memory
-import Lib.Registers
-import Lib.Segment
-import Lib.State
+import           Lib.Decode
+import           Lib.Memory
+import           Lib.Registers
+import           Lib.Segment
+import           Lib.State
 
-import qualified Data.BitVector as BV
+import qualified Data.BitVector   as BV
 import qualified Data.IntMap.Lazy as IM
-import qualified Data.Vector as V
+import qualified Data.Vector      as V
 
-import Data.Char (toLower)
-import Data.List (intercalate)
-import Data.Maybe (fromMaybe)
-import Text.Printf (printf)
+import           Data.Char        (toLower)
+import           Data.List        (intercalate)
+import           Data.Maybe       (fromMaybe)
+import           Text.Printf      (printf)
 
 -- MEMORY
 showMemory :: Memory -> [String]

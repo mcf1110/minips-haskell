@@ -1,7 +1,7 @@
 module Lib.Registers where
 
 import qualified Data.Vector as V
-import qualified Data.Word as W
+import qualified Data.Word   as W
 
 type Registers = V.Vector W.Word32
 

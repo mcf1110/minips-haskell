@@ -3,14 +3,14 @@ module Lib.File
   , readFile
   ) where
 
-import Numeric (showHex)
-import Prelude hiding (readFile)
+import           Numeric         (showHex)
+import           Prelude         hiding (readFile)
 
 import qualified Data.ByteString as B
 import qualified Data.List.Split as S
-import qualified Data.Word as W
+import qualified Data.Word       as W
 
-import Lib.Segment (Segment)
+import           Lib.Segment     (Segment)
 
 toWord32 :: [W.Word8] -> W.Word32
 toWord32 ws = toEnum $ sum $ zipWith (*) is [2 ^ (x * 8) | x <- [3,2 .. 0]]
