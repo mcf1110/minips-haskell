@@ -29,6 +29,9 @@ rTests =  [("Add",
           ,("Jump Register", 
             [(0x03e00008, "jr $ra", (RInstr Jr 31 0 0 0))
             ])
+          ,("Set Less Than", 
+            [(0x0150582a, "slt $t3, $t2, $s0", (RInstr Slt 10 16 11 0))
+            ])
           ]
 jTests = [("Jump", 
             [(0x08100022, "j 0x00400088", (JInstr J 0x00400088))
