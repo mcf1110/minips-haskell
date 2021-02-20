@@ -26,7 +26,7 @@ runState st = do
           else st'
   if sc == Die
     then (putStrLn "--- Program Finished ---")
-    else (printState st'') --(runState st'')
+    else (runState st'') -- (printState st'')
 
 runSc :: SC -> IO (Maybe Int)
 runSc GetInt = do
@@ -69,9 +69,14 @@ runInstruction ins (r, m) = (eval ins, NoOp)
     ($=) ad v = R.set ad v r
     ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
     ($+:) ra im = addEnum (R.get ra r) (BV.nat im)
+    ($|:) ra im =
+      toEnum $
+      fromEnum $ (BV.bitVec 32 $ R.get ra r) BV..|. (BV.zeroExtend 32 im)
+    ------
     eval (IInstr Addi rs rt im) = (incPC $ rt $= rs $+: im, m)
     eval (IInstr Lui rs rt im) =
       (incPC $ rt $= (toEnum $ fromEnum $ (BV.zeroExtend 32 im) BV.<<. 0x10), m)
+    eval (IInstr Ori rs rt im) = (incPC $ rt $= rs $|: im, m)
     eval (RInstr Add rs rt rd _) = (incPC $ rd $= rs $+$ rt, m)
     eval a = error $ "Falta implementar: " <> show a
 
