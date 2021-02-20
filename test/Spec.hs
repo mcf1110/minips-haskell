@@ -2,10 +2,12 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 
 import qualified Data.BitVector   as BV
+
 import           Lib.Decode
 import           Lib.Print
 import qualified Lib.Registers    as R
 import           Lib.Run
+import           Lib.Segment
 import           Lib.State
 
 main :: IO ()
@@ -113,14 +115,20 @@ printingTests =
     dt (_, src, instr) =
       testCase src $ assertEqual "" src (showInstruction instr)
 
--- IInstr {iop = Addi, rs = [5]0, rt = [5]8, immediate = [16]3}
-runInstrInitial i = runInstruction i $ initialState [] []
+runSegInitial :: Segment -> State
+runSegInitial segment =
+  foldl (flip runInstruction) (initialState [] segment) (decodeProgram segment)
 
 regAt ix = (R.get ix) . fst
 
 runningTests =
   [ testCase "addi $t0, $zero, 3" $
-    assertEqual "" 3 (regAt 8 $ runInstrInitial $ i Addi 0 8 3)
+    assertEqual "" 3 (regAt 8 $ runSegInitial $ [0x20080003])
   , testCase "addi $t1, $zero, 4" $
-    assertEqual "" 4 (regAt 9 $ runInstrInitial $ i Addi 0 9 4)
+    assertEqual "" 4 (regAt 9 $ runSegInitial $ [0x20090004])
+  , testCase "3 + 4" $
+    assertEqual
+      ""
+      7
+      (regAt 16 $ runSegInitial $ [0x20080003, 0x20090004, 0x01098020])
   ]

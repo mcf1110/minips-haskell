@@ -23,5 +23,12 @@ addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
 addEnum x y = toEnum $ (fromEnum x) + (fromEnum y)
 
 runInstruction :: Instr -> State -> State
-runInstruction (IInstr Addi rs rt im) (r, m) =
-  (R.set rt (addEnum (R.get rs r) (BV.nat im)) r, m)
+runInstruction ins (r, m) = eval ins
+  where
+    infixr 1 $=
+    ($=) ad v = R.set ad v r
+    ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
+    ($+:) ra im = addEnum (R.get ra r) (BV.nat im)
+    eval (IInstr Addi rs rt im)  = (rt $= rs $+: im, m)
+    eval (RInstr Add rs rt rd _) = (rd $= rs $+$ rt, m)
+    eval a                       = error $ "Falta implementar: " <> show a
