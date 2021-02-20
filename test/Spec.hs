@@ -59,6 +59,7 @@ iTests =
       , (0x2404000a, "addiu $a0, $zero, 10", (IInstr Addiu 0 4 10))
       , (0x2402000b, "addiu $v0, $zero, 11", (IInstr Addiu 0 2 11))
       ])
+  , ("And Immediate", [(0x30860001, "andi $a2, $a0, 1", (IInstr Andi 4 6 1))])
   , ( "Branch on Equal"
     , [ (0x10000006, "beq $zero, $zero, 0x00000006", (IInstr Beq 0 0 6))
       , (0x11310012, "beq $t1, $s1, 0x00000012", (IInstr Beq 9 17 18))

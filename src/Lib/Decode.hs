@@ -44,6 +44,7 @@ data Funct
 data IOp
   = Addi
   | Addiu
+  | Andi
   | Beq
   | Bne
   | Lui
@@ -105,6 +106,7 @@ decodeIFormat = fromList . getFields [6, 5, 5, 16]
     fromList [op, s, t, i] = IInstr (decodeOp op) s t i
     decodeOp 0x8 = Addi
     decodeOp 0x9 = Addiu
+    decodeOp 0xc = Andi
     decodeOp 0x4 = Beq
     decodeOp 0x5 = Bne
     decodeOp 0xf = Lui
