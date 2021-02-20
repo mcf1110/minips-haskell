@@ -1,3 +1,4 @@
 module Lib.Operations where
 
-data Op = Add
+data Op =
+  Add
