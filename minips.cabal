@@ -31,7 +31,6 @@ library
       Lib.Decode
       Lib.File
       Lib.Memory
-      Lib.Operations
       Lib.Print
       Lib.Registers
       Lib.Segment
