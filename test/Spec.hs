@@ -26,6 +26,10 @@ rTests =
     , [ (0x01098020, "add $s0, $t0, $t1", (RInstr Add 8 9 16 0))
       , (0x00102020, "add $a0, $zero, $s0", (RInstr Add 0 16 4 0))
       ])
+  , ( "Add Unsigned"
+    , [ (0x00441021, "addu $v0, $v0, $a0", (RInstr Addu 2 4 2 0))
+      , (0x00641821, "addu $v1, $v1, $a0", (RInstr Addu 3 4 3 0))
+      ])
   , ("Jump Register", [(0x03e00008, "jr $ra", (RInstr Jr 31 0 0 0))])
   , ( "Set Less Than"
     , [(0x0150582a, "slt $t3, $t2, $s0", (RInstr Slt 10 16 11 0))])

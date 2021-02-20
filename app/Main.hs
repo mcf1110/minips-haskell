@@ -5,5 +5,5 @@ import Lib.Print
 
 main :: IO ()
 main = do
-  pgm <- Lib.loadProgram "./inputs/05.fibo"
+  pgm <- Lib.loadProgram "./inputs/06.collatz"
   printProgram pgm
