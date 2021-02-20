@@ -117,7 +117,19 @@ printingTests =
 
 runSegInitial :: Segment -> State
 runSegInitial segment =
-  foldl (flip runInstruction) (initialState [] segment) (decodeProgram segment)
+  foldl
+    (\s i -> fst $ runInstruction i s)
+    (initialState [] segment)
+    (decodeProgram segment)
+
+getSC :: Segment -> SC
+getSC segment =
+  snd $
+  runInstruction Syscall $
+  foldl
+    (\s i -> fst $ runInstruction i s)
+    (initialState [] segment)
+    (decodeProgram segment)
 
 regAt ix = (R.get ix) . fst
 
@@ -131,4 +143,10 @@ runningTests =
       ""
       7
       (regAt 16 $ runSegInitial $ [0x20080003, 0x20090004, 0x01098020])
+  , testCase "putInt (3+4)" $
+    assertEqual
+      ""
+      (PutInt 7)
+      (getSC [0x20080003, 0x20090004, 0x01098020, 0x20020001, 0x102020])
+  , testCase "die" $ assertEqual "" (Die) (getSC [0x2002000a])
   ]

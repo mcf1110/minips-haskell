@@ -15,15 +15,33 @@ runState st = do
   let (r, m) = st
       pc = R.get 32 r
       ins = decodeInstruction $ M.get pc m
-      st' = runInstruction ins st
+      (st', sc) = runInstruction ins st
   print ins
   printState st'
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
 addEnum x y = toEnum $ (fromEnum x) + (fromEnum y)
 
-runInstruction :: Instr -> State -> State
-runInstruction ins (r, m) = eval ins
+data SC
+  = PutInt Int
+  | PutStr String
+  | PutChar Char
+  | GetInt
+  | Die
+  | NoOp
+  deriving (Show, Eq)
+
+runInstruction :: Instr -> State -> (State, SC)
+runInstruction Syscall (r, m) = ((r, m), sc)
+  where
+    sc =
+      case R.get 2 r of
+        1  -> PutInt $ fromEnum $ R.get 4 r
+        4  -> PutStr $ ""
+        11 -> PutChar $ toEnum . fromEnum $ R.get 4 r
+        5  -> GetInt
+        10 -> Die
+runInstruction ins (r, m) = (eval ins, NoOp)
   where
     infixr 1 $=
     ($=) ad v = R.set ad v r
