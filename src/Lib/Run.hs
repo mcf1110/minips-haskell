@@ -1,16 +1,17 @@
 module Lib.Run where
 
 import           Lib.Decode
-import qualified Lib.Memory     as M
+import qualified Lib.Memory      as M
 import           Lib.Print
-import qualified Lib.Registers  as R
+import qualified Lib.Registers   as R
 import           Lib.State
 
-import qualified Data.BitVector as BV
-import qualified Data.Word      as W
+import qualified Data.BitVector  as BV
+import qualified Data.Word       as W
 
-import           Data.Maybe     (isJust)
+import           Data.Maybe      (isJust)
 
+import           Data.List.Split (chunksOf)
 import           Debug.Trace
 
 runState :: State -> IO ()
@@ -58,22 +59,33 @@ runInstruction Syscall (r, m) = ((incPC r, m), sc)
   where
     sc =
       case R.get 2 r of
-        1  -> PutInt $ fromEnum $ R.get 4 r
-        4  -> PutStr $ ""
+        1 -> PutInt $ fromEnum $ R.get 4 r
+        4 ->
+          PutStr $
+          map (toEnum . fromEnum) $
+          takeWhile (/= 0) $
+          concat $ [toQuarterWord $ M.get a m | a <- [st,(st + 4) ..]]
+          where st = R.get 4 r
+                toQuarterWord w =
+                  [bv BV.@: ix | ix <- (map reverse) $ chunksOf 8 [0 .. 31]]
+                  where
+                    bv = BV.bitVec 32 w
         11 -> PutChar $ toEnum . fromEnum $ R.get 4 r
-        5  -> GetInt
+        5 -> GetInt
         10 -> Die
 runInstruction ins (r, m) = (eval ins, NoOp)
   where
     infixr 1 $=
     ($=) ad v = R.set ad v r
     ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
-    ($+:) ra im = addEnum (R.get ra r) (BV.nat im)
+    ($+::) ra im = addEnum (R.get ra r) (BV.nat im)
+    ($+:) ra im = addEnum (R.get ra r) (BV.int im)
     ($|:) ra im =
       toEnum $
       fromEnum $ (BV.bitVec 32 $ R.get ra r) BV..|. (BV.zeroExtend 32 im)
     ------
     eval (IInstr Addi rs rt im) = (incPC $ rt $= rs $+: im, m)
+    eval (IInstr Addiu rs rt im) = (incPC $ rt $= rs $+:: im, m)
     eval (IInstr Lui rs rt im) =
       (incPC $ rt $= (toEnum $ fromEnum $ (BV.zeroExtend 32 im) BV.<<. 0x10), m)
     eval (IInstr Ori rs rt im) = (incPC $ rt $= rs $|: im, m)

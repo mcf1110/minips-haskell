@@ -7,5 +7,5 @@ import           Lib.Run
 main :: IO ()
 main = do
   st <- Lib.loadState "./inputs/02.hello"
-  printState st
+  -- printState st
   runState st

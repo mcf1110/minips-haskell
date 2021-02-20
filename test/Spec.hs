@@ -122,14 +122,14 @@ runSegInitial segment =
     (initialState [] segment)
     (decodeProgram segment)
 
-getSC :: Segment -> SC
-getSC segment =
+getSC :: Segment -> Segment -> SC
+getSC dataS textS =
   snd $
   runInstruction Syscall $
   foldl
     (\s i -> fst $ runInstruction i s)
-    (initialState [] segment)
-    (decodeProgram segment)
+    (initialState dataS textS)
+    (decodeProgram textS)
 
 regAt ix = (R.get ix) . fst
 
@@ -147,8 +147,8 @@ runningTests =
     assertEqual
       ""
       (PutInt 7)
-      (getSC [0x20080003, 0x20090004, 0x01098020, 0x20020001, 0x102020])
-  , testCase "die" $ assertEqual "" (Die) (getSC [0x2002000a])
+      (getSC [] [0x20080003, 0x20090004, 0x01098020, 0x20020001, 0x102020])
+  , testCase "die" $ assertEqual "" (Die) (getSC [] [0x2002000a])
   , testCase "lui $a0, 0x1001" $
     assertEqual "" 0x10010000 (regAt 1 $ runSegInitial $ [0x3c011001])
   , testCase "ori $a0, $at, 0" $
@@ -156,4 +156,11 @@ runningTests =
       ""
       0x10010000
       (regAt 4 $ runSegInitial $ [0x3c011001, 0x34240000])
+  , testCase "print 'Ola mundo!'" $
+    assertEqual
+      ""
+      (PutStr "Ola mundo!")
+      (getSC
+         [0x20616c4f, 0x646e756d, 8559]
+         [0x3c011001, 0x34240000, 0x24020004, 0xc])
   ]
