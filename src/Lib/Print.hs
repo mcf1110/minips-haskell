@@ -116,7 +116,7 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
 showInstruction ins@(IInstr op rs rt rd)
   | op `elem` [Lui] = mkIns [rName rt, hx rd]
-  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, hx rd]
+  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, show $ BV.int rd]
   | otherwise = mkIns [rName rt, rName rs, show $ BV.int rd]
   where
     mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
