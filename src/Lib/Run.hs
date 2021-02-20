@@ -9,15 +9,35 @@ import           Lib.State
 import qualified Data.BitVector as BV
 import qualified Data.Word      as W
 
+import           Data.Maybe     (isJust)
+
 runState :: State -> IO ()
 runState st = do
-  printState st
   let (r, m) = st
       pc = R.get 32 r
       ins = decodeInstruction $ M.get pc m
       (st', sc) = runInstruction ins st
-  print ins
-  printState st'
+  mi <- runSc sc
+  let st'' =
+        if isJust mi
+          then st'
+          else st'
+  if sc == Die
+    then (putStrLn "Program Finished")
+    else (runState st'')
+
+runSc :: SC -> IO (Maybe Int)
+runSc GetInt = do
+  i <- getLine
+  return $ Just $ read i
+runSc sc = do
+  runIO sc
+  return Nothing
+  where
+    runIO (PutInt x)  = print x
+    runIO (PutStr x)  = putStrLn x
+    runIO (PutChar x) = putChar x
+    runIO _           = return ()
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
 addEnum x y = toEnum $ (fromEnum x) + (fromEnum y)
@@ -32,7 +52,7 @@ data SC
   deriving (Show, Eq)
 
 runInstruction :: Instr -> State -> (State, SC)
-runInstruction Syscall (r, m) = ((r, m), sc)
+runInstruction Syscall (r, m) = ((incPC r, m), sc)
   where
     sc =
       case R.get 2 r of
@@ -47,6 +67,9 @@ runInstruction ins (r, m) = (eval ins, NoOp)
     ($=) ad v = R.set ad v r
     ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
     ($+:) ra im = addEnum (R.get ra r) (BV.nat im)
-    eval (IInstr Addi rs rt im)  = (rt $= rs $+: im, m)
-    eval (RInstr Add rs rt rd _) = (rd $= rs $+$ rt, m)
+    eval (IInstr Addi rs rt im)  = (incPC $ rt $= rs $+: im, m)
+    eval (RInstr Add rs rt rd _) = (incPC $ rd $= rs $+$ rt, m)
     eval a                       = error $ "Falta implementar: " <> show a
+
+incPC :: R.Registers -> R.Registers
+incPC r = R.set 32 (addEnum (R.get 32 r) (4)) r
