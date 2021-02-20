@@ -11,6 +11,8 @@ import qualified Data.Word      as W
 
 import           Data.Maybe     (isJust)
 
+import           Debug.Trace
+
 runState :: State -> IO ()
 runState st = do
   let (r, m) = st
@@ -23,8 +25,8 @@ runState st = do
           then st'
           else st'
   if sc == Die
-    then (putStrLn "Program Finished")
-    else (runState st'')
+    then (putStrLn "--- Program Finished ---")
+    else (printState st'') --(runState st'')
 
 runSc :: SC -> IO (Maybe Int)
 runSc GetInt = do
@@ -67,9 +69,11 @@ runInstruction ins (r, m) = (eval ins, NoOp)
     ($=) ad v = R.set ad v r
     ($+$) ra rb = addEnum (R.get ra r) (R.get rb r)
     ($+:) ra im = addEnum (R.get ra r) (BV.nat im)
-    eval (IInstr Addi rs rt im)  = (incPC $ rt $= rs $+: im, m)
+    eval (IInstr Addi rs rt im) = (incPC $ rt $= rs $+: im, m)
+    eval (IInstr Lui rs rt im) =
+      (incPC $ rt $= (toEnum $ fromEnum $ (BV.zeroExtend 32 im) BV.<<. 0x10), m)
     eval (RInstr Add rs rt rd _) = (incPC $ rd $= rs $+$ rt, m)
-    eval a                       = error $ "Falta implementar: " <> show a
+    eval a = error $ "Falta implementar: " <> show a
 
 incPC :: R.Registers -> R.Registers
 incPC r = R.set 32 (addEnum (R.get 32 r) (4)) r

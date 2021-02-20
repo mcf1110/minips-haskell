@@ -149,4 +149,6 @@ runningTests =
       (PutInt 7)
       (getSC [0x20080003, 0x20090004, 0x01098020, 0x20020001, 0x102020])
   , testCase "die" $ assertEqual "" (Die) (getSC [0x2002000a])
+  , testCase "lui $a0, 0x1001" $
+    assertEqual "" 0x10010000 (regAt 1 $ runSegInitial $ [0x3c011001])
   ]
