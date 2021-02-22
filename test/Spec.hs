@@ -121,7 +121,7 @@ testComputerUntilSyscall :: Computer -> (SC, Computer)
 testComputerUntilSyscall c =
   case tick c of
     (NoOp, (r, m)) ->
-      if ((M.get (R.get 32 r) m) == 0)
+      if M.get (R.get 32 r) m == 0
         then (NoOp, (r, m))
         else testComputerUntilSyscall (r, m)
     x -> x
