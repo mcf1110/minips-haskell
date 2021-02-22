@@ -49,6 +49,7 @@ evalInstruction ins = do
     eval (IInstr Lui _ rt im)     = lui rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Beq rs rt im)    = beq rs rt im
+    eval (IInstr Bne rs rt im)    = bne rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval a                        = error $ "Falta implementar: " <> show a
@@ -105,16 +106,28 @@ addiu rs rt im = do
   res <- rs $+:. im
   rt $= res
 
-lui :: RegNum -> Immediate -> Operation ()
-lui rt im = do
-  rt $= toEnum (fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10)
-
 ori :: RegNum -> RegNum -> Immediate -> Operation ()
 ori rs rt im = do
   res <- rs $|: im
   rt $= res
 
-beq :: RegNum -> RegNum -> Immediate -> Operation ()
-beq rs rt im = do
+lui :: RegNum -> Immediate -> Operation ()
+lui rt im = do
+  rt $= toEnum (fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10)
+
+-- Branching
+branchOn ::
+     (W.Word32 -> W.Word32 -> Bool)
+  -> RegNum
+  -> RegNum
+  -> Immediate
+  -> Operation ()
+branchOn op rs rt im = do
   (r, m) <- get
-  when (R.get rs r == R.get rt r) $ addToPC $ BV.int im
+  when (R.get rs r `op` R.get rt r) $ addToPC $ BV.int im
+
+beq :: RegNum -> RegNum -> Immediate -> Operation ()
+beq = branchOn (==)
+
+bne :: RegNum -> RegNum -> Immediate -> Operation ()
+bne = branchOn (/=)
