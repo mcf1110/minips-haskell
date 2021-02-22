@@ -62,6 +62,11 @@ infixr 1 $=
 ($=) :: RegNum -> W.Word32 -> Operation ()
 ($=) ad v = modify . B.first $ R.set ad v
 
+infixr 1 $<-
+
+($<-) :: RegNum -> Operation W.Word32 -> Operation () -- monadic version
+($<-) tgt op = op >>= (tgt $=)
+
 ($+$) :: RegNum -> RegNum -> Operation W.Word32
 ($+$) ra rb = do
   (r, m) <- get
@@ -91,29 +96,22 @@ incPC = addToPC 1
 
 -- Type R
 add :: RegNum -> RegNum -> RegNum -> Operation ()
-add rs rt rd = do
-  res <- rs $+$ rt
-  rd $= res
+add rs rt rd = rd $<- rs $+$ rt
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
-addi rs rt im = do
-  res <- rs $+: im
-  rt $= res
+addi rs rt im = rt $<- rs $+: im
 
 addiu :: RegNum -> RegNum -> Immediate -> Operation ()
-addiu rs rt im = do
-  res <- rs $+:. im
-  rt $= res
+addiu rs rt im = rt $<- rs $+:. im
 
 ori :: RegNum -> RegNum -> Immediate -> Operation ()
-ori rs rt im = do
-  res <- rs $|: im
-  rt $= res
+ori rs rt im = rt $<- rs $|: im
 
 lui :: RegNum -> Immediate -> Operation ()
-lui rt im = do
-  rt $= toEnum (fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10)
+lui rt im = rt $= up
+  where
+    up = toEnum . fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10
 
 -- Branching
 branchOn ::
