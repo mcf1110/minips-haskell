@@ -1,10 +1,10 @@
 module Lib.Print where
 
+import           Lib.Computer
 import           Lib.Decode
 import           Lib.Memory
 import           Lib.Registers
 import           Lib.Segment
-import           Lib.State
 
 import qualified Data.BitVector   as BV
 import qualified Data.IntMap.Lazy as IM
@@ -93,8 +93,8 @@ printRegisters :: Registers -> IO ()
 printRegisters = mapM_ putStrLn . showRegisters
 
 -- STATE
-printState :: State -> IO ()
-printState (r, m) = do
+printComputer :: Computer -> IO ()
+printComputer (r, m) = do
   mapM_ putStrLn $ zipWithDefault (showMemory m) (showRegisters r)
   -- based on https://stackoverflow.com/a/21350444
   where

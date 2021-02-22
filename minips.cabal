@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 354b2af169874bd0fc056f547e7ec560295662db0cdea5a87b6b3ea47174c9a2
+-- hash: 8c05b4bb84d78e5a23ac23f4f617c8e9dbc46a35e7378592b93b6bfb8f4c4057
 
 name:           minips
 version:        0.1.0.0
@@ -28,14 +28,15 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Lib.Computer
       Lib.Decode
       Lib.File
       Lib.Memory
+      Lib.Operation
       Lib.Print
       Lib.Registers
       Lib.Run
       Lib.Segment
-      Lib.State
   other-modules:
       Paths_minips
   hs-source-dirs:
@@ -45,6 +46,7 @@ library
     , bv
     , bytestring
     , containers
+    , mtl
     , split
     , vector
   default-language: Haskell2010
@@ -62,6 +64,7 @@ executable minips-exe
     , bytestring
     , containers
     , minips
+    , mtl
     , split
     , vector
   default-language: Haskell2010
@@ -80,6 +83,7 @@ test-suite minips-test
     , bytestring
     , containers
     , minips
+    , mtl
     , split
     , tasty
     , tasty-hunit

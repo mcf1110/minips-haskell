@@ -3,12 +3,13 @@ import           Test.Tasty.HUnit
 
 import qualified Data.BitVector   as BV
 
+import           Lib.Computer
 import           Lib.Decode
+import           Lib.Operation
 import           Lib.Print
 import qualified Lib.Registers    as R
 import           Lib.Run
 import           Lib.Segment
-import           Lib.State
 
 main :: IO ()
 main = defaultMain tests
@@ -115,20 +116,20 @@ printingTests =
     dt (_, src, instr) =
       testCase src $ assertEqual "" src (showInstruction instr)
 
-runSegInitial :: Segment -> State
+runSegInitial :: Segment -> Computer
 runSegInitial segment =
   foldl
-    (\s i -> fst $ runInstruction i s)
-    (initialState [] segment)
+    (\s i -> snd $ runInstruction i s)
+    (initialComputer [] segment)
     (decodeProgram segment)
 
 getSC :: Segment -> Segment -> SC
 getSC dataS textS =
-  snd $
+  fst $
   runInstruction Syscall $
   foldl
-    (\s i -> fst $ runInstruction i s)
-    (initialState dataS textS)
+    (\s i -> snd $ runInstruction i s)
+    (initialComputer dataS textS)
     (decodeProgram textS)
 
 regAt ix = R.get ix . fst

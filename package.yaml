@@ -26,6 +26,7 @@ dependencies:
 - split
 - vector
 - bv
+- mtl
 
 library:
   source-dirs: src

@@ -1,4 +1,4 @@
-module Lib.State where
+module Lib.Computer where
 
 import qualified Data.IntMap.Lazy as IM
 
@@ -6,10 +6,10 @@ import           Lib.Memory
 import           Lib.Registers
 import           Lib.Segment
 
-type State = (Registers, Memory)
+type Computer = (Registers, Memory)
 
-initialState :: Segment -> Segment -> State
-initialState dataSegment textSegment = (startingRegisters, startingMemory)
+initialComputer :: Segment -> Segment -> Computer
+initialComputer dataSegment textSegment = (startingRegisters, startingMemory)
   where
     startingMemory =
       IM.filter (/= 0) $
