@@ -12,10 +12,7 @@ import           Control.Monad.State.Lazy (runState)
 
 runComputer :: Computer -> IO ()
 runComputer c0 = do
-  let (r, m) = c0
-      pc = R.get 32 r
-      ins = decodeInstruction $ M.get pc m
-      (sc, c1) = runInstruction ins c0
+  let (sc, c1) = tick c0
   mi <- runSyscall sc
   let c2 =
         case mi of
@@ -38,6 +35,13 @@ runSyscall sc = do
     runIO (PutStr x)  = putStrLn x
     runIO (PutChar x) = putChar x
     runIO _           = return ()
+
+tick :: Computer -> (SC, Computer)
+tick c0 = runInstruction ins c0
+  where
+    (r, m) = c0
+    pc = R.get 32 r
+    ins = decodeInstruction $ M.get pc m
 
 runInstruction :: Instr -> Computer -> (SC, Computer)
 runInstruction i = runState (evalInstruction i)

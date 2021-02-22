@@ -5,6 +5,7 @@ import qualified Data.BitVector   as BV
 
 import           Lib.Computer
 import           Lib.Decode
+import qualified Lib.Memory       as M
 import           Lib.Operation
 import           Lib.Print
 import qualified Lib.Registers    as R
@@ -116,21 +117,24 @@ printingTests =
     dt (_, src, instr) =
       testCase src $ assertEqual "" src (showInstruction instr)
 
+testComputerUntilSyscall :: Computer -> (SC, Computer)
+testComputerUntilSyscall c =
+  case tick c of
+    (NoOp, (r, m)) ->
+      if ((M.get (R.get 32 r) m) == 0)
+        then (NoOp, (r, m))
+        else testComputerUntilSyscall (r, m)
+    x -> x
+
 runSegInitial :: Segment -> Computer
 runSegInitial segment =
-  foldl
-    (\s i -> snd $ runInstruction i s)
-    (initialComputer [] segment)
-    (decodeProgram segment)
+  snd $ testComputerUntilSyscall (initialComputer [] segment)
 
 getSC :: Segment -> Segment -> SC
 getSC dataS textS =
   fst $
   runInstruction Syscall $
-  foldl
-    (\s i -> snd $ runInstruction i s)
-    (initialComputer dataS textS)
-    (decodeProgram textS)
+  snd $ testComputerUntilSyscall (initialComputer dataS textS)
 
 regAt ix = R.get ix . fst
 
@@ -154,6 +158,17 @@ runningTests =
     assertEqual "" 0x10010000 (regAt 1 $ runSegInitial [0x3c011001])
   , testCase "ori $a0, $at, 0" $
     assertEqual "" 0x10010000 (regAt 4 $ runSegInitial [0x3c011001, 0x34240000])
+  , testCase "beq $zero, $zero, 1" $
+    assertEqual
+      ""
+      (0x00400000 + (2 * 4))
+      (regAt 32 $ runSegInitial [0x10000001])
+  , testCase "beq $zero, $zero, 1" $
+    assertEqual
+      ""
+      0x0
+      (regAt 4 $ runSegInitial [0x10000001, 0x3c011001, 0x34240000])
+    -- SystemCalls
   , testCase "print 'Ola mundo!'" $
     assertEqual
       ""

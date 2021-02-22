@@ -5,6 +5,7 @@ import           Lib.Decode
 import qualified Lib.Memory               as M
 import qualified Lib.Registers            as R
 
+import           Control.Monad            (when)
 import           Control.Monad.State.Lazy
 import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
@@ -47,6 +48,7 @@ evalInstruction ins = do
     eval (IInstr Addiu rs rt im)  = addiu rs rt im
     eval (IInstr Lui _ rt im)     = lui rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
+    eval (IInstr Beq rs rt im)    = beq rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval a                        = error $ "Falta implementar: " <> show a
@@ -80,14 +82,19 @@ infixr 1 $=
   return $
     toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) BV..|. BV.zeroExtend 32 im
 
-incPC :: Operation ()
-incPC = modify . B.first $ (\r -> R.set 32 (addEnum (R.get 32 r) 4) r)
+addToPC :: (Integral a, Show a) => a -> Operation ()
+addToPC v = modify . B.first $ (\r -> R.set 32 (addEnum (R.get 32 r) (4 * v)) r)
 
+incPC :: Operation ()
+incPC = addToPC 1
+
+-- Type R
 add :: RegNum -> RegNum -> RegNum -> Operation ()
 add rs rt rd = do
   res <- rs $+$ rt
   rd $= res
 
+-- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
 addi rs rt im = do
   res <- rs $+: im
@@ -98,11 +105,16 @@ addiu rs rt im = do
   res <- rs $+:. im
   rt $= res
 
+lui :: RegNum -> Immediate -> Operation ()
+lui rt im = do
+  rt $= toEnum (fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10)
+
 ori :: RegNum -> RegNum -> Immediate -> Operation ()
 ori rs rt im = do
   res <- rs $|: im
   rt $= res
 
-lui :: RegNum -> Immediate -> Operation ()
-lui rt im = do
-  rt $= toEnum (fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10)
+beq :: RegNum -> RegNum -> Immediate -> Operation ()
+beq rs rt im = do
+  (r, m) <- get
+  when (R.get rs r == R.get rt r) $ addToPC $ BV.int im
