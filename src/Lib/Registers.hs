@@ -12,5 +12,6 @@ startingRegisters =
 get :: Enum a => a -> Registers -> W.Word32
 get ix r = r V.! fromEnum ix
 
-set :: Enum a => a -> W.Word32 -> Registers -> Registers
+set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Registers -> Registers
+set 0 _ r  = r
 set ix v r = r V.// [(fromEnum ix, v)]

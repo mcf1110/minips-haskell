@@ -139,7 +139,9 @@ getSC dataS textS =
 regAt ix = R.get ix . fst
 
 runningTests =
-  [ testCase "addi $t0, $zero, 3" $
+  [ testCase "Cannot overwrite $zero" $
+    assertEqual "" 0 (regAt 0 $ runSegInitial [0x24000003])
+  , testCase "addi $t0, $zero, 3" $
     assertEqual "" 3 (regAt 8 $ runSegInitial [0x20080003])
   , testCase "addi $t1, $zero, 4" $
     assertEqual "" 4 (regAt 9 $ runSegInitial [0x20090004])

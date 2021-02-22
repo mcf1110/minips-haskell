@@ -10,6 +10,7 @@ import           Control.Monad.State.Lazy
 import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
+import           Debug.Trace
 
 data SC
   = PutInt Int
@@ -27,6 +28,8 @@ type RegNum = BV.BitVector
 type Immediate = BV.BitVector
 
 evalInstruction :: Instr -> Operation SC
+evalInstruction i
+  | traceShow i False = undefined
 evalInstruction Syscall = do
   incPC
   (r, m) <- get
@@ -122,7 +125,8 @@ branchOn ::
   -> Operation ()
 branchOn op rs rt im = do
   (r, m) <- get
-  when (R.get rs r `op` R.get rt r) $ addToPC $ BV.int im
+  when (traceShow (rs, R.get rs r, rt, R.get rt r) $ R.get rs r `op` R.get rt r) $
+    addToPC $ BV.int im
 
 beq :: RegNum -> RegNum -> Immediate -> Operation ()
 beq = branchOn (==)
