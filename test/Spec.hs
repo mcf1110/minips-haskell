@@ -98,7 +98,7 @@ decodingTests =
   [ testGroup "R Instructions" $ map makeDecTest rTests
   , testGroup "J Instructions" $ map makeDecTest iTests
   , testGroup "I Instructions" $ map makeDecTest jTests
-  , testCase "Syscall" $ assertEqual "" (Syscall) (decode 0x0000000c)
+  , testCase "Syscall" $ assertEqual "" Syscall (decode 0x0000000c)
   ]
   where
     makeDecTest (title, ts) = testGroup title $ map dt ts
@@ -108,7 +108,7 @@ printingTests =
   [ testGroup "R Instructions" $ map makePrintTest rTests
   , testGroup "J Instructions" $ map makePrintTest iTests
   , testGroup "I Instructions" $ map makePrintTest jTests
-  , testCase "Syscall" $ assertEqual "" ("syscall") (showInstruction Syscall)
+  , testCase "Syscall" $ assertEqual "" "syscall" (showInstruction Syscall)
   ]
   where
     makePrintTest (title, ts) = testGroup title $ map dt ts
@@ -131,31 +131,28 @@ getSC dataS textS =
     (initialState dataS textS)
     (decodeProgram textS)
 
-regAt ix = (R.get ix) . fst
+regAt ix = R.get ix . fst
 
 runningTests =
   [ testCase "addi $t0, $zero, 3" $
-    assertEqual "" 3 (regAt 8 $ runSegInitial $ [0x20080003])
+    assertEqual "" 3 (regAt 8 $ runSegInitial [0x20080003])
   , testCase "addi $t1, $zero, 4" $
-    assertEqual "" 4 (regAt 9 $ runSegInitial $ [0x20090004])
+    assertEqual "" 4 (regAt 9 $ runSegInitial [0x20090004])
   , testCase "3 + 4" $
     assertEqual
       ""
       7
-      (regAt 16 $ runSegInitial $ [0x20080003, 0x20090004, 0x01098020])
+      (regAt 16 $ runSegInitial [0x20080003, 0x20090004, 0x01098020])
   , testCase "putInt (3+4)" $
     assertEqual
       ""
       (PutInt 7)
       (getSC [] [0x20080003, 0x20090004, 0x01098020, 0x20020001, 0x102020])
-  , testCase "die" $ assertEqual "" (Die) (getSC [] [0x2002000a])
+  , testCase "die" $ assertEqual "" Die (getSC [] [0x2002000a])
   , testCase "lui $a0, 0x1001" $
-    assertEqual "" 0x10010000 (regAt 1 $ runSegInitial $ [0x3c011001])
+    assertEqual "" 0x10010000 (regAt 1 $ runSegInitial [0x3c011001])
   , testCase "ori $a0, $at, 0" $
-    assertEqual
-      ""
-      0x10010000
-      (regAt 4 $ runSegInitial $ [0x3c011001, 0x34240000])
+    assertEqual "" 0x10010000 (regAt 4 $ runSegInitial [0x3c011001, 0x34240000])
   , testCase "print 'Ola mundo!'" $
     assertEqual
       ""
@@ -163,8 +160,8 @@ runningTests =
       (getSC
          [0x20616c4f, 0x646e756d, 8559]
          [0x3c011001, 0x34240000, 0x24020004, 0xc])
-  , testCase "getint" $ assertEqual "" (GetInt) (getSC [] [0x24020005, 0xc])
-  , testCase "putStr desalinhado é permitido" $
+  , testCase "getint" $ assertEqual "" GetInt (getSC [] [0x24020005, 0xc])
+  , testCase "Unaligned putStr is allowed" $
     assertEqual
       ""
       (PutStr "Voc\195\170 digitou: ")
