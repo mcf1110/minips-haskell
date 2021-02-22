@@ -25,4 +25,4 @@ readFile path = do
 printFile :: FilePath -> IO ()
 printFile path = do
   ws <- readFile path
-  mapM_ (putStrLn . (flip showHex "")) ws
+  mapM_ (putStrLn . (`showHex` "")) ws

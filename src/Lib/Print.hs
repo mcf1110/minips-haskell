@@ -24,54 +24,55 @@ showMemory m =
   , "│    Addr    │    Code    │"
   , "╞════════════╪════════════╡"
   ] <>
-  (map line $ IM.assocs m) <> ["└────────────┴────────────┘"]
+  map line (IM.assocs m) <> ["└────────────┴────────────┘"]
   where
     line (addr, val) = printf "│ 0x%08x │ 0x%08x │" addr val
 
 printMemory :: Memory -> IO ()
-printMemory = (mapM_ putStrLn) . showMemory
+printMemory = mapM_ putStrLn . showMemory
 
 -- REGISTERS
 regNumberToNameMap :: IM.IntMap String
 regNumberToNameMap =
   IM.fromAscList $
-  zip [0 ..] $
-  [ "$zero"
-  , "$at"
-  , "$v0"
-  , "$v1"
-  , "$a0"
-  , "$a1"
-  , "$a2"
-  , "$a3"
-  , "$t0"
-  , "$t1"
-  , "$t2"
-  , "$t3"
-  , "$t4"
-  , "$t5"
-  , "$t6"
-  , "$t7"
-  , "$s0"
-  , "$s1"
-  , "$s2"
-  , "$s3"
-  , "$s4"
-  , "$s5"
-  , "$s6"
-  , "$s7"
-  , "$t8"
-  , "$t9"
-  , "$k0"
-  , "$k1"
-  , "$gp"
-  , "$sp"
-  , "$fp"
-  , "$ra"
-  , "pc"
-  , "hi"
-  , "lo"
-  ]
+  zip
+    [0 ..]
+    [ "$zero"
+    , "$at"
+    , "$v0"
+    , "$v1"
+    , "$a0"
+    , "$a1"
+    , "$a2"
+    , "$a3"
+    , "$t0"
+    , "$t1"
+    , "$t2"
+    , "$t3"
+    , "$t4"
+    , "$t5"
+    , "$t6"
+    , "$t7"
+    , "$s0"
+    , "$s1"
+    , "$s2"
+    , "$s3"
+    , "$s4"
+    , "$s5"
+    , "$s6"
+    , "$s7"
+    , "$t8"
+    , "$t9"
+    , "$k0"
+    , "$k1"
+    , "$gp"
+    , "$sp"
+    , "$fp"
+    , "$ra"
+    , "pc"
+    , "hi"
+    , "lo"
+    ]
 
 rName :: Enum a => a -> String
 rName = (IM.!) regNumberToNameMap . fromEnum
@@ -84,12 +85,12 @@ showRegisters r =
   , "\t│  Name  │ No │    Val     │"
   , "\t╞════════╪════╪════════════╡"
   ] <>
-  (map line $ V.toList $ V.indexed r) <> ["\t└────────┴────┴────────────┘"]
+  map line (V.toList $ V.indexed r) <> ["\t└────────┴────┴────────────┘"]
   where
     line (num, val) = printf "\t│ %6s │ %02d │ 0x%08x │" (rName num) num val
 
 printRegisters :: Registers -> IO ()
-printRegisters = (mapM_ putStrLn) . showRegisters
+printRegisters = mapM_ putStrLn . showRegisters
 
 -- STATE
 printState :: State -> IO ()
@@ -97,10 +98,10 @@ printState (r, m) = do
   mapM_ putStrLn $ zipWithDefault (showMemory m) (showRegisters r)
   -- based on https://stackoverflow.com/a/21350444
   where
-    memSpacing = (replicate 23 ' ') <> "\t"
-    infPad ls = (map Just ls) <> (repeat Nothing)
+    memSpacing = replicate 23 ' ' <> "\t"
+    infPad ls = map Just ls <> repeat Nothing
     zipWithDefault xs ys =
-      map (\(x, y) -> (fromMaybe memSpacing x <> fromMaybe "" y)) $
+      map (\(x, y) -> fromMaybe memSpacing x <> fromMaybe "" y) $
       takeWhile (/= (Nothing, Nothing)) $ zip (infPad xs) (infPad ys)
 
 -- ASSEMBLY
@@ -117,12 +118,12 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
 showInstruction ins@(IInstr op rs rt rd)
   | op `elem` [Lui] = mkIns [rName rt, hx rd]
   | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, dec rd]
-  | op `elem` [Lw, Sw] = mkIns [rName rt, (dec rd) <> "(" <> rName rs <> ")"]
+  | op `elem` [Lw, Sw] = mkIns [rName rt, dec rd <> "(" <> rName rs <> ")"]
   | otherwise = mkIns [rName rt, rName rs, dec rd]
   where
     mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
     hx = printf "0x%08x" . BV.int
     dec = show . BV.int
 showInstruction ins@(JInstr op tgt) =
-  (toLower <$> show op) <> " " <> (printf "0x%08x" $ BV.int tgt)
+  (toLower <$> show op) <> " " <> printf "0x%08x" (BV.int tgt)
 showInstruction Syscall = "syscall"

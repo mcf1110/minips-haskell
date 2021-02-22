@@ -78,7 +78,7 @@ getFields sizes bv = map get offsets
 
 decode :: BV.BitVector -> Instr
 decode bv =
-  case (BV.extract 31 26 bv) of
+  case BV.extract 31 26 bv of
     0 -> decodeRFormat bv
     2 -> decodeJFormat bv
     3 -> decodeJFormat bv
