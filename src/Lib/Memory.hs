@@ -13,18 +13,13 @@ type Memory = IM.IntMap W.Word32
 get :: Enum a => a -> Memory -> W.Word32
 get n m = fromMaybe 0 $ m IM.!? (fromEnum n)
 
-getString :: Enum a => a -> Memory -> String
-getString n m = map (toEnum . fromEnum . snd) $ qs
+getQuarter :: Enum a => a -> Memory -> W.Word8
+getQuarter n m = toEnum $ fromEnum $ quarterWords !! i
   where
-    bits = 8 * byte
-    byte = mod (fromEnum n) 4
-    aligned = (4 * (div (fromEnum n) 4))
-    starts = [aligned,(aligned + 4) ..]
-    qs =
-      takeWhile (\(_, v) -> v /= 0) $
-      filter (\(a, _) -> a >= (fromEnum n)) $
-      concat [zip [s + 24, s + 16, s + 8, s] $ quarterWords s | s <- starts]
-    quarterWords s =
-      [(bv BV.@: ix) | ix <- (map reverse) $ chunksOf 8 [0 .. 31]]
-      where
-        bv = BV.bitVec 32 (get s m)
+    s = (4 * (div (fromEnum n) 4))
+    i = (mod (fromEnum n) 4)
+    quarterWords = let bv = BV.bitVec 32 (get s m) in [(bv BV.@: ix) | ix <- (map reverse) $ chunksOf 8 [0 .. 31]]
+
+getString :: Enum a => a -> Memory -> String
+getString n m = map (toEnum . fromEnum) $ takeWhile (/= 0) $ [getQuarter a m | a <- [ix..]]
+  where ix = fromEnum n
