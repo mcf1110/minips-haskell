@@ -52,6 +52,7 @@ evalInstruction ins = do
     eval (IInstr Bne rs rt im)    = bne rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
+    eval (RInstr Slt rs rt rd _)  = slt rs rt rd
     eval (JInstr J tgt)           = jump tgt
     eval (JInstr Jal tgt)         = jal tgt
     eval a                        = error $ "Falta implementar: " <> show a
@@ -73,6 +74,14 @@ infixr 1 $<-
 ($+$) ra rb = do
   (r, m) <- get
   return $ addEnum (R.get ra r) (R.get rb r)
+
+($<$) :: RegNum -> RegNum -> Operation W.Word32
+($<$) ra rb = do
+  (r, m) <- get
+  return $
+    if R.get ra r < R.get rb r
+      then 1
+      else 0
 
 ($+:) :: RegNum -> Immediate -> Operation W.Word32
 ($+:) ra im = do
@@ -99,6 +108,9 @@ incPC = addToPC 1
 -- Type R
 add :: RegNum -> RegNum -> RegNum -> Operation ()
 add rs rt rd = rd $<- rs $+$ rt
+
+slt :: RegNum -> RegNum -> RegNum -> Operation ()
+slt rs rt rd = rd $<- rs $<$ rt
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
