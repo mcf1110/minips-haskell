@@ -84,8 +84,9 @@ infixr 1 $<-
 ($<$) :: RegNum -> RegNum -> Operation W.Word32
 ($<$) ra rb = do
   (r, m) <- get
+  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx r
   return $
-    if R.get ra r < R.get rb r
+    if signed ra < signed rb
       then 1
       else 0
 
