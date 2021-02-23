@@ -54,6 +54,8 @@ evalInstruction ins = do
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
     eval (RInstr Jr rs _ _ _)     = jr rs
+    eval (RInstr Srl _ rt rd sh)  = srl rt rd sh
+    eval (RInstr Sll _ rt rd sh)  = sll rt rd sh
     eval (JInstr J tgt)           = jump tgt
     eval (JInstr Jal tgt)         = jal tgt
     eval a                        = error $ "Falta implementar: " <> show a
@@ -100,6 +102,23 @@ infixr 1 $<-
   return $
     toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) BV..|. BV.zeroExtend 32 im
 
+shiftWith ::
+     Enum a
+  => (RegNum -> Immediate -> a)
+  -> RegNum
+  -> Immediate
+  -> Operation W.Word32
+shiftWith op ra im = do
+  (r, m) <- get
+  return $
+    (toEnum . fromEnum) $ op (BV.bitVec 32 $ R.get ra r) $ BV.zeroExtend 32 im
+
+($>>:) :: RegNum -> Immediate -> Operation W.Word32
+($>>:) = shiftWith BV.shr
+
+($<<:) :: RegNum -> Immediate -> Operation W.Word32
+($<<:) = shiftWith BV.shl
+
 addToPC :: (Integral a, Show a) => a -> Operation ()
 addToPC v = modify . B.first $ (\r -> R.set 32 (addEnum (R.get 32 r) (4 * v)) r)
 
@@ -115,6 +134,12 @@ slt rs rt rd = rd $<- rs $<$ rt
 
 jr :: RegNum -> Operation ()
 jr rnum = modify . B.first $ (\r -> R.set 32 (R.get rnum r) r)
+
+srl :: RegNum -> RegNum -> Immediate -> Operation ()
+srl rt rd sh = rd $<- rt $>>: sh
+
+sll :: RegNum -> RegNum -> Immediate -> Operation ()
+sll rt rd sh = rd $<- rt $<<: sh
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
