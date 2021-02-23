@@ -46,6 +46,7 @@ evalInstruction ins = do
   where
     eval (IInstr Addi rs rt im)   = addi rs rt im
     eval (IInstr Addiu rs rt im)  = addiu rs rt im
+    eval (IInstr Andi rs rt im)   = andi rs rt im
     eval (IInstr Lui _ rt im)     = lui rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Beq rs rt im)    = beq rs rt im
@@ -96,11 +97,21 @@ infixr 1 $<-
   (r, m) <- get
   return $ addEnum (R.get ra r) (BV.nat im)
 
-($|:) :: RegNum -> Immediate -> Operation W.Word32
-($|:) ra im = do
+bitwiseWith ::
+     (BV.BitVector -> BV.BitVector -> BV.BitVector)
+  -> RegNum
+  -> Immediate
+  -> Operation W.Word32
+bitwiseWith op ra im = do
   (r, m) <- get
   return $
-    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) BV..|. BV.zeroExtend 32 im
+    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) `op` BV.zeroExtend 32 im
+
+($|:) :: RegNum -> Immediate -> Operation W.Word32
+($|:) = bitwiseWith (BV..|.)
+
+($&:) :: RegNum -> Immediate -> Operation W.Word32
+($&:) = bitwiseWith (BV..&.)
 
 shiftWith ::
      Enum a
@@ -147,6 +158,9 @@ addi rs rt im = rt $<- rs $+: im
 
 addiu :: RegNum -> RegNum -> Immediate -> Operation ()
 addiu rs rt im = rt $<- rs $+:. im
+
+andi :: RegNum -> RegNum -> Immediate -> Operation ()
+andi rs rt im = rt $<- rs $&: im
 
 ori :: RegNum -> RegNum -> Immediate -> Operation ()
 ori rs rt im = rt $<- rs $|: im

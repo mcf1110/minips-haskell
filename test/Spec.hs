@@ -160,6 +160,8 @@ runningTests =
     assertEqual "" 0x10010000 (regAt 1 $ runSegInitial [0x3c011001])
   , testCase "ori $a0, $at, 0" $
     assertEqual "" 0x10010000 (regAt 4 $ runSegInitial [0x3c011001, 0x34240000])
+  , testCase "ori $t1, $t0, 16" $
+    assertEqual "" 0x10 (regAt 9 $ runSegInitial [0x24080014, 0x31090010])
   , testCase "beq $zero, $zero, 1" $
     assertEqual
       ""
@@ -200,9 +202,9 @@ runningTests =
       (0x00400000 + 4)
       (regAt 32 $ runSegInitial [0x0c100002, 0, 0x03e00008])
   , testCase "srl $t1, $t0, 2" $
-    assertEqual "" (4) (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
+    assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
   , testCase "sll $t1, $t0, 2" $
-    assertEqual "" (0x40) (regAt 9 $ runSegInitial [0x24080010, 0x00084880])
+    assertEqual "" 0x40 (regAt 9 $ runSegInitial [0x24080010, 0x00084880])
     -- SystemCalls
   , testCase "print 'Ola mundo!'" $
     assertEqual
