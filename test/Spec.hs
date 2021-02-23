@@ -145,6 +145,8 @@ runningTests =
     assertEqual "" 3 (regAt 8 $ runSegInitial [0x20080003])
   , testCase "addi $t1, $zero, 4" $
     assertEqual "" 4 (regAt 9 $ runSegInitial [0x20090004])
+  , testCase "addiu $sp, $sp, -32" $
+    assertEqual "" 0x7fffefdc (regAt 29 $ runSegInitial [0x27bdffe0])
   , testCase "3 + 4" $
     assertEqual
       ""

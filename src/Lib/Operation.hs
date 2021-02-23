@@ -64,7 +64,7 @@ evalInstruction ins = do
     eval a                        = error $ "Falta implementar: " <> show a
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
-addEnum x y = toEnum $ fromEnum x + fromEnum y
+addEnum x y = toEnum . fromEnum $ BV.bitVec 32 $ fromEnum x + fromEnum y
 
 infixr 1 $=
 
@@ -93,11 +93,6 @@ infixr 1 $<-
 ($+:) ra im = do
   (r, m) <- get
   return $ addEnum (R.get ra r) (BV.int im)
-
-($+:.) :: RegNum -> Immediate -> Operation W.Word32
-($+:.) ra im = do
-  (r, m) <- get
-  return $ addEnum (R.get ra r) (BV.nat im)
 
 bitwiseWith ::
      (BV.BitVector -> BV.BitVector -> BV.BitVector)
@@ -159,7 +154,7 @@ addi :: RegNum -> RegNum -> Immediate -> Operation ()
 addi rs rt im = rt $<- rs $+: im
 
 addiu :: RegNum -> RegNum -> Immediate -> Operation ()
-addiu rs rt im = rt $<- rs $+:. im
+addiu rs rt im = rt $<- rs $+: im
 
 andi :: RegNum -> RegNum -> Immediate -> Operation ()
 andi rs rt im = rt $<- rs $&: im
