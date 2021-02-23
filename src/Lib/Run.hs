@@ -1,27 +1,39 @@
 module Lib.Run where
 
 import           Lib.Computer
-
 import           Lib.Decode
 import qualified Lib.Memory               as M
 import           Lib.Operation
 import           Lib.Print
 import qualified Lib.Registers            as R
 
+import           Control.Monad            (when)
 import           Control.Monad.State.Lazy (runState)
 import           System.IO
+import           Text.Printf              (printf)
+
+import qualified Data.Word                as W
 
 runComputer :: Computer -> IO ()
-runComputer c0 = do
+runComputer = runWithBreakpoints []
+
+runWithBreakpoints :: [W.Word32] -> Computer -> IO ()
+runWithBreakpoints bps c0 = do
   let (sc, c1) = tick c0
   mi <- runSyscall sc
   let c2 =
         case mi of
           Just i  -> setInput c1 i
           Nothing -> c1
+  let pc = R.get 32 $ fst c2
+  when (pc `elem` bps) $ do
+    putStrLn $ "pc: " <> printf "0x%08x" pc
+    printComputer c2
+    getLine
+    putStrLn "---------"
   if sc == Die
     then putStrLn "--- Program Finished ---"
-    else runComputer c2 -- (printComputer c2)
+    else runWithBreakpoints bps c2
 
 setInput :: Computer -> Int -> Computer
 setInput (r, m) i = (R.set 2 (toEnum i) r, m)
