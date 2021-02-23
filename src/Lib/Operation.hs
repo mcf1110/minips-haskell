@@ -52,6 +52,7 @@ evalInstruction ins = do
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Beq rs rt im)    = beq rs rt im
     eval (IInstr Bne rs rt im)    = bne rs rt im
+    eval (IInstr Sw rs rt im)     = sw rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
@@ -178,6 +179,15 @@ lw rs rt im = do
       sign = BV.zeroExtend 32 im
       word = M.get (addEnum rsv sign) m
   rt $= word
+
+sw :: RegNum -> RegNum -> Immediate -> Operation ()
+sw rs rt im = do
+  (r, m) <- get
+  let rsv = R.get rs r
+      rtv = R.get rt r
+      sign = BV.zeroExtend 32 im
+      m' = M.set (addEnum rsv sign) rtv m
+  put (r, m')
 
 -- Type J
 jump :: Immediate -> Operation ()

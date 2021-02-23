@@ -10,6 +10,9 @@ import           Data.Maybe       (fromMaybe)
 
 type Memory = IM.IntMap W.Word32
 
+set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Memory -> Memory
+set ix = IM.insert (fromEnum ix)
+
 get :: Enum a => a -> Memory -> W.Word32
 get n m = fromMaybe 0 $ m IM.!? fromEnum n
 

@@ -198,6 +198,11 @@ runningTests =
       (regAt 10 $ runSegInitial [0x24080002, 0x2409000a, 0x0109502a])
   , testCase "lw $t0, ans" $
     assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
+  , testCase "sw $t0, ans" $
+    assertEqual
+      ""
+      0x2a
+      (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
   , testCase "jr $ra" $
     assertEqual
       ""
