@@ -9,6 +9,7 @@ import           Lib.Print
 import qualified Lib.Registers            as R
 
 import           Control.Monad.State.Lazy (runState)
+import           System.IO
 
 runComputer :: Computer -> IO ()
 runComputer c0 = do
@@ -31,10 +32,12 @@ runSyscall sc = do
   runIO sc
   return Nothing
   where
-    runIO (PutInt x)  = print x
-    runIO (PutStr x)  = putStrLn x
+    runIO (PutInt x) = print x
+    runIO (PutStr x) = do
+      putStr x
+      hFlush stdout
     runIO (PutChar x) = putChar x
-    runIO _           = return ()
+    runIO _ = return ()
 
 tick :: Computer -> (SC, Computer)
 tick c0 = runInstruction ins c0
