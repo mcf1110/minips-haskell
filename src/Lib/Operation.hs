@@ -10,7 +10,6 @@ import           Control.Monad.State.Lazy
 import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
-import           Debug.Trace
 
 data SC
   = PutInt Int
@@ -28,8 +27,6 @@ type RegNum = BV.BitVector
 type Immediate = BV.BitVector
 
 evalInstruction :: Instr -> Operation SC
-evalInstruction i
-  | traceShow i False = undefined
 evalInstruction Syscall = do
   incPC
   (r, m) <- get
@@ -55,6 +52,7 @@ evalInstruction ins = do
     eval (IInstr Bne rs rt im)    = bne rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
+    eval (JInstr J tgt)           = jump tgt
     eval a                        = error $ "Falta implementar: " <> show a
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
@@ -116,6 +114,10 @@ lui rt im = rt $= up
   where
     up = toEnum . fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10
 
+-- Type J
+jump :: Immediate -> Operation ()
+jump tgt = modify . B.first $ R.set 32 (toEnum $ fromEnum tgt)
+
 -- Branching
 branchOn ::
      (W.Word32 -> W.Word32 -> Bool)
@@ -125,8 +127,7 @@ branchOn ::
   -> Operation ()
 branchOn op rs rt im = do
   (r, m) <- get
-  when (traceShow (rs, R.get rs r, rt, R.get rt r) $ R.get rs r `op` R.get rt r) $
-    addToPC $ BV.int im
+  when (R.get rs r `op` R.get rt r) $ addToPC $ BV.int im
 
 beq :: RegNum -> RegNum -> Immediate -> Operation ()
 beq = branchOn (==)

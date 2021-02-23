@@ -175,6 +175,11 @@ runningTests =
       ""
       0x10010000
       (regAt 4 $ runSegInitial [0x15310001, 0x3c011001, 0x34240000])
+  , testCase "j 0x40000008" $
+    assertEqual
+      ""
+      0
+      (regAt 4 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
     -- SystemCalls
   , testCase "print 'Ola mundo!'" $
     assertEqual
