@@ -40,8 +40,8 @@ evalInstruction Syscall = do
       5  -> GetInt
       10 -> Die
 evalInstruction ins = do
-  eval ins
   incPC
+  eval ins
   return NoOp
   where
     eval (IInstr Addi rs rt im)   = addi rs rt im
@@ -53,6 +53,7 @@ evalInstruction ins = do
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (JInstr J tgt)           = jump tgt
+    eval (JInstr Jal tgt)         = jal tgt
     eval a                        = error $ "Falta implementar: " <> show a
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
@@ -117,6 +118,11 @@ lui rt im = rt $= up
 -- Type J
 jump :: Immediate -> Operation ()
 jump tgt = modify . B.first $ R.set 32 (toEnum $ fromEnum tgt)
+
+jal :: Immediate -> Operation ()
+jal tgt = modify . B.first $ (\r -> R.set 32 t $ R.set 31 (R.get 32 r) r)
+  where
+    t = toEnum $ fromEnum tgt
 
 -- Branching
 branchOn ::
