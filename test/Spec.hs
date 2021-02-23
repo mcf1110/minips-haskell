@@ -92,6 +92,7 @@ iTests =
     , [ (0x8c290000, "lw $t1, 0($at)", i Lw 1 9 0)
       , (0x8d840000, "lw $a0, 0($t4)", i Lw 12 4 0)
       , (0x8d8d0000, "lw $t5, 0($t4)", i Lw 12 13 0)
+      , (0x8d090004, "lw $t1, 4($t0)", i Lw 8 9 4)
       ])
   , ("Store Word", [(0xad8d0000, "sw $t5, 0($t4)", i Sw 12 13 0)])
   ]
@@ -200,6 +201,12 @@ runningTests =
       (regAt 10 $ runSegInitial [0x24080002, 0x2409000a, 0x0109502a])
   , testCase "lw $t0, ans" $
     assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
+  , testCase "lw $t1, 4($t0)" $
+    assertEqual
+      ""
+      0x30303234
+      (regAt 9 $
+       runSeg [0x70736552, 0x30303234] [0x3c011001, 0x34280000, 0x8d090004])
   , testCase "sw $t0, ans" $
     assertEqual
       ""
