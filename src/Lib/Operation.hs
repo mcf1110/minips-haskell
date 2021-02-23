@@ -48,6 +48,7 @@ evalInstruction ins = do
     eval (IInstr Addiu rs rt im)  = addiu rs rt im
     eval (IInstr Andi rs rt im)   = andi rs rt im
     eval (IInstr Lui _ rt im)     = lui rt im
+    eval (IInstr Lw rs rt im)     = lw rs rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Beq rs rt im)    = beq rs rt im
     eval (IInstr Bne rs rt im)    = bne rs rt im
@@ -169,6 +170,14 @@ lui :: RegNum -> Immediate -> Operation ()
 lui rt im = rt $= up
   where
     up = toEnum . fromEnum $ BV.zeroExtend 32 im BV.<<. 0x10
+
+lw :: RegNum -> RegNum -> Immediate -> Operation ()
+lw rs rt im = do
+  (r, m) <- get
+  let rsv = R.get rs r
+      sign = BV.zeroExtend 32 im
+      word = M.get (addEnum rsv sign) m
+  rt $= word
 
 -- Type J
 jump :: Immediate -> Operation ()

@@ -126,15 +126,15 @@ testComputerUntilSyscall c =
         else testComputerUntilSyscall (r, m)
     x -> x
 
+runSeg :: Segment -> Segment -> Computer
+runSeg dataS textS =
+  snd $ testComputerUntilSyscall (initialComputer dataS textS)
+
 runSegInitial :: Segment -> Computer
-runSegInitial segment =
-  snd $ testComputerUntilSyscall (initialComputer [] segment)
+runSegInitial = runSeg []
 
 getSC :: Segment -> Segment -> SC
-getSC dataS textS =
-  fst $
-  runInstruction Syscall $
-  snd $ testComputerUntilSyscall (initialComputer dataS textS)
+getSC dataS textS = fst $ runInstruction Syscall $ runSeg dataS textS
 
 regAt ix = R.get ix . fst
 
@@ -196,6 +196,8 @@ runningTests =
       ""
       1
       (regAt 10 $ runSegInitial [0x24080002, 0x2409000a, 0x0109502a])
+  , testCase "lw $t0, ans" $
+    assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
   , testCase "jr $ra" $
     assertEqual
       ""
