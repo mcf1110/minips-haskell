@@ -53,6 +53,7 @@ evalInstruction ins = do
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
+    eval (RInstr Jr rs _ _ _)     = jr rs
     eval (JInstr J tgt)           = jump tgt
     eval (JInstr Jal tgt)         = jal tgt
     eval a                        = error $ "Falta implementar: " <> show a
@@ -111,6 +112,9 @@ add rs rt rd = rd $<- rs $+$ rt
 
 slt :: RegNum -> RegNum -> RegNum -> Operation ()
 slt rs rt rd = rd $<- rs $<$ rt
+
+jr :: RegNum -> Operation ()
+jr rnum = modify . B.first $ (\r -> R.set 32 (R.get rnum r) r)
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
