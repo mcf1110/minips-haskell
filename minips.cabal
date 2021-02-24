@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f222e6620ede0d577b9d19a019863280a416fc8cf66ee76027cd80f4594ddb9a
+-- hash: 4d5a5eddecca08d14c4563ec5de4dda17e80c25d0f9cfcda29f9d3d718bd9fe6
 
 name:           minips
 version:        0.1.0.0
@@ -51,7 +51,7 @@ library
     , vector
   default-language: Haskell2010
 
-executable minips-exe
+executable minips
   main-is: Main.hs
   other-modules:
       Paths_minips
