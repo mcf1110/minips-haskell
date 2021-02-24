@@ -1,15 +1,26 @@
 module Lib
-  ( loadProgram
-  , loadComputer
+  ( decode
+  , run
   ) where
 
 import           Lib.Computer
-import           Lib.Decode
+
+import           Lib.Decode    (Program, decodeProgram)
 import           Lib.Memory
+import           Lib.Print
 import           Lib.Registers
+import           Lib.Run
 import           Lib.Segment
 
 import qualified Lib.File      as F
+
+import           Control.Monad ((>=>))
+
+run :: FilePath -> IO ()
+run = loadComputer >=> runComputer
+
+decode :: FilePath -> IO ()
+decode = loadProgram >=> printProgram
 
 loadComputer :: FilePath -> IO Computer
 loadComputer fp = do

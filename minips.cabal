@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8c05b4bb84d78e5a23ac23f4f617c8e9dbc46a35e7378592b93b6bfb8f4c4057
+-- hash: f222e6620ede0d577b9d19a019863280a416fc8cf66ee76027cd80f4594ddb9a
 
 name:           minips
 version:        0.1.0.0
@@ -73,6 +73,7 @@ test-suite minips-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      RunSpec
       Paths_minips
   hs-source-dirs:
       test
