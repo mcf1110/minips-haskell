@@ -44,7 +44,7 @@ runSyscall sc = do
   runIO sc
   return Nothing
   where
-    runIO (PutInt x) = print x
+    runIO (PutInt x) = putStr $ show x
     runIO (PutStr x) = do
       putStr x
       hFlush stdout
