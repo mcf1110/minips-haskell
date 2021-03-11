@@ -123,6 +123,11 @@ jTests =
       ""
       0
       (regAt 4 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
+  , testCase "j 0x40000008" $
+    assertEqual
+      ""
+      0x40000C
+      (regAt 32 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
   , testCase "jal 0x00400008" $
     assertEqual "" (0x00400000 + 8) (regAt 32 $ runSegInitial [0x0c100002])
   , testCase "jal 0x00400008" $

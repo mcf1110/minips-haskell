@@ -187,12 +187,18 @@ sw rs rt im = do
 
 -- Type J
 jump :: Immediate -> Operation ()
-jump tgt = modify . B.first $ R.set 32 (toEnum $ fromEnum tgt)
+jump tgt = modify . B.first $ (\r -> R.set 32 (calcJumpAddr tgt r) r)
 
 jal :: Immediate -> Operation ()
-jal tgt = modify . B.first $ (\r -> R.set 32 t $ R.set 31 (R.get 32 r) r)
+jal tgt =
+  modify . B.first $
+  (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
+
+calcJumpAddr :: Immediate -> R.Registers -> W.Word32
+calcJumpAddr tgt r =
+  toEnum $ fromEnum $ BV.append upperPC $ BV.zeroExtend (28 - BV.size tgt) tgt
   where
-    t = toEnum $ fromEnum tgt
+    upperPC = BV.most 4 $ BV.bitVec 32 $ fromEnum $ R.get 32 r
 
 -- Branching
 branchOn ::
