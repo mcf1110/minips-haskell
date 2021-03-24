@@ -61,6 +61,7 @@ evalInstruction ins = do
     eval (RInstr Sll _ rt rd sh)  = sll rt rd sh
     eval (JInstr J tgt)           = jump tgt
     eval (JInstr Jal tgt)         = jal tgt
+    eval Nop                      = return ()
     eval a                        = error $ "Falta implementar: " <> show a
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
