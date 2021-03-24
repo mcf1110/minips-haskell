@@ -17,7 +17,7 @@ data SC
   | PutChar Char
   | GetInt
   | Die
-  | NoOp
+  | NoSC
   deriving (Show, Eq)
 
 type Operation a = State Computer a
@@ -42,7 +42,7 @@ evalInstruction Syscall = do
 evalInstruction ins = do
   incPC
   eval ins
-  return NoOp
+  return NoSC
   where
     eval (IInstr Addi rs rt im)   = addi rs rt im
     eval (IInstr Addiu rs rt im)  = addiu rs rt im

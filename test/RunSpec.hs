@@ -16,9 +16,9 @@ import           Lib.Segment
 testComputerUntilSyscall :: Computer -> (SC, Computer)
 testComputerUntilSyscall c =
   case tick c of
-    (NoOp, (r, m)) ->
+    (NoSC, (r, m)) ->
       if M.get (R.get 32 r) m == 0
-        then (NoOp, (r, m))
+        then (NoSC, (r, m))
         else testComputerUntilSyscall (r, m)
     x -> x
 
