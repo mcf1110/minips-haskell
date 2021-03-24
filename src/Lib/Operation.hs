@@ -11,7 +11,6 @@ import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
 
-import           Debug.Trace
 
 data SC
   = PutInt Int
@@ -216,7 +215,7 @@ branchOn op rs rt im = do
   (r, m) <- get
   if R.get rs r `op` R.get rt r
     then do
-      addToPC $ BV.int $ traceShowId im
+      addToPC $ BV.int im
       runBranchDelaySlot (r, m)
     else return NoSC
 

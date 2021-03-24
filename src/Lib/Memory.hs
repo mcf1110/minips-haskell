@@ -3,7 +3,6 @@ module Lib.Memory where
 import qualified Data.BitVector   as BV
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.Word        as W
-import           Debug.Trace
 
 import           Data.List.Split  (chunksOf)
 import           Data.Maybe       (fromMaybe)
