@@ -11,6 +11,8 @@ import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
 
+import           Debug.Trace
+
 data SC
   = PutInt Int
   | PutStr String
@@ -41,17 +43,19 @@ evalInstruction Syscall = do
       10 -> Die
 evalInstruction ins = do
   incPC
-  eval ins
-  return NoSC
+  evalWithSyscall ins
   where
+    evalWithSyscall (IInstr Beq rs rt im) = beq rs rt im
+    evalWithSyscall (IInstr Bne rs rt im) = bne rs rt im
+    evalWithSyscall x = do
+      eval x
+      return NoSC
     eval (IInstr Addi rs rt im)   = addi rs rt im
     eval (IInstr Addiu rs rt im)  = addiu rs rt im
     eval (IInstr Andi rs rt im)   = andi rs rt im
     eval (IInstr Lui _ rt im)     = lui rt im
     eval (IInstr Lw rs rt im)     = lw rs rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
-    eval (IInstr Beq rs rt im)    = beq rs rt im
-    eval (IInstr Bne rs rt im)    = bne rs rt im
     eval (IInstr Sw rs rt im)     = sw rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
@@ -207,13 +211,26 @@ branchOn ::
   -> RegNum
   -> RegNum
   -> Immediate
-  -> Operation ()
+  -> Operation SC
 branchOn op rs rt im = do
   (r, m) <- get
-  when (R.get rs r `op` R.get rt r) $ addToPC $ BV.int im
+  if R.get rs r `op` R.get rt r
+    then do
+      addToPC $ BV.int $ traceShowId im
+      runBranchDelaySlot (r, m)
+    else return NoSC
 
-beq :: RegNum -> RegNum -> Immediate -> Operation ()
+beq :: RegNum -> RegNum -> Immediate -> Operation SC
 beq = branchOn (==)
 
-bne :: RegNum -> RegNum -> Immediate -> Operation ()
+bne :: RegNum -> RegNum -> Immediate -> Operation SC
 bne = branchOn (/=)
+
+runBranchDelaySlot :: Computer -> Operation SC
+runBranchDelaySlot c = do
+  let (r, m) = c
+      pc = R.get 32 r
+      ins = decodeInstruction $ M.get pc m
+  sc <- evalInstruction ins
+  addToPC (-1) -- after evaluating, PC will have to revert back
+  return sc

@@ -37,7 +37,7 @@ regAt ix = R.get ix . fst
 runningTests =
   [ testGroup "R Instructions" rTests
   , testGroup "I Instructions" iTests
-  , testGroup "J Instructions" jTests
+  -- , testGroup "J Instructions" jTests
   ]
 
 iTests =
@@ -60,6 +60,21 @@ iTests =
     assertEqual "" 0x10010000 (regAt 4 $ runSegInitial [0x3c011001, 0x34240000])
   , testCase "ori $t1, $t0, 16" $
     assertEqual "" 0x10 (regAt 9 $ runSegInitial [0x24080014, 0x31090010])
+  , testCase "Branch Delay" $
+    assertEqual
+      ""
+      1
+      (regAt 9 $ runSegInitial [0x10000002, 0x24090001, 0x240a0002, 0x240b0003])
+  , testCase "Branch Delay" $
+    assertEqual
+      ""
+      0
+      (regAt 10 $ runSegInitial [0x10000002, 0x24090001, 0x240a0002, 0x240b0003])
+  , testCase "Branch Delay" $
+    assertEqual
+      ""
+      3
+      (regAt 11 $ runSegInitial [0x10000002, 0x24090001, 0x240a0002, 0x240b0003])
   , testCase "beq $zero, $zero, 1" $
     assertEqual
       ""
@@ -69,12 +84,28 @@ iTests =
     assertEqual
       ""
       0x0
-      (regAt 4 $ runSegInitial [0x10000001, 0x3c011001, 0x34240000])
-  , testCase "bne $zero, $zero, 1" $
+      (regAt 4 $ runSegInitial [0x10000002, 0x0, 0x3c011001, 0x34240000])
+  , testCase "bne 1, $zero, 2" $
     assertEqual
       ""
-      0x10010000
-      (regAt 4 $ runSegInitial [0x15310001, 0x3c011001, 0x34240000])
+      15
+      (regAt 9 $
+       runSegInitial
+         [0x24090001, 0x15200002, 0x2409000f, 0x240a0002, 0x240b0003])
+  , testCase "bne 1, $zero, 2" $
+    assertEqual
+      ""
+      0
+      (regAt 10 $
+       runSegInitial
+         [0x24090001, 0x15200002, 0x2409000f, 0x240a0002, 0x240b0003])
+  , testCase "bne 1, $zero, 2" $
+    assertEqual
+      ""
+      3
+      (regAt 11 $
+       runSegInitial
+         [0x24090001, 0x15200002, 0x2409000f, 0x240a0002, 0x240b0003])
   , testCase "lw $t0, ans" $
     assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
   , testCase "lw $t1, 4($t0)" $
