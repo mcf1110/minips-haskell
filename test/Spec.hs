@@ -104,6 +104,7 @@ decodingTests =
   , testGroup "J Instructions" $ map makeDecTest iTests
   , testGroup "I Instructions" $ map makeDecTest jTests
   , testCase "Syscall" $ assertEqual "" Syscall (decode 0x0000000c)
+  , testCase "Nop" $ assertEqual "" Nop (decode 0x00000000)
   ]
   where
     makeDecTest (title, ts) = testGroup title $ map dt ts
@@ -114,6 +115,7 @@ printingTests =
   , testGroup "J Instructions" $ map makePrintTest iTests
   , testGroup "I Instructions" $ map makePrintTest jTests
   , testCase "Syscall" $ assertEqual "" "syscall" (showInstruction Syscall)
+  , testCase "Nop" $ assertEqual "" "nop" (showInstruction Nop)
   ]
   where
     makePrintTest (title, ts) = testGroup title $ map dt ts

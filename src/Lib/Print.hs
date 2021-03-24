@@ -140,3 +140,4 @@ showInstruction ins@(IInstr op rs rt rd)
 showInstruction ins@(JInstr op tgt) =
   (toLower <$> show op) <> " " <> printf "0x%08x" (BV.int tgt)
 showInstruction Syscall = "syscall"
+showInstruction Nop = "nop"

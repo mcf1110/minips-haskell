@@ -24,6 +24,7 @@ data Instr
       , tgt :: BV.BitVector
       }
   | Syscall
+  | Nop
   deriving (Show, Eq)
 
 data Funct
@@ -77,6 +78,7 @@ getFields sizes bv = map get offsets
     get (a, b) = BV.extract a b bv
 
 decode :: BV.BitVector -> Instr
+decode 0 = Nop
 decode bv =
   case BV.extract 31 26 bv of
     0 -> decodeRFormat bv
