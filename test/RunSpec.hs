@@ -188,11 +188,13 @@ jTests =
       ""
       0x40000C
       (regAt 32 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
-  , testCase "jal 0x00400008" $
-    assertEqual "" (0x00400000 + 8) (regAt 32 $ runSegInitial [0x0c100002])
-  , testCase "jal 0x00400008" $
-    assertEqual "" (0x00400000 + 4) (regAt 31 $ runSegInitial [0x0c100002])
-  ]
+  , testGroup
+      "Jump and Link - jal 0x00400008"
+      [ testCase "Sets PC" $
+        assertEqual "" (0x00400000 + 8) (regAt 32 $ runSegInitial [0x0c100002])
+      , testCase "Sets $ra" $
+        assertEqual "" (0x00400000 + 4) (regAt 31 $ runSegInitial [0x0c100002])
+      ]
 
 systemCallTests =
   [ testCase "print 'Ola mundo!'" $
