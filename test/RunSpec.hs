@@ -37,7 +37,7 @@ regAt ix = R.get ix . fst
 runningTests =
   [ testGroup "R Instructions" rTests
   , testGroup "I Instructions" iTests
-  -- , testGroup "J Instructions" jTests
+  , testGroup "J Instructions" jTests
   ]
 
 iTests =
