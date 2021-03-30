@@ -32,7 +32,7 @@ runWithBreakpoints bps c0 = do
     getLine
     putStrLn "---------"
   if sc == Die
-    then putStrLn "--- Program Finished ---"
+    then putStrLn "\n--- Program Finished ---"
     else runWithBreakpoints bps c2
 
 setInput :: Computer -> Int -> Computer
