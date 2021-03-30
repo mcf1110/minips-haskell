@@ -41,6 +41,7 @@ data Funct
   | Srl
   | Sub
   | Subu
+  | Jalr
   deriving (Show, Eq)
 
 data IOp
@@ -107,6 +108,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     -- decodeFunct 0x2b = Sltu
     decodeFunct 0x00 = Sll
     decodeFunct 0x02 = Srl
+    decodeFunct 0x9  = Jalr
     -- decodeFunct 0x22 = Sub
     -- decodeFunct 0x23 = Subu
 
