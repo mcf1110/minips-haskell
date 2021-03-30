@@ -55,6 +55,7 @@ evalInstruction ins = do
     eval (IInstr Lw rs rt im)     = lw rs rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Sw rs rt im)     = sw rs rt im
+    eval (IInstr Slti rs rt im)   = slti rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
@@ -69,6 +70,9 @@ evalInstruction ins = do
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32
 addEnum x y = toEnum . fromEnum $ BV.bitVec 32 $ fromEnum x + fromEnum y
+
+signExt :: BV.BitVector -> Integer
+signExt = BV.int . BV.bitVec 32
 
 infixr 1 $=
 
@@ -91,6 +95,16 @@ infixr 1 $<-
   let signed rx = BV.int $ BV.bitVec 32 $ R.get rx r
   return $
     if signed ra < signed rb
+      then 1
+      else 0
+
+($<:) :: RegNum -> Immediate -> Operation W.Word32
+($<:) ra im = do
+  (r, m) <- get
+  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx r
+      signedIm = BV.int $ BV.bitVec 32 im
+  return $
+    if signed ra < signedIm
       then 1
       else 0
 
@@ -188,6 +202,9 @@ sw rs rt im = do
       sign = BV.zeroExtend 32 im
       m' = M.set (addEnum rsv sign) rtv m
   put (r, m')
+
+slti :: RegNum -> RegNum -> Immediate -> Operation ()
+slti rs rt im = rt $<- rs $<: im
 
 -- Type J
 jump :: Immediate -> Operation ()

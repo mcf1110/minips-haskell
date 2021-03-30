@@ -119,6 +119,17 @@ iTests =
       ""
       0x2a
       (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
+  , testGroup
+      "slti"
+      [ testCase "Sets reg to True" $
+        assertEqual "" 1 (regAt 9 $ runSegInitial [0x2408002a, 0x29090032])
+      , testCase "Sets reg to False" $
+        assertEqual "" 0 (regAt 9 $ runSegInitial [0x2408002a, 0x2909001e])
+      , testCase "Deals with negative numbers" $
+        assertEqual "" 0 (regAt 9 $ runSegInitial [0x2408fff4, 0x2909ffd6])
+      , testCase "Deals with negative numbers pt2" $
+        assertEqual "" 1 (regAt 9 $ runSegInitial [0x2408ffd6, 0x2909fff4])
+      ]
   ]
 
 rTests =

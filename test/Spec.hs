@@ -97,6 +97,8 @@ iTests =
       , (0x8d090004, "lw $t1, 4($t0)", i Lw 8 9 4)
       ])
   , ("Store Word", [(0xad8d0000, "sw $t5, 0($t4)", i Sw 12 13 0)])
+  , ( "Set on Less Than Immediate"
+    , [(0x28880009, "slti $t0, $a0, 9", i Slti 4 8 9)])
   ]
 
 decodingTests =
@@ -117,7 +119,7 @@ printingTests =
   , testGroup "I Instructions" $ map makePrintTest jTests
   , testCase "Syscall" $ assertEqual "" "syscall" (showInstruction Syscall)
   , testCase "Nop" $ assertEqual "" "nop" (showInstruction Nop)
-  , testCase "Nop" $ assertEqual "" "break" (showInstruction Break)
+  , testCase "Break" $ assertEqual "" "break" (showInstruction Break)
   ]
   where
     makePrintTest (title, ts) = testGroup title $ map dt ts
