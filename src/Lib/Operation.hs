@@ -11,7 +11,6 @@ import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
 
-
 data SC
   = PutInt Int
   | PutStr String
@@ -65,6 +64,7 @@ evalInstruction ins = do
     eval (JInstr J tgt)           = jump tgt
     eval (JInstr Jal tgt)         = jal tgt
     eval Nop                      = return ()
+    eval Break                    = return ()
     eval a                        = error $ "Falta implementar: " <> show a
 
 addEnum :: (Enum a, Enum b) => a -> b -> W.Word32

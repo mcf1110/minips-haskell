@@ -25,6 +25,7 @@ data Instr
       }
   | Syscall
   | Nop
+  | Break
   deriving (Show, Eq)
 
 data Funct
@@ -90,9 +91,10 @@ decodeRFormat :: BV.BitVector -> Instr
 decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
   where
     fromList [_, s, t, d, shamt, f] =
-      if f == 0x0c
-        then Syscall
-        else RInstr (decodeFunct f) s t d shamt
+      case f of
+        0x0c -> Syscall
+        0x0d -> Break
+        _    -> RInstr (decodeFunct f) s t d shamt
     decodeFunct :: BV.BitVector -> Funct
     decodeFunct 0x20 = Add
     decodeFunct 0x21 = Addu
