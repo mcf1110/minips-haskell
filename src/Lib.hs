@@ -14,7 +14,7 @@ import           Lib.Segment
 
 import qualified Lib.File          as F
 
-import           Control.Exception (SomeException (SomeException), try)
+import           Control.Exception (IOException, try)
 import           Control.Monad     ((>=>))
 import           Data.Either
 
@@ -30,7 +30,7 @@ loadComputer fp = do
   textSegment <- F.readFile $ fp <> ".text"
   roDataSegment <-
     fromRight [] <$>
-    (try $ F.readFile $ fp <> ".rodata" :: IO (Either SomeException Segment))
+    (try $ F.readFile $ fp <> ".rodata" :: IO (Either IOException Segment))
   return $ initialComputer dataSegment textSegment roDataSegment
 
 loadProgram :: FilePath -> IO Program
