@@ -24,7 +24,7 @@ testComputerUntilSyscall c =
 
 runSeg :: Segment -> Segment -> Computer
 runSeg dataS textS =
-  snd $ testComputerUntilSyscall (initialComputer dataS textS)
+  snd $ testComputerUntilSyscall (initialComputer dataS textS [])
 
 runSegInitial :: Segment -> Computer
 runSegInitial = runSeg []
