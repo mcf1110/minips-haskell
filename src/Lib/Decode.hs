@@ -87,7 +87,10 @@ decode bv =
     0 -> decodeRFormat bv
     2 -> decodeJFormat bv
     3 -> decodeJFormat bv
-    _ -> decodeIFormat bv
+    x ->
+      if x < 16 || x > 19
+        then decodeIFormat bv
+        else error "Coprocessor"
 
 decodeRFormat :: BV.BitVector -> Instr
 decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
@@ -103,7 +106,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     -- decodeFunct 0x24 = And
     decodeFunct 0x08 = Jr
     -- decodeFunct 0x27 = Nor
-    -- decodeFunct 0x25 = Or
+    decodeFunct 0x25 = Or
     decodeFunct 0x2a = Slt
     -- decodeFunct 0x2b = Sltu
     decodeFunct 0x00 = Sll
@@ -111,6 +114,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeFunct 0x9  = Jalr
     -- decodeFunct 0x22 = Sub
     -- decodeFunct 0x23 = Subu
+    decodeFunct x    = error $ "Falta decodificar o funct " <> BV.showBin x
 
 decodeIFormat :: BV.BitVector -> Instr
 decodeIFormat = fromList . getFields [6, 5, 5, 16]
