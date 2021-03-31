@@ -191,16 +191,37 @@ rTests =
   ]
 
 jTests =
-  [ testCase "j 0x40000008" $
-    assertEqual
-      ""
-      0
-      (regAt 4 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
-  , testCase "j 0x40000008" $
-    assertEqual
-      ""
-      0x40000C
-      (regAt 32 $ runSegInitial [0x08100002, 0x3c011001, 0x34240000])
+  [ testGroup
+      "Jump"
+      [ testCase "j 0x40000008" $
+        assertEqual
+          ""
+          0
+          (regAt 4 $ runSegInitial [0x08100003, 0, 0x3c011001, 0x34240000])
+      , testCase "j 0x40000008" $
+        assertEqual
+          ""
+          0x400010
+          (regAt 32 $ runSegInitial [0x08100003, 0, 0x3c011001, 0x34240000])
+      , testCase "BDL" $
+        assertEqual
+          ""
+          11
+          (regAt 9 $
+           runSegInitial [0x08100003, 0x2409000b, 0x240a0016, 0x240b0021])
+      , testCase "BDL+1" $
+        assertEqual
+          ""
+          0
+          (regAt 10 $
+           runSegInitial [0x08100003, 0x2409000b, 0x240a0016, 0x240b0021])
+      , testCase "Jumps to instruction" $
+        assertEqual
+          ""
+          33
+          (regAt 11 $
+           runSegInitial [0x08100003, 0x2409000b, 0x240a0016, 0x240b0021])
+      ]
   , testGroup
       "Jump and Link - jal 0x00400008"
       [ testCase "Sets PC" $

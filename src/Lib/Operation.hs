@@ -215,7 +215,9 @@ slti rs rt im = rt $<- rs $<: im
 
 -- Type J
 jump :: Immediate -> Operation ()
-jump tgt = modify . B.first $ (\r -> R.set 32 (calcJumpAddr tgt r) r)
+jump tgt = do
+  runBranchDelaySlot
+  modify . B.first $ (\r -> R.set 32 (calcJumpAddr tgt r) r)
 
 jal :: Immediate -> Operation ()
 jal tgt =
