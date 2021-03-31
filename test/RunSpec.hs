@@ -150,12 +150,25 @@ iTests =
       ]
   ]
 
+jrComputer :: Computer
+jrComputer =
+  runSegInitial
+    [0x3c010040, 0x34290014, 0x01200008, 0x2408002a, 0x240b002a, 0x240a0016]
+
 rTests =
-  [ testCase "jr $ra" $
-    assertEqual
-      ""
-      (0x00400000 + 4)
-      (regAt 32 $ runSegInitial [0x0c100002, 0, 0x03e00008])
+  [ testGroup
+      "Jump register"
+      [ testCase "Works with jal" $
+        assertEqual
+          ""
+          (0x00400000 + 4)
+          (regAt 32 $ runSegInitial [0x0c100002, 0, 0x03e00008])
+      , testCase "Changes PC" $
+        assertEqual "" (0x00400000 + 6 * 4) (regAt 32 jrComputer)
+      , testCase "Jumps correctly" $ assertEqual "" 22 (regAt 10 jrComputer)
+      , testCase "BDL" $ assertEqual "" 42 (regAt 8 jrComputer)
+      , testCase "Not BDL+1" $ assertEqual "" 0 (regAt 11 jrComputer)
+      ]
   , testCase "slt $t2, 10, 10" $
     assertEqual
       ""

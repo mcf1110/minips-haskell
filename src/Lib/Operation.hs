@@ -159,7 +159,9 @@ slt :: RegNum -> RegNum -> RegNum -> Operation ()
 slt rs rt rd = rd $<- rs $<$ rt
 
 jr :: RegNum -> Operation ()
-jr rnum = modify . B.first $ (\r -> R.set 32 (R.get rnum r) r)
+jr rnum = do
+  runBranchDelaySlot
+  modify . B.first $ (\r -> R.set 32 (R.get rnum r) r)
 
 srl :: RegNum -> RegNum -> Immediate -> Operation ()
 srl rt rd sh = rd $<- rt $>>: sh
@@ -171,7 +173,6 @@ sll rt rd sh = rd $<- rt $<<: sh
 jalr :: RegNum -> RegNum -> Operation ()
 jalr rd rs = do
   modify . B.first $ (\r -> R.set rd (4 + R.get 32 r) r)
-  runBranchDelaySlot
   jr rs
 
 -- Type I
@@ -237,8 +238,9 @@ branchOn ::
 branchOn op rs rt im = do
   (r, m) <- get
   when (R.get rs r `op` R.get rt r) $ do
-    addToPC $ BV.int im
     runBranchDelaySlot
+    addToPC (-1)
+    addToPC $ BV.int im
 
 beq :: RegNum -> RegNum -> Immediate -> Operation ()
 beq = branchOn (==)
