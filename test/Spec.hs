@@ -107,6 +107,8 @@ iTests =
 frTests =
   [ ( "Move Word From Floating Point"
     , [(0x44036000, "mfc1 $v1, $f12", fr Mfc1 0 3 12 0)])
+  , ( "Move Word To Floating Point"
+    , [(0x44830000, "mtc1 $v1, $f0", fr Mtc1 4 3 0 0)])
   ]
 
 decodingTests =

@@ -74,8 +74,9 @@ data JOp
   | Jal
   deriving (Show, Eq)
 
-data FFunct =
-  Mfc1
+data FFunct
+  = Mfc1
+  | Mtc1
   deriving (Show, Eq)
 
 data FIOp
@@ -165,3 +166,4 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 8, 3]
     fromList [op, fmt, ft, fs, fd, funct] =
       FRInstr (decodeOp fmt funct) fmt ft fs fd
     decodeOp 0 _ = Mfc1
+    decodeOp 4 _ = Mtc1
