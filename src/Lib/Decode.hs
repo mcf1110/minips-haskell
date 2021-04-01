@@ -23,6 +23,18 @@ data Instr
       { jop :: JOp
       , tgt :: BV.BitVector
       }
+  | FRInstr
+      { ffunct :: FFunct
+      , fmt    :: BV.BitVector
+      , ft     :: BV.BitVector
+      , fs     :: BV.BitVector
+      , fd     :: BV.BitVector
+      }
+  | FIInstr
+      { fiop :: FIOp
+      , ft   :: BV.BitVector
+      , imm  :: BV.BitVector
+      }
   | Syscall
   | Nop
   | Break
@@ -62,6 +74,15 @@ data JOp
   | Jal
   deriving (Show, Eq)
 
+data FFunct =
+  Mfc1
+  deriving (Show, Eq)
+
+data FIOp
+  = Bc1t
+  | Bc1f
+  deriving (Show, Eq)
+
 type Program = [Instr]
 
 decodeProgram :: Segment -> Program
@@ -90,7 +111,7 @@ decode bv =
     x ->
       if x < 16 || x > 19
         then decodeIFormat bv
-        else error "Coprocessor"
+        else decodeCoprocessor bv
 
 decodeRFormat :: BV.BitVector -> Instr
 decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
@@ -137,3 +158,10 @@ decodeJFormat = fromList . getFields [6, 26]
     fromList [op, tgt] = JInstr (decodeOp op) (4 * tgt)
     decodeOp 0x2 = J
     decodeOp 0x3 = Jal
+
+decodeCoprocessor :: BV.BitVector -> Instr
+decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 8, 3]
+  where
+    fromList [op, fmt, ft, fs, fd, funct] =
+      FRInstr (decodeOp fmt funct) fmt ft fs fd
+    decodeOp 0 _ = Mfc1

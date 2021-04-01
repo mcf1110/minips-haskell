@@ -41,6 +41,8 @@ j o t = JInstr o (b 26 t)
 
 i o s t im = IInstr o (b 5 s) (b 5 t) (b 16 im)
 
+fr f s t d a = FRInstr f (b 5 s) (b 5 t) (b 5 d) (b 6 a)
+
 rTests =
   [ ( "Add"
     , [ (0x01098020, "add $s0, $t0, $t1", r Add 8 9 16 0)
@@ -102,10 +104,16 @@ iTests =
     , [(0x28880009, "slti $t0, $a0, 9", i Slti 4 8 9)])
   ]
 
+frTests =
+  [ ( "Move Word From Floating Point"
+    , [(0x44036000, "mfc1 $v1, $f12", fr Mfc1 0 3 12 0)])
+  ]
+
 decodingTests =
   [ testGroup "R Instructions" $ map makeDecTest rTests
   , testGroup "J Instructions" $ map makeDecTest iTests
   , testGroup "I Instructions" $ map makeDecTest jTests
+  , testGroup "FR Instructions" $ map makeDecTest frTests
   , testCase "Syscall" $ assertEqual "" Syscall (decode 0x0000000c)
   , testCase "Break" $ assertEqual "" Break (decode 0x0000000d)
   , testCase "Nop" $ assertEqual "" Nop (decode 0x00000000)
@@ -118,6 +126,7 @@ printingTests =
   [ testGroup "R Instructions" $ map makePrintTest rTests
   , testGroup "J Instructions" $ map makePrintTest iTests
   , testGroup "I Instructions" $ map makePrintTest jTests
+  , testGroup "FR Instructions" $ map makePrintTest frTests
   , testCase "Syscall" $ assertEqual "" "syscall" (showInstruction Syscall)
   , testCase "Nop" $ assertEqual "" "nop" (showInstruction Nop)
   , testCase "Break" $ assertEqual "" "break" (showInstruction Break)

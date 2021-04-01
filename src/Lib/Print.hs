@@ -90,6 +90,13 @@ regNumberToNameMap =
 rName :: Enum a => a -> String
 rName = (IM.!) regNumberToNameMap . fromEnum
 
+coProcRegNumberToNameMap :: IM.IntMap String
+coProcRegNumberToNameMap =
+  IM.fromAscList $ zip [0 ..] (map (("$f" <>) . show) [0 .. 31])
+
+fName :: Enum a => a -> String
+fName = (IM.!) coProcRegNumberToNameMap . fromEnum
+
 showRegisters :: Registers -> [String]
 showRegisters r =
   [ "\t┌──────────────────────────┐"
@@ -140,6 +147,10 @@ showInstruction ins@(IInstr op rs rt rd)
     dec = show . BV.int
 showInstruction ins@(JInstr op tgt) =
   (toLower <$> show op) <> " " <> printf "0x%08x" (BV.int tgt)
+showInstruction ins@(FRInstr funct fmt ft fs fd)
+  | funct `elem` [Mfc1] = mkIns [rName ft, fName fs]
+  where
+    mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
 showInstruction Syscall = "syscall"
 showInstruction Nop = "nop"
 showInstruction Break = "break"
