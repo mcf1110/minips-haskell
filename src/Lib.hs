@@ -17,12 +17,10 @@ import qualified Lib.File          as F
 import           Control.Exception (IOException, try)
 import           Control.Monad     ((>=>))
 import           Data.Either
+import           Data.Maybe        (fromMaybe)
 
 run :: FilePath -> IO ()
 run = loadComputer >=> runComputer
-
-decode :: FilePath -> IO ()
-decode = loadProgram >=> printProgram
 
 loadComputer :: FilePath -> IO Computer
 loadComputer fp = do
@@ -33,5 +31,8 @@ loadComputer fp = do
     (try $ F.readFile $ fp <> ".rodata" :: IO (Either IOException Segment))
   return $ initialComputer dataSegment textSegment roDataSegment
 
-loadProgram :: FilePath -> IO Program
-loadProgram fp = fmap decodeProgram $ F.readFile $ fp <> ".text"
+decode :: FilePath -> IO ()
+decode = readSegment >=> printProgramWithHexes
+
+readSegment :: FilePath -> IO Segment
+readSegment fp = F.readFile $ fp <> ".text"

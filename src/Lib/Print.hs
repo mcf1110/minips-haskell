@@ -128,6 +128,14 @@ printComputer (r, m) = do
 printProgram :: Program -> IO ()
 printProgram = mapM_ (putStrLn . showInstruction)
 
+printProgramWithHexes :: Segment -> IO ()
+printProgramWithHexes contents = putStrLn $ unlines $ tab addr $tab hex decoded
+  where
+    decoded = showInstruction <$> decodeProgram contents
+    addr = printf "%08x:" <$> [0x400000 + i * 4 | i <- [0 ..] :: [Integer]]
+    hex = printf "%08x" <$> contents
+    tab = zipWith (\x y -> x <> "\t" <> y)
+
 showInstruction :: Instr -> String
 showInstruction ins@(RInstr funct rs rt rd shamt)
   | funct `elem` [Jr] = mkIns [rName rs]
