@@ -126,14 +126,28 @@ iTests =
            runSegInitial
              [0x24090001, 0x15200002, 0x2409000f, 0x240a0002, 0x240b0003])
       ]
-  , testCase "lw $t0, ans" $
-    assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
-  , testCase "lw $t1, 4($t0)" $
-    assertEqual
-      ""
-      0x30303234
-      (regAt 9 $
-       runSeg [0x70736552, 0x30303234] [0x3c011001, 0x34280000, 0x8d090004])
+  , testGroup
+      "Load Word"
+      [ testCase "lw $t0, ans" $
+        assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
+      , testCase "lw $t1, 4($t0)" $
+        assertEqual
+          ""
+          0x30303234
+          (regAt 9 $
+           runSeg [0x70736552, 0x30303234] [0x3c011001, 0x34280000, 0x8d090004])
+      ]
+  , testGroup
+      "Load Byte"
+      [ testCase "First byte" $
+        assertEqual "" 0xffffffdd (regAt 8 loadByteComputer)
+      , testCase "Second byte" $
+        assertEqual "" 0xffffffcc (regAt 9 loadByteComputer)
+      , testCase "Third byte" $
+        assertEqual "" 0xffffffbb (regAt 10 loadByteComputer)
+      , testCase "Fourth byte" $
+        assertEqual "" 0xffffffaa (regAt 11 loadByteComputer)
+      ]
   , testCase "sw $t0, ans" $
     assertEqual
       ""
@@ -151,6 +165,19 @@ iTests =
         assertEqual "" 1 (regAt 9 $ runSegInitial [0x2408ffd6, 0x2909fff4])
       ]
   ]
+
+loadByteComputer :: Computer
+loadByteComputer =
+  runSeg
+    [0xaabbccdd]
+    [ 0x3c011001
+    , 0x342f0000
+    , 0x81e80000
+    , 0x81e90001
+    , 0x81ea0002
+    , 0x81eb0003
+    , 0x81ec0004
+    ]
 
 jrComputer :: Computer
 jrComputer =

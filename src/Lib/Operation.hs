@@ -53,6 +53,7 @@ evalInstruction ins = do
     eval (IInstr Andi rs rt im)   = andi rs rt im
     eval (IInstr Lui _ rt im)     = lui rt im
     eval (IInstr Lw rs rt im)     = lw rs rt im
+    eval (IInstr Lb rs rt im)     = lb rs rt im
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Sw rs rt im)     = sw rs rt im
     eval (IInstr Slti rs rt im)   = slti rs rt im
@@ -263,6 +264,15 @@ lw rs rt im = do
   let rsv = R.get rs r
       sign = BV.zeroExtend 32 im
       word = M.get (addEnum rsv sign) m
+  rt $= word
+
+lb :: RegNum -> RegNum -> Immediate -> Operation ()
+lb rs rt off = do
+  (r, m) <- get
+  let rsv = R.get rs r
+      sign = BV.zeroExtend 32 off
+      byte = M.getQuarter (addEnum rsv sign) m
+      word = toEnum $ fromEnum $ BV.signExtend (32 - 8) $ BV.bitVec 8 byte
   rt $= word
 
 sw :: RegNum -> RegNum -> Immediate -> Operation ()
