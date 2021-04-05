@@ -198,8 +198,50 @@ rTests =
       , testCase "42 | -200 == -192" $
         assertEqual
           ""
-          (-198)
+          (0xffffffff - 198 + 1)
           (regAt 11 $ runSegInitial [0x2409002a, 0x240aff38, 0x012a5825])
+      ]
+  , testGroup
+      "Mult"
+      [ testGroup
+          "42*42 == 1764"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              1764
+              (regAt 34 $ runSegInitial [0x2409002a, 0x240a002a, 0x012a0018])
+          , testCase "hi" $
+            assertEqual
+              ""
+              0
+              (regAt 33 $ runSegInitial [0x2409002a, 0x240a002a, 0x012a0018])
+          ]
+      , testGroup
+          "42*-42 == -1764"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              (-1764)
+              (regAt 34 $ runSegInitial [0x2409002a, 0x240affd6, 0x012a0018])
+          , testCase "hi" $
+            assertEqual
+              ""
+              (-1)
+              (regAt 33 $ runSegInitial [0x2409002a, 0x240affd6, 0x012a0018])
+          ]
+      , testGroup
+          "-42*-42 == -1764"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              1764
+              (regAt 34 $ runSegInitial [0x2409ffd6, 0x240affd6, 0x012a0018])
+          , testCase "hi" $
+            assertEqual
+              ""
+              0
+              (regAt 33 $ runSegInitial [0x2409ffd6, 0x240affd6, 0x012a0018])
+          ]
       ]
   ]
 

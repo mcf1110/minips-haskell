@@ -11,6 +11,8 @@ import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
 
+import           Debug.Trace
+
 data SC
   = PutInt Int
   | PutStr String
@@ -58,6 +60,7 @@ evalInstruction ins = do
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
     eval (RInstr Or rs rt rd _)   = Lib.Operation.or rs rt rd
+    eval (RInstr Mult rs rt _ _)  = mult rs rt
     eval (RInstr Jr rs _ _ _)     = jr rs
     eval (RInstr Srl _ rt rd sh)  = srl rt rd sh
     eval (RInstr Sll _ rt rd sh)  = sll rt rd sh
@@ -104,6 +107,14 @@ bitwiseWithRegNum op ra rb = do
 
 ($&$) :: RegNum -> RegNum -> Operation W.Word32
 ($&$) = bitwiseWithRegNum (BV..&.)
+
+($*$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
+($*$) ra rb = do
+  (r, m) <- get
+  let a = BV.signExtend 32 $ BV.bitVec 32 $ R.get ra r
+      b = BV.signExtend 32 $ BV.bitVec 32 $ R.get rb r
+      [hi, lo] = map (toEnum . fromEnum) $ BV.split 2 $ BV.least 64 $ a * b
+  return (hi, lo)
 
 ($<$) :: RegNum -> RegNum -> Operation W.Word32
 ($<$) ra rb = do
@@ -194,6 +205,13 @@ jalr :: RegNum -> RegNum -> Operation ()
 jalr rd rs = do
   modify . B.first $ (\r -> R.set rd (4 + R.get 32 r) r)
   jr rs
+
+mult :: RegNum -> RegNum -> Operation ()
+mult rs rt = do
+  (hi, lo) <- rs $*$ rt
+  34 $= lo
+  33 $= hi
+  return ()
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
