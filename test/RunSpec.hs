@@ -13,6 +13,8 @@ import qualified Lib.Registers    as R
 import           Lib.Run
 import           Lib.Segment
 
+tc x = 0xffffffff - x + 1 -- twos complement
+
 testComputerUntilSyscall :: Computer -> (SC, Computer)
 testComputerUntilSyscall c =
   case tick c of
@@ -198,7 +200,7 @@ rTests =
       , testCase "42 | -200 == -192" $
         assertEqual
           ""
-          (0xffffffff - 198 + 1)
+          (tc 198)
           (regAt 11 $ runSegInitial [0x2409002a, 0x240aff38, 0x012a5825])
       ]
   , testGroup
@@ -221,12 +223,12 @@ rTests =
           [ testCase "lo" $
             assertEqual
               ""
-              (-1764)
+              (tc 1764)
               (regAt 34 $ runSegInitial [0x2409002a, 0x240affd6, 0x012a0018])
           , testCase "hi" $
             assertEqual
               ""
-              (-1)
+              (tc 1)
               (regAt 33 $ runSegInitial [0x2409002a, 0x240affd6, 0x012a0018])
           ]
       , testGroup
@@ -242,6 +244,24 @@ rTests =
               0
               (regAt 33 $ runSegInitial [0x2409ffd6, 0x240affd6, 0x012a0018])
           ]
+      ]
+  , testGroup
+      "Move from low"
+      [ testCase "mflo $t3" $
+        assertEqual
+          ""
+          242
+          (regAt 11 $
+           runSegInitial [0x2409000b, 0x240a0016, 0x012a0018, 0x00005812])
+      ]
+  , testGroup
+      "Move from high"
+      [ testCase "mfhi $t3" $
+        assertEqual
+          ""
+          (tc 1)
+          (regAt 11 $
+           runSegInitial [0x2409000b, 0x240affea, 0x012a0018, 0x00005810])
       ]
   ]
 

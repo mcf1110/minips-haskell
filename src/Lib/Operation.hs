@@ -61,6 +61,8 @@ evalInstruction ins = do
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
     eval (RInstr Or rs rt rd _)   = Lib.Operation.or rs rt rd
     eval (RInstr Mult rs rt _ _)  = mult rs rt
+    eval (RInstr Mflo _ _ rd _)   = moveFromTo 34 rd
+    eval (RInstr Mfhi _ _ rd _)   = moveFromTo 33 rd
     eval (RInstr Jr rs _ _ _)     = jr rs
     eval (RInstr Srl _ rt rd sh)  = srl rt rd sh
     eval (RInstr Sll _ rt rd sh)  = sll rt rd sh
@@ -212,6 +214,9 @@ mult rs rt = do
   34 $= lo
   33 $= hi
   return ()
+
+moveFromTo :: RegNum -> RegNum -> Operation ()
+moveFromTo from to = modify . B.first $ (\r -> R.set to (R.get from r) r)
 
 -- Type I
 addi :: RegNum -> RegNum -> Immediate -> Operation ()
