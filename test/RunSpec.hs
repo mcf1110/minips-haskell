@@ -188,6 +188,19 @@ rTests =
     assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
   , testCase "sll $t1, $t0, 2" $
     assertEqual "" 0x40 (regAt 9 $ runSegInitial [0x24080010, 0x00084880])
+  , testGroup
+      "Or"
+      [ testCase "42 | 17 == 59" $
+        assertEqual
+          ""
+          59
+          (regAt 11 $ runSegInitial [0x2409002a, 0x240a0011, 0x012a5825])
+      , testCase "42 | -200 == -192" $
+        assertEqual
+          ""
+          (-198)
+          (regAt 11 $ runSegInitial [0x2409002a, 0x240aff38, 0x012a5825])
+      ]
   ]
 
 jTests =

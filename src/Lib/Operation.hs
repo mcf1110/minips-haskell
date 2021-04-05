@@ -57,6 +57,7 @@ evalInstruction ins = do
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
+    eval (RInstr Or rs rt rd _)   = Lib.Operation.or rs rt rd
     eval (RInstr Jr rs _ _ _)     = jr rs
     eval (RInstr Srl _ rt rd sh)  = srl rt rd sh
     eval (RInstr Sll _ rt rd sh)  = sll rt rd sh
@@ -88,6 +89,22 @@ infixr 1 $<-
   (r, m) <- get
   return $ addEnum (R.get ra r) (R.get rb r)
 
+bitwiseWithRegNum ::
+     (BV.BitVector -> BV.BitVector -> BV.BitVector)
+  -> RegNum
+  -> RegNum
+  -> Operation W.Word32
+bitwiseWithRegNum op ra rb = do
+  (r, m) <- get
+  return $
+    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) `op` BV.bitVec 32 (R.get rb r)
+
+($|$) :: RegNum -> RegNum -> Operation W.Word32
+($|$) = bitwiseWithRegNum (BV..|.)
+
+($&$) :: RegNum -> RegNum -> Operation W.Word32
+($&$) = bitwiseWithRegNum (BV..&.)
+
 ($<$) :: RegNum -> RegNum -> Operation W.Word32
 ($<$) ra rb = do
   (r, m) <- get
@@ -112,21 +129,21 @@ infixr 1 $<-
   (r, m) <- get
   return $ addEnum (R.get ra r) (BV.int im)
 
-bitwiseWith ::
+bitwiseWithImmediate ::
      (BV.BitVector -> BV.BitVector -> BV.BitVector)
   -> RegNum
   -> Immediate
   -> Operation W.Word32
-bitwiseWith op ra im = do
+bitwiseWithImmediate op ra im = do
   (r, m) <- get
   return $
     toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) `op` BV.zeroExtend 32 im
 
 ($|:) :: RegNum -> Immediate -> Operation W.Word32
-($|:) = bitwiseWith (BV..|.)
+($|:) = bitwiseWithImmediate (BV..|.)
 
 ($&:) :: RegNum -> Immediate -> Operation W.Word32
-($&:) = bitwiseWith (BV..&.)
+($&:) = bitwiseWithImmediate (BV..&.)
 
 shiftWith ::
      Enum a
@@ -157,6 +174,9 @@ add rs rt rd = rd $<- rs $+$ rt
 
 slt :: RegNum -> RegNum -> RegNum -> Operation ()
 slt rs rt rd = rd $<- rs $<$ rt
+
+or :: RegNum -> RegNum -> RegNum -> Operation ()
+or rs rt rd = rd $<- rs $|$ rt
 
 jr :: RegNum -> Operation ()
 jr rnum = do
