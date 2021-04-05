@@ -56,6 +56,7 @@ data Funct
   | Jalr
   | Mult
   | Mflo
+  | Mfhi
   | Div
   deriving (Show, Eq)
 
@@ -141,6 +142,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     -- decodeFunct 0x23 = Subu
     decodeFunct 0x18 = Mult
     decodeFunct 0x12 = Mflo
+    decodeFunct 0x10 = Mfhi
     decodeFunct 0x1a = Div
     decodeFunct x    = error $ "Falta decodificar o funct " <> BV.showBin x
 

@@ -35,7 +35,7 @@ tests =
 -- helpers
 b = BV.bitVec
 
-r f s t d a = RInstr f (b 5 s) (b 5 t) (b 5 d) (b 6 a)
+r f s t d a = RInstr f (b 5 s) (b 5 t) (b 5 d) (b 5 a)
 
 j o t = JInstr o (b 26 t)
 
@@ -59,6 +59,7 @@ rTests =
   , ("Jump and Link Register", [(0x01008009, "jalr $s0, $t0", r Jalr 8 0 16 0)])
   , ("Mult", [(0x00840018, "mult $a0, $a0", r Mult 4 4 0 0)])
   , ("Move From Low", [(0x00001012, "mflo $v0", r Mflo 0 0 2 0)])
+  , ("Move From High", [(0x00001010, "mfhi $v0", r Mfhi 0 0 2 0)])
   , ("Div", [(0x0082001a, "div $a0, $v0", r Div 4 2 0 0)])
   ]
 
