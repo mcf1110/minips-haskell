@@ -103,6 +103,7 @@ iTests =
       , (0x8d8d0000, "lw $t5, 0($t4)", i Lw 12 13 0)
       , (0x8d090004, "lw $t1, 4($t0)", i Lw 8 9 4)
       ])
+  , ("Load Byte", [(0x8184000c, "lb $a0, 12($t4)", i Lb 12 4 12)])
   , ("Store Word", [(0xad8d0000, "sw $t5, 0($t4)", i Sw 12 13 0)])
   , ( "Set on Less Than Immediate"
     , [(0x28880009, "slti $t0, $a0, 9", i Slti 4 8 9)])

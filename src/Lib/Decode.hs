@@ -69,6 +69,7 @@ data IOp
   | Lui
   | Ori
   | Lw
+  | Lb
   | Sw
   | Slti
   deriving (Show, Eq)
@@ -158,6 +159,7 @@ decodeIFormat = fromList . getFields [6, 5, 5, 16]
     decodeOp 0xf  = Lui
     decodeOp 0xd  = Ori
     decodeOp 0x23 = Lw
+    decodeOp 0x20 = Lb
     decodeOp 0x2b = Sw
     decodeOp 0xa  = Slti
 
