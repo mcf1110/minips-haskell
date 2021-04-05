@@ -246,6 +246,48 @@ rTests =
           ]
       ]
   , testGroup
+      "Div"
+      [ testGroup
+          "42/11"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              3
+              (regAt 34 $ runSegInitial [0x2409002a, 0x240a000b, 0x012a001a])
+          , testCase "hi" $
+            assertEqual
+              ""
+              9
+              (regAt 33 $ runSegInitial [0x2409002a, 0x240a000b, 0x012a001a])
+          ]
+      , testGroup
+          "-42/11"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              (tc 3)
+              (regAt 34 $ runSegInitial [0x2409ffd6, 0x240a000b, 0x012a001a])
+          , testCase "hi" $
+            assertEqual
+              ""
+              (tc 9)
+              (regAt 33 $ runSegInitial [0x2409ffd6, 0x240a000b, 0x012a001a])
+          ]
+      , testGroup
+          "-42/-11"
+          [ testCase "lo" $
+            assertEqual
+              ""
+              3
+              (regAt 34 $ runSegInitial [0x2409ffd6, 0x240afff5, 0x012a001a])
+          , testCase "hi" $
+            assertEqual
+              ""
+              (tc 9)
+              (regAt 33 $ runSegInitial [0x2409ffd6, 0x240afff5, 0x012a001a])
+          ]
+      ]
+  , testGroup
       "Move from low"
       [ testCase "mflo $t3" $
         assertEqual

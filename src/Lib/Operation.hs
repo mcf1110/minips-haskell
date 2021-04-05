@@ -61,6 +61,7 @@ evalInstruction ins = do
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
     eval (RInstr Or rs rt rd _)   = Lib.Operation.or rs rt rd
     eval (RInstr Mult rs rt _ _)  = mult rs rt
+    eval (RInstr Div rs rt _ _)   = divide rs rt
     eval (RInstr Mflo _ _ rd _)   = moveFromTo 34 rd
     eval (RInstr Mfhi _ _ rd _)   = moveFromTo 33 rd
     eval (RInstr Jr rs _ _ _)     = jr rs
@@ -116,6 +117,16 @@ bitwiseWithRegNum op ra rb = do
   let a = BV.signExtend 32 $ BV.bitVec 32 $ R.get ra r
       b = BV.signExtend 32 $ BV.bitVec 32 $ R.get rb r
       [hi, lo] = map (toEnum . fromEnum) $ BV.split 2 $ BV.least 64 $ a * b
+  return (hi, lo)
+
+($/$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
+($/$) ra rb = do
+  (r, m) <- get
+  let toSigned = traceShowId . fromInteger . BV.int . BV.bitVec 32
+      a = toSigned $ R.get ra r
+      b = toSigned $ R.get rb r
+      cvt = toEnum . fromEnum . BV.bitVec 32
+      (lo, hi) = B.bimap cvt cvt $ a `quotRem` b
   return (hi, lo)
 
 ($<$) :: RegNum -> RegNum -> Operation W.Word32
@@ -208,12 +219,22 @@ jalr rd rs = do
   modify . B.first $ (\r -> R.set rd (4 + R.get 32 r) r)
   jr rs
 
-mult :: RegNum -> RegNum -> Operation ()
-mult rs rt = do
-  (hi, lo) <- rs $*$ rt
+setHiLo ::
+     (RegNum -> RegNum -> Operation (W.Word32, W.Word32))
+  -> RegNum
+  -> RegNum
+  -> Operation ()
+setHiLo f rs rt = do
+  (hi, lo) <- rs `f` rt
   34 $= lo
   33 $= hi
   return ()
+
+mult :: RegNum -> RegNum -> Operation ()
+mult = setHiLo ($*$)
+
+divide :: RegNum -> RegNum -> Operation ()
+divide = setHiLo ($/$)
 
 moveFromTo :: RegNum -> RegNum -> Operation ()
 moveFromTo from to = modify . B.first $ (\r -> R.set to (R.get from r) r)
