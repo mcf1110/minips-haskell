@@ -139,6 +139,7 @@ printProgramWithHexes contents = putStrLn $ unlines $ tab addr $tab hex decoded
 showInstruction :: Instr -> String
 showInstruction ins@(RInstr funct rs rt rd shamt)
   | funct `elem` [Mult] = mkIns [rName rs, rName rt]
+  | funct `elem` [Mflo] = mkIns [rName rd]
   | funct `elem` [Jr] = mkIns [rName rs]
   | funct `elem` [Jalr] = mkIns [rName rd, rName rs]
   | funct `elem` [Srl, Sll] = mkIns [rName rd, rName rt, show $ BV.nat shamt]

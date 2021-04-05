@@ -55,6 +55,7 @@ data Funct
   | Subu
   | Jalr
   | Mult
+  | Mflo
   deriving (Show, Eq)
 
 data IOp
@@ -138,6 +139,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     -- decodeFunct 0x22 = Sub
     -- decodeFunct 0x23 = Subu
     decodeFunct 0x18 = Mult
+    decodeFunct 0x12 = Mflo
     decodeFunct x    = error $ "Falta decodificar o funct " <> BV.showBin x
 
 decodeIFormat :: BV.BitVector -> Instr

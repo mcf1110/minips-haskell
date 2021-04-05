@@ -58,6 +58,7 @@ rTests =
   , ("Shift Left Logical", [(0x00041040, "sll $v0, $a0, 1", r Sll 0 4 2 1)])
   , ("Jump and Link Register", [(0x01008009, "jalr $s0, $t0", r Jalr 8 0 16 0)])
   , ("Mult", [(0x00840018, "mult $a0, $a0", r Mult 4 4 0 0)])
+  , ("Mult", [(0x00001012, "mflo $v0", r Mflo 0 0 2 0)])
   ]
 
 jTests =
