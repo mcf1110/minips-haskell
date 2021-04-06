@@ -11,8 +11,6 @@ import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
 
-import           Debug.Trace
-
 data SC
   = PutInt Int
   | PutStr String
@@ -127,7 +125,7 @@ bitwiseWithRegNum op ra rb = do
 ($/$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
 ($/$) ra rb = do
   (r, m) <- get
-  let toSigned = traceShowId . fromInteger . BV.int . BV.bitVec 32
+  let toSigned = fromInteger . BV.int . BV.bitVec 32
       a = toSigned $ R.get ra r
       b = toSigned $ R.get rb r
       cvt = toEnum . fromEnum . BV.bitVec 32
