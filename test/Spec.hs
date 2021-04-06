@@ -105,6 +105,8 @@ iTests =
       ])
   , ("Load Byte", [(0x8184000c, "lb $a0, 12($t4)", i Lb 12 4 12)])
   , ("Store Word", [(0xad8d0000, "sw $t5, 0($t4)", i Sw 12 13 0)])
+  , ( "Load Word To Floating Point"
+    , [(0xc42c0000, "lwc1 $f12, 0($at)", i Lwc1 1 12 0)])
   , ( "Set on Less Than Immediate"
     , [(0x28880009, "slti $t0, $a0, 9", i Slti 4 8 9)])
   ]
