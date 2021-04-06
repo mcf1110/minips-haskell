@@ -190,8 +190,10 @@ rTests =
       [ testCase "Works with jal" $
         assertEqual
           ""
-          (0x00400000 + 4)
-          (regAt 32 $ runSegInitial [0x0c100002, 0, 0x03e00008])
+          11
+          (regAt 9 $
+           runSegInitial
+             [0x0c100005, 0, 0x2409000b, 0x08100007, 0, 0x03e00008, 0])
       , testCase "Changes PC" $
         assertEqual "" (0x00400000 + 6 * 4) (regAt 32 jrComputer)
       , testCase "Jumps correctly" $ assertEqual "" 22 (regAt 10 jrComputer)
@@ -371,7 +373,31 @@ jTests =
       [ testCase "Sets PC" $
         assertEqual "" (0x00400000 + 8) (regAt 32 $ runSegInitial [0x0c100002])
       , testCase "Sets $ra" $
-        assertEqual "" (0x00400000 + 4) (regAt 31 $ runSegInitial [0x0c100002])
+        assertEqual "" (0x00400000 + 8) (regAt 31 $ runSegInitial [0x0c100002])
+      , testCase "BDS runs" $
+        assertEqual
+          ""
+          11
+          (regAt 9 $
+           runSegInitial [0x0c100003, 0x2409000b, 0x2409002a, 0x240b0021])
+      , testCase "BDS does jump" $
+        assertEqual
+          ""
+          33
+          (regAt 11 $
+           runSegInitial [0x0c100003, 0x2409000b, 0x2409002a, 0x240b0021])
+      , testCase "BDS sets $ra" $
+        assertEqual
+          ""
+          (0x00400000 + 8)
+          (regAt 31 $
+           runSegInitial [0x0c100003, 0x2409000b, 0x2409002a, 0x240b0021])
+      , testCase "BDS sets PC" $
+        assertEqual
+          ""
+          (0x00400000 + 0x10)
+          (regAt 32 $
+           runSegInitial [0x0c100003, 0x2409000b, 0x2409002a, 0x240b0021])
       ]
   , testGroup
       "Jalr"

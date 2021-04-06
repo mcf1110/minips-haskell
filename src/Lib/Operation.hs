@@ -294,9 +294,10 @@ jump tgt = do
   modify . B.first $ (\r -> R.set 32 (calcJumpAddr tgt r) r)
 
 jal :: Immediate -> Operation ()
-jal tgt =
+jal tgt = do
+  runBranchDelaySlot
   modify . B.first $
-  (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
+    (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
 
 calcJumpAddr :: Immediate -> R.Registers -> W.Word32
 calcJumpAddr tgt r =
