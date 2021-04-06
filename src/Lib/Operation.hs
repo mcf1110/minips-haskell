@@ -36,10 +36,14 @@ evalInstruction Syscall = do
       a0 = R.get 4 r
   return $
     case v0 of
-      1  -> PutInt $ fromEnum a0
-      4  -> PutStr $ M.getString a0 m
+      1 ->
+        PutInt $
+        if a0 > 0x0fffffff
+          then -(fromEnum (0xffffffff - a0 + 1))
+          else fromEnum a0
+      4 -> PutStr $ M.getString a0 m
       11 -> PutChar $ toEnum . fromEnum $ a0
-      5  -> GetInt
+      5 -> GetInt
       10 -> Die
 evalInstruction ins = do
   incPC
