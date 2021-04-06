@@ -4,6 +4,7 @@ import           Control.Monad.State.Lazy (modify)
 import qualified Data.Bifunctor           as B
 import qualified Data.Word                as W
 
+import           Lib.Operation.Helpers    (modifyReg)
 import           Lib.Operation.Infixes
 import           Lib.Operation.Types      (Immediate, Operation, RegNum)
 import qualified Lib.Registers            as R
@@ -41,4 +42,4 @@ divide :: RegNum -> RegNum -> Operation ()
 divide = setHiLo ($/$)
 
 moveFromTo :: RegNum -> RegNum -> Operation ()
-moveFromTo from to = modify . B.first $ (\r -> R.set to (R.get from r) r)
+moveFromTo from to = modifyReg (\r -> R.set to (R.get from r) r)

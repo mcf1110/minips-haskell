@@ -16,7 +16,7 @@ signExt :: BV.BitVector -> Integer
 signExt = BV.int . BV.bitVec 32
 
 addToPC :: (Integral a, Show a) => a -> Operation ()
-addToPC v = modify . B.first $ (\r -> R.set 32 (addEnum (R.get 32 r) (4 * v)) r)
+addToPC v = modifyReg $ (\r -> R.set 32 (addEnum (R.get 32 r) (4 * v)) r)
 
 incPC :: Operation ()
 incPC = addToPC 1
@@ -26,3 +26,6 @@ calcJumpAddr tgt r =
   toEnum $ fromEnum $ BV.append upperPC $ BV.zeroExtend (28 - BV.size tgt) tgt
   where
     upperPC = BV.most 4 $ BV.bitVec 32 $ fromEnum $ R.get 32 r
+
+modifyReg :: (R.Registers -> R.Registers) -> Operation ()
+modifyReg = modify . B.first

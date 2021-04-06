@@ -4,14 +4,14 @@ import           Control.Monad.State.Lazy
 import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
-import           Lib.Operation.Helpers    (addEnum)
+import           Lib.Operation.Helpers    (addEnum, modifyReg)
 import           Lib.Operation.Types      (Immediate, Operation, RegNum)
 import qualified Lib.Registers            as R
 
 infixr 1 $=
 
 ($=) :: RegNum -> W.Word32 -> Operation ()
-($=) ad v = modify . B.first $ R.set ad v
+($=) ad v = modifyReg $ R.set ad v
 
 infixr 1 $<-
 
@@ -21,7 +21,7 @@ infixr 1 $<-
 infixr 1 $.=
 
 ($.=) :: RegNum -> W.Word32 -> Operation ()
-($.=) ad v = modify . B.first $ R.setCop ad v
+($.=) ad v = modifyReg $ R.setCop ad v
 
 ($+$) :: RegNum -> RegNum -> Operation W.Word32
 ($+$) ra rb = do

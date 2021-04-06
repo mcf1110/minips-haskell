@@ -24,11 +24,11 @@ set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Registers -> Registers
 set 0 _  = id
 set ix v = B.first (\gpr -> gpr V.// [(fromEnum ix, v)])
 
-_getFromCoprocessor :: Enum a => a -> Registers -> W.Word32
-_getFromCoprocessor ix r = snd r V.! fromEnum ix
-
-getF :: Enum a => a -> Registers -> Float
-getF ix r = F.wordToFloat $ _getFromCoprocessor ix r
+getCop :: Enum a => a -> Registers -> W.Word32
+getCop ix r = snd r V.! fromEnum ix
 
 setCop :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Registers -> Registers
 setCop ix v = B.second (\fpr -> fpr V.// [(fromEnum ix, v)])
+
+getF :: Enum a => a -> Registers -> Float
+getF ix r = F.wordToFloat $ getCop ix r

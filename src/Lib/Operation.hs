@@ -14,7 +14,9 @@ import           Lib.Decode
 import qualified Lib.Memory               as M
 import qualified Lib.Registers            as R
 
-import           Lib.Operation.Helpers    (addToPC, calcJumpAddr, incPC)
+import           Lib.Operation.Helpers    (addToPC, calcJumpAddr, incPC,
+                                           modifyReg)
+import           Lib.Operation.TypeFR
 import           Lib.Operation.TypeI
 import           Lib.Operation.TypeR
 import           Lib.Operation.Types
@@ -70,6 +72,7 @@ runOperation (RInstr Sll _ rt rd sh)  = sll rt rd sh
 runOperation (RInstr Jalr rs _ rd _)  = jalr rd rs
 runOperation (JInstr J tgt)           = jump tgt
 runOperation (JInstr Jal tgt)         = jal tgt
+runOperation (FRInstr Mfc1 _ rt fs _) = mfc1 rt fs
 runOperation Nop                      = return ()
 runOperation Break                    = return ()
 runOperation a                        = error $ "Falta implementar: " <> show a
@@ -105,20 +108,19 @@ bne = branchOn (/=)
 jr :: RegNum -> Operation ()
 jr rnum = do
   runBranchDelaySlot
-  modify . B.first $ (\r -> R.set 32 (R.get rnum r) r)
+  modifyReg (\r -> R.set 32 (R.get rnum r) r)
 
 jalr :: RegNum -> RegNum -> Operation ()
 jalr rd rs = do
-  modify . B.first $ (\r -> R.set rd (4 + R.get 32 r) r)
+  modifyReg (\r -> R.set rd (4 + R.get 32 r) r)
   jr rs
 
 jump :: Immediate -> Operation ()
 jump tgt = do
   runBranchDelaySlot
-  modify . B.first $ (\r -> R.set 32 (calcJumpAddr tgt r) r)
+  modifyReg (\r -> R.set 32 (calcJumpAddr tgt r) r)
 
 jal :: Immediate -> Operation ()
 jal tgt = do
   runBranchDelaySlot
-  modify . B.first $
-    (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
+  modifyReg (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
