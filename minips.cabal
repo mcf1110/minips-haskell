@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4d5a5eddecca08d14c4563ec5de4dda17e80c25d0f9cfcda29f9d3d718bd9fe6
+-- hash: c272af593c40aeebb2b5369ed3c101a3246d5ce6318cec9a1822297c398a0632
 
 name:           minips
 version:        0.1.0.0
@@ -46,6 +46,7 @@ library
     , bv
     , bytestring
     , containers
+    , data-binary-ieee754
     , mtl
     , split
     , vector
@@ -63,6 +64,7 @@ executable minips
     , bv
     , bytestring
     , containers
+    , data-binary-ieee754
     , minips
     , mtl
     , split
@@ -83,6 +85,7 @@ test-suite minips-test
     , bv
     , bytestring
     , containers
+    , data-binary-ieee754
     , minips
     , mtl
     , split

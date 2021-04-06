@@ -59,6 +59,7 @@ evalInstruction ins = do
     eval (IInstr Ori rs rt im)    = ori rs rt im
     eval (IInstr Sw rs rt im)     = sw rs rt im
     eval (IInstr Slti rs rt im)   = slti rs rt im
+    eval (IInstr Lwc1 rs rt im)   = lwc1 rs rt im
     eval (RInstr Add rs rt rd _)  = add rs rt rd
     eval (RInstr Addu rs rt rd _) = add rs rt rd
     eval (RInstr Slt rs rt rd _)  = slt rs rt rd
@@ -92,6 +93,11 @@ infixr 1 $<-
 
 ($<-) :: RegNum -> Operation W.Word32 -> Operation () -- monadic version
 ($<-) tgt op = op >>= (tgt $=)
+
+infixr 1 $.=
+
+($.=) :: RegNum -> W.Word32 -> Operation ()
+($.=) ad v = modify . B.first $ R.setCop ad v
 
 ($+$) :: RegNum -> RegNum -> Operation W.Word32
 ($+$) ra rb = do
@@ -285,6 +291,14 @@ sw rs rt im = do
       sign = BV.zeroExtend 32 im
       m' = M.set (addEnum rsv sign) rtv m
   put (r, m')
+
+lwc1 :: RegNum -> RegNum -> Immediate -> Operation ()
+lwc1 base ft offset = do
+  (r, m) <- get
+  let baseValue = R.get base r
+      sign = BV.zeroExtend 32 offset
+      word = M.get (addEnum baseValue sign) m
+  ft $.= word
 
 slti :: RegNum -> RegNum -> Immediate -> Operation ()
 slti rs rt im = rt $<- rs $<: im

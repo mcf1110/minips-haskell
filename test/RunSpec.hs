@@ -36,6 +36,8 @@ getSC dataS textS = fst $ runInstruction Syscall $ runSeg dataS textS
 
 regAt ix = R.get ix . fst
 
+floatAt ix = R.getF ix . fst
+
 runningTests =
   [ testGroup "R Instructions" rTests
   , testGroup "I Instructions" iTests
@@ -163,6 +165,14 @@ iTests =
         assertEqual "" 0 (regAt 9 $ runSegInitial [0x2408fff4, 0x2909ffd6])
       , testCase "Deals with negative numbers pt2" $
         assertEqual "" 1 (regAt 9 $ runSegInitial [0x2408ffd6, 0x2909fff4])
+      ]
+  , testGroup
+      "Load Word to Floating Point"
+      [ testCase "Sets $f0 to pi" $
+        assertEqual
+          ""
+          pi
+          (floatAt 0 $ runSeg [0x40490fdb] [0x3c011001, 0xc4200000])
       ]
   ]
 

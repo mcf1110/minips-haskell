@@ -27,6 +27,7 @@ dependencies:
 - vector
 - bv
 - mtl
+- data-binary-ieee754
 
 library:
   source-dirs: src

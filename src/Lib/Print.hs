@@ -105,7 +105,7 @@ showRegisters r =
   , "\t│  Name  │ No │    Val     │"
   , "\t╞════════╪════╪════════════╡"
   ] <>
-  map line (V.toList $ V.indexed r) <> ["\t└────────┴────┴────────────┘"]
+  map line (V.toList $ V.indexed $ fst r) <> ["\t└────────┴────┴────────────┘"]
   where
     line (num, val) = printf "\t│ %6s │ %02d │ 0x%08x │" (rName num) num val
 
