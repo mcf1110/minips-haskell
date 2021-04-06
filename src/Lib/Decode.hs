@@ -25,7 +25,7 @@ data Instr
       }
   | FRInstr
       { ffunct :: FFunct
-      , fmt    :: BV.BitVector
+      , fmt    :: FFmt
       , ft     :: BV.BitVector
       , fs     :: BV.BitVector
       , fd     :: BV.BitVector
@@ -38,6 +38,11 @@ data Instr
   | Syscall
   | Nop
   | Break
+  deriving (Show, Eq)
+
+data FFmt
+  = Single
+  | Double
   deriving (Show, Eq)
 
 data Funct
@@ -84,6 +89,7 @@ data JOp
 data FFunct
   = Mfc1
   | Mtc1
+  | Mov
   deriving (Show, Eq)
 
 data FIOp
@@ -175,9 +181,16 @@ decodeJFormat = fromList . getFields [6, 26]
     decodeOp 0x3 = Jal
 
 decodeCoprocessor :: BV.BitVector -> Instr
-decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 8, 3]
+decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
   where
-    fromList [op, fmt, ft, fs, fd, funct] =
-      FRInstr (decodeOp fmt funct) fmt ft fs fd
-    decodeOp 0 _ = Mfc1
-    decodeOp 4 _ = Mtc1
+    fromList [op, fmt, ft, fs, fd, funct] = FRInstr operation format ft fs fd
+      where
+        (operation, format) = decodeOp fmt funct
+    decodeOp 0 _ = (Mfc1, Single)
+    decodeOp 4 _ = (Mtc1, Single)
+    decodeOp fmt 6 = (Mov, toFormat fmt)
+    decodeOp fmt funct =
+      error $
+      "FR: falta implementar fmt=" <> show fmt <> " e funct=" <> show funct
+    toFormat 16 = Single
+    toFormat 17 = Double

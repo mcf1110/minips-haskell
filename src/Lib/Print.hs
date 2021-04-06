@@ -160,8 +160,12 @@ showInstruction ins@(JInstr op tgt) =
   (toLower <$> show op) <> " " <> printf "0x%08x" (BV.int tgt)
 showInstruction ins@(FRInstr funct fmt ft fs fd)
   | funct `elem` [Mfc1, Mtc1] = mkIns [rName ft, fName fs]
+  | funct `elem` [Mov] = mkInsWithFormat [fName fd, fName fs]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
+    mkInsWithFormat ls =
+      (toLower <$> show funct) <>
+      ['.', toLower (head $ show fmt)] <> " " <> intercalate ", " ls
 showInstruction Syscall = "syscall"
 showInstruction Nop = "nop"
 showInstruction Break = "break"

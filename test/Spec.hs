@@ -41,7 +41,7 @@ j o t = JInstr o (b 26 t)
 
 i o s t im = IInstr o (b 5 s) (b 5 t) (b 16 im)
 
-fr f s t d a = FRInstr f (b 5 s) (b 5 t) (b 5 d) (b 6 a)
+fr f fmt t d a = FRInstr f fmt (b 5 t) (b 5 d) (b 6 a)
 
 rTests =
   [ ( "Add"
@@ -115,9 +115,11 @@ iTests =
 
 frTests =
   [ ( "Move Word From Floating Point"
-    , [(0x44036000, "mfc1 $v1, $f12", fr Mfc1 0 3 12 0)])
+    , [(0x44036000, "mfc1 $v1, $f12", fr Mfc1 Single 3 12 0)])
   , ( "Move Word To Floating Point"
-    , [(0x44830000, "mtc1 $v1, $f0", fr Mtc1 4 3 0 0)])
+    , [(0x44830000, "mtc1 $v1, $f0", fr Mtc1 Single 3 0 0)])
+  , ( "Floating Point Move"
+    , [(0x46000306, "mov.s $f12, $f0", fr Mov Single 0 0 12)])
   ]
 
 decodingTests =
