@@ -119,7 +119,9 @@ frTests =
   , ( "Move Word To Floating Point"
     , [(0x44830000, "mtc1 $v1, $f0", fr Mtc1 Single 3 0 0)])
   , ( "Floating Point Move"
-    , [(0x46000306, "mov.s $f12, $f0", fr Mov Single 0 0 12)])
+    , [ (0x46000306, "mov.s $f12, $f0", fr Mov Single 0 0 12)
+      , (0x46200306, "mov.d $f12, $f0", fr Mov Double 0 0 12)
+      ])
   ]
 
 decodingTests =
