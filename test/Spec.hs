@@ -3,14 +3,10 @@ import           Test.Tasty.HUnit
 
 import qualified Data.BitVector   as BV
 
-import           Lib.Computer
 import           Lib.Decode
 import qualified Lib.Memory       as M
-import           Lib.Operation
 import           Lib.Print
 import qualified Lib.Registers    as R
-import           Lib.Run
-import           Lib.Segment
 
 import           RunSpec
 
