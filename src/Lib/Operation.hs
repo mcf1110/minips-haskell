@@ -36,6 +36,8 @@ evalInstruction Syscall = do
       11 -> PutChar $ toEnum . fromEnum $ a0
       5 -> GetInt
       10 -> Die
+      2 -> PutFloat $ R.getF 12 r
+      x -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC
   runOperation ins

@@ -8,7 +8,11 @@ data SC
   = PutInt Int
   | PutStr String
   | PutChar Char
+  | PutFloat Float
+  | PutDouble Double
   | GetInt
+  | GetFloat
+  | GetDouble
   | Die
   | NoSC
   deriving (Show, Eq)
