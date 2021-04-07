@@ -36,3 +36,6 @@ regAt ix = R.get ix . fst
 
 floatAt :: Enum a => a -> (R.Registers, b) -> Float
 floatAt ix = R.getF ix . fst
+
+doubleAt :: (Num a, Enum a) => a -> (R.Registers, b) -> Double
+doubleAt ix = R.getD ix . fst

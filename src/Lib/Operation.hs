@@ -58,6 +58,7 @@ runOperation (IInstr Ori rs rt im)    = ori rs rt im
 runOperation (IInstr Sw rs rt im)     = sw rs rt im
 runOperation (IInstr Slti rs rt im)   = slti rs rt im
 runOperation (IInstr Lwc1 rs rt im)   = lwc1 rs rt im
+runOperation (IInstr Ldc1 rs rt im)   = ldc1 rs rt im
 runOperation (RInstr Add rs rt rd _)  = add rs rt rd
 runOperation (RInstr Addu rs rt rd _) = add rs rt rd
 runOperation (RInstr Slt rs rt rd _)  = slt rs rt rd

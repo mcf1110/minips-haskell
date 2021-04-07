@@ -3,7 +3,8 @@ module RunSpec.IRunSpec
   ) where
 
 import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (floatAt, regAt, runSeg, runSegInitial)
+import           RunSpec.Helpers  (doubleAt, floatAt, regAt, runSeg,
+                                   runSegInitial)
 import           Test.Tasty       (TestTree, testGroup)
 import           Test.Tasty.HUnit (assertEqual, testCase)
 
@@ -137,6 +138,24 @@ iTests =
           ""
           pi
           (floatAt 0 $ runSeg [0x40490fdb] [0x3c011001, 0xc4200000])
+      ]
+  , testGroup
+      "Load Double Word to Floating Point"
+      [ testCase "Sets $f0 to pi as double" $
+        assertEqual
+          ""
+          pi
+          (doubleAt 0 $ runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000])
+      , testCase "Sets $f0 to 3.31e12 as float" $
+        assertEqual
+          ""
+          3.37028055E12
+          (floatAt 0 $ runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000])
+      , testCase "Sets $f1 to 2.14 as float" $
+        assertEqual
+          ""
+          2.142699
+          (floatAt 1 $ runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000])
       ]
   ]
 

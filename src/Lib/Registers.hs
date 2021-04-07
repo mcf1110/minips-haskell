@@ -5,6 +5,7 @@ import qualified Data.Word           as W
 
 import qualified Data.Bifunctor      as B
 import qualified Data.Binary.IEEE754 as F
+import           Data.Bits           (Bits (shiftL))
 import           Data.Either         (fromRight)
 
 type Registers = (V.Vector W.Word32, V.Vector W.Word32)
@@ -32,3 +33,11 @@ setCop ix v = B.second (\fpr -> fpr V.// [(fromEnum ix, v)])
 
 getF :: Enum a => a -> Registers -> Float
 getF ix r = F.wordToFloat $ getCop ix r
+
+getD :: (Enum a, Num a) => a -> Registers -> Double
+getD ix r = F.wordToDouble $ shiftL word2 32 + word1
+  where
+    word1 :: W.Word64
+    word1 = toEnum . fromEnum $ getCop ix r
+    word2 :: W.Word64
+    word2 = toEnum . fromEnum $ getCop (ix + 1) r

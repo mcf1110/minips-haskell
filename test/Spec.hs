@@ -106,7 +106,9 @@ iTests =
   , ( "Load Word To Floating Point"
     , [(0xc42c0000, "lwc1 $f12, 0($at)", i Lwc1 1 12 0)])
   , ( "Load Double Word To Floating Point"
-    , [(0xd42c0008, "ldc1 $f12, 8($at)", i Ldc1 1 12 8)])
+    , [ (0xd42c0008, "ldc1 $f12, 8($at)", i Ldc1 1 12 8)
+      , (0xd4200000, "ldc1 $f0, 0($at)", i Ldc1 1 0 0)
+      ])
   ]
 
 frTests =
