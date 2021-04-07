@@ -1,6 +1,9 @@
 module RunSpec.SystemCallTests where
 
+import           Lib.Computer     (Computer, initialComputer)
 import           Lib.Operation
+import qualified Lib.Registers    as R
+import           Lib.Run
 import           RunSpec.Helpers
 import           Test.Tasty
 import           Test.Tasty.HUnit
@@ -28,4 +31,16 @@ systemCallTests =
       (getSC
          [0, 0, 0x5600203a, 0xaac3636f, 0x67696420, 0x756f7469, 0x0000203a]
          [0x3c011001, 0x3424000b, 0x24020004, 0xc])
+  , testGroup
+      "Systemcall Results Correctly Stores"
+      [ testCase "Ints" $
+        assertEqual "" 12 (R.get 2 $ fst $ testInput (GotInt 12))
+      , testCase "Floats" $
+        assertEqual "" pi (R.getF 0 $ fst $ testInput (GotFloat pi))
+      , testCase "Doubles" $
+        assertEqual "" pi (R.getD 0 $ fst $ testInput (GotDouble pi))
+      ]
   ]
+
+testInput :: SyscallInput -> Computer
+testInput inp = storeInput inp $ initialComputer [] [] []

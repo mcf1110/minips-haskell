@@ -5,7 +5,7 @@ import qualified Data.Word           as W
 
 import qualified Data.Bifunctor      as B
 import qualified Data.Binary.IEEE754 as F
-import           Data.Bits           (Bits (shiftL, (.&.)))
+import           Data.Bits           (shiftL, shiftR, (.&.))
 import           Data.Either         (fromRight)
 
 type Registers = (V.Vector W.Word32, V.Vector W.Word32)
@@ -52,4 +52,4 @@ setD ix d r = setCop (ix + 1) w2 (setCop ix w1 r)
     bitMask = 0xffffffff
     w2, w1 :: W.Word32
     w1 = toEnum . fromEnum $ bitMask .&. word
-    w2 = toEnum . fromEnum $ shiftL bitMask 32 .&. word
+    w2 = toEnum . fromEnum $ shiftR word 32

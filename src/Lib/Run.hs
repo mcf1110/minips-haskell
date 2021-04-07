@@ -26,14 +26,9 @@ runComputer = runWithBreakpoints []
 runWithBreakpoints :: [W.Word32] -> Computer -> IO ()
 runWithBreakpoints bps c0 = do
   let (sc, c1) = tick c0
-  mi <- runSyscall sc
-  let c2 =
-        case mi of
-          GotInt i    -> gotInt c1 i
-          GotFloat f  -> gotFloat c1 f
-          GotDouble d -> gotDouble c1 d
-          GotNothing  -> c1
-  let pc = R.get 32 $ fst c2
+  syscallInput <- runSyscall sc
+  let c2 = storeInput syscallInput c1
+      pc = R.get 32 $ fst c2
   when (pc `elem` bps) $ do
     putStrLn $ "pc: " <> printf "0x%08x" pc
     printComputer c2
@@ -42,6 +37,14 @@ runWithBreakpoints bps c0 = do
   if sc == Die
     then putStrLn "\n--- Program Finished ---"
     else runWithBreakpoints bps c2
+
+storeInput :: SyscallInput -> Computer -> Computer
+storeInput syscallInput c =
+  case syscallInput of
+    GotInt i    -> gotInt c i
+    GotFloat f  -> gotFloat c f
+    GotDouble d -> gotDouble c d
+    GotNothing  -> c
 
 gotInt :: Computer -> Int -> Computer
 gotInt (r, m) i = (R.set 2 (toEnum i) r, m)
