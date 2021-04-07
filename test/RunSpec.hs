@@ -12,7 +12,7 @@ import           RunSpec.RRunSpec  (rTests)
 runningTests :: [TestTree]
 runningTests =
   [ testGroup "R Instructions" rTests
-  -- , testGroup "I Instructions" iTests
-  -- , testGroup "J Instructions" jTests
+  , testGroup "I Instructions" iTests
+  , testGroup "J Instructions" jTests
   , testGroup "FR Instructions" frTests
   ]
