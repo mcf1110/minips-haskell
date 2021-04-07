@@ -40,6 +40,8 @@ evalInstruction Syscall = do
       10 -> Die
       2 -> PutFloat $ R.getF 12 r
       3 -> PutDouble $ R.getD 12 r
+      6 -> GetFloat
+      7 -> GetDouble
       x -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC

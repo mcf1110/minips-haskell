@@ -14,6 +14,12 @@ import           Text.Printf              (printf)
 
 import qualified Data.Word                as W
 
+data SyscallInput
+  = GotInt Int
+  | GotFloat Float
+  | GotDouble Double
+  | GotNothing
+
 runComputer :: Computer -> IO ()
 runComputer = runWithBreakpoints []
 
@@ -23,8 +29,10 @@ runWithBreakpoints bps c0 = do
   mi <- runSyscall sc
   let c2 =
         case mi of
-          Just i  -> setInput c1 i
-          Nothing -> c1
+          GotInt i    -> gotInt c1 i
+          GotFloat f  -> gotFloat c1 f
+          GotDouble d -> gotDouble c1 d
+          GotNothing  -> c1
   let pc = R.get 32 $ fst c2
   when (pc `elem` bps) $ do
     putStrLn $ "pc: " <> printf "0x%08x" pc
@@ -35,14 +43,22 @@ runWithBreakpoints bps c0 = do
     then putStrLn "\n--- Program Finished ---"
     else runWithBreakpoints bps c2
 
-setInput :: Computer -> Int -> Computer
-setInput (r, m) i = (R.set 2 (toEnum i) r, m)
+gotInt :: Computer -> Int -> Computer
+gotInt (r, m) i = (R.set 2 (toEnum i) r, m)
 
-runSyscall :: SC -> IO (Maybe Int)
-runSyscall GetInt = Just . read <$> getLine
+gotFloat :: Computer -> Float -> Computer
+gotFloat (r, m) f = (R.setF 0 f r, m)
+
+gotDouble :: Computer -> Double -> Computer
+gotDouble (r, m) d = (R.setD 0 d r, m)
+
+runSyscall :: SC -> IO SyscallInput
+runSyscall GetInt = GotInt . read <$> getLine
+runSyscall GetFloat = GotFloat . read <$> getLine
+runSyscall GetDouble = GotDouble . read <$> getLine
 runSyscall sc = do
   runIO sc
-  return Nothing
+  return GotNothing
   where
     runIO (PutInt x) = putStr $ show x
     runIO (PutFloat x) = putStr $ show x
