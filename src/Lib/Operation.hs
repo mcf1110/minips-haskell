@@ -77,6 +77,7 @@ runOperation (RInstr Jalr rs _ rd _)   = jalr rd rs
 runOperation (JInstr J tgt)            = jump tgt
 runOperation (JInstr Jal tgt)          = jal tgt
 runOperation (FRInstr Mfc1 _ rt fs _)  = mfc1 rt fs
+runOperation (FRInstr Mtc1 _ rt fs _)  = mtc1 rt fs
 runOperation (FRInstr Mov fmt _ fs fd) = mov fmt fs fd
 runOperation Nop                       = return ()
 runOperation Break                     = return ()

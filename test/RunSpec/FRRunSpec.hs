@@ -35,4 +35,12 @@ frTests =
           (doubleAt 2 $
            runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000, 0x46200086])
       ]
+  , testGroup
+      "Move Word To FP"
+      [ testCase "Can move 42 from $t0 to $f0" $
+        assertEqual
+          ""
+          5.9E-44
+          (floatAt 0 $ runSegInitial [0x2408002a, 0x44880000])
+      ]
   ]
