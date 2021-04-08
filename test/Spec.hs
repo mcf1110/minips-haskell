@@ -104,7 +104,9 @@ iTests =
   , ( "Set on Less Than Immediate"
     , [(0x28880009, "slti $t0, $a0, 9", i Slti 4 8 9)])
   , ( "Load Word To Floating Point"
-    , [(0xc42c0000, "lwc1 $f12, 0($at)", i Lwc1 1 12 0)])
+    , [ (0xc42c0000, "lwc1 $f12, 0($at)", i Lwc1 1 12 0)
+      , (0xc4440048, "lwc1 $f4, 72($v0)", i Lwc1 2 4 72)
+      ])
   , ( "Load Double Word To Floating Point"
     , [ (0xd42c0008, "ldc1 $f12, 8($at)", i Ldc1 1 12 8)
       , (0xd4200000, "ldc1 $f0, 0($at)", i Ldc1 1 0 0)
