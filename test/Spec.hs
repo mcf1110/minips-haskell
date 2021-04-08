@@ -9,6 +9,7 @@ import           Lib.Print
 import qualified Lib.Registers    as R
 
 import           RunSpec
+import           RunSpec.Helpers  (tc)
 
 main :: IO ()
 main = defaultMain tests
@@ -91,7 +92,9 @@ iTests =
       , (0x1487fff4, "bne $a0, $a3, -12", i Bne 4 7 $ BV.bitVec 16 (-12))
       ])
   , ( "Load Upper Immediate"
-    , [(0x3c011001, "lui $at, 0x00001001", i Lui 0 1 4097)])
+    , [ (0x3c011001, "lui $at, 4097", i Lui 0 1 4097)
+      , (0x3c068000, "lui $a2, -32768", i Lui 0 6 (tc 32768))
+      ])
   , ("Or Immediate", [(0x34240000, "ori $a0, $at, 0", i Ori 1 4 0)])
   , ( "Load Word"
     , [ (0x8c290000, "lw $t1, 0($at)", i Lw 1 9 0)
