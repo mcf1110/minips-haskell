@@ -90,6 +90,7 @@ data FFunct
   | Mov
   | CvtD
   | CvtS
+  | CvtW
   deriving (Show, Eq)
 
 data FIOp

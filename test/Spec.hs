@@ -133,6 +133,10 @@ frTests =
     , [ (0x468000a0, "cvt.s.w $f2, $f0", fr CvtS Word 0 0 2)
       , (0x46200020, "cvt.s.d $f0, $f0", fr CvtS Double 0 0 0)
       ])
+  , ( "Convert to Word"
+    , [ (0x460000a4, "cvt.w.s $f2, $f0", fr CvtW Single 0 0 2)
+      , (0x462000a4, "cvt.w.d $f2, $f0", fr CvtW Double 0 0 2)
+      ])
   ]
 
 decodingTests =

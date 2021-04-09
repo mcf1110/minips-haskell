@@ -98,6 +98,7 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeOp fmt 6 = (Mov, toFormat fmt)
     decodeOp fmt 0x20 = (CvtS, toFormat fmt)
     decodeOp fmt 0x21 = (CvtD, toFormat fmt)
+    decodeOp fmt 0x24 = (CvtW, toFormat fmt)
     decodeOp fmt funct =
       error $
       "FR: falta implementar fmt=" <> show fmt <> " e funct=" <> show funct
