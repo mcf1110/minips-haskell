@@ -18,6 +18,9 @@ slt rs rt rd = rd $<- rs $<$ rt
 or :: RegNum -> RegNum -> RegNum -> Operation ()
 or rs rt rd = rd $<- rs $|$ rt
 
+xor :: RegNum -> RegNum -> RegNum -> Operation ()
+xor rs rt rd = rd $<- rs $^$ rt
+
 srl :: RegNum -> RegNum -> Immediate -> Operation ()
 srl rt rd sh = rd $<- rt $>>: sh
 

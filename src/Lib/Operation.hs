@@ -66,6 +66,7 @@ runOperation (RInstr Add rs rt rd _) = add rs rt rd
 runOperation (RInstr Addu rs rt rd _) = add rs rt rd
 runOperation (RInstr Slt rs rt rd _) = slt rs rt rd
 runOperation (RInstr Or rs rt rd _) = or rs rt rd
+runOperation (RInstr Xor rs rt rd _) = xor rs rt rd
 runOperation (RInstr Mult rs rt _ _) = mult rs rt
 runOperation (RInstr Div rs rt _ _) = divide rs rt
 runOperation (RInstr Mflo _ _ rd _) = moveFromTo 34 rd

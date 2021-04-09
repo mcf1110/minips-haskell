@@ -57,6 +57,19 @@ rTests =
           (regAt 11 $ runSegInitial [0x2409002a, 0x240aff38, 0x012a5825])
       ]
   , testGroup
+      "XOr"
+      [ testCase "42 ^ 55 == 29" $
+        assertEqual
+          ""
+          29
+          (regAt 10 $ runSegInitial [0x2408002a, 0x24090037, 0x01285026])
+      , testCase "42 ^ -200 == -238" $
+        assertEqual
+          ""
+          (tc 238)
+          (regAt 10 $ runSegInitial [0x2408002a, 0x2409ff38, 0x01285026])
+      ]
+  , testGroup
       "Mult"
       [ testGroup
           "42*42 == 1764"

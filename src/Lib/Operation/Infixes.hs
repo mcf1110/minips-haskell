@@ -44,6 +44,9 @@ bitwiseWithRegNum op ra rb = do
 ($&$) :: RegNum -> RegNum -> Operation W.Word32
 ($&$) = bitwiseWithRegNum (BV..&.)
 
+($^$) :: RegNum -> RegNum -> Operation W.Word32
+($^$) = bitwiseWithRegNum (\a b -> BV.not $ BV.xnor a b)
+
 ($*$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
 ($*$) ra rb = do
   (r, m) <- get
