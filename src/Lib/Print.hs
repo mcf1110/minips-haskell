@@ -161,10 +161,14 @@ showInstruction ins@(JInstr op tgt) =
 showInstruction ins@(FRInstr funct fmt ft fs fd)
   | funct `elem` [Mfc1, Mtc1] = mkIns [rName ft, fName fs]
   | funct `elem` [Mov, CvtD, CvtS, CvtW] = mkInsWithFormat [fName fd, fName fs]
+  | funct `elem` [FAdd] = mkAliasedInsWithFormat [fName fd, fName fs, fName ft]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
     mkInsWithFormat ls =
       insWithFormatName <>
+      ['.', toLower (head $ show fmt)] <> " " <> intercalate ", " ls
+    mkAliasedInsWithFormat ls =
+      drop 2 insWithFormatName <>
       ['.', toLower (head $ show fmt)] <> " " <> intercalate ", " ls
     insWithFormatName =
       toLower <$>

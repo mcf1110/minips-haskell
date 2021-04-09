@@ -137,6 +137,10 @@ frTests =
     , [ (0x460000a4, "cvt.w.s $f2, $f0", fr CvtW Single 0 0 2)
       , (0x462000a4, "cvt.w.d $f2, $f0", fr CvtW Double 0 0 2)
       ])
+  , ( "FP Add"
+    , [ (0x46221080, "add.d $f2, $f2, $f2", fr FAdd Double 2 2 2)
+      , (0x46020000, "add.s $f0, $f0, $f2", fr FAdd Single 2 0 0)
+      ])
   ]
 
 decodingTests =

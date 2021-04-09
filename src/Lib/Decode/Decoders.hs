@@ -95,6 +95,7 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
         (operation, format) = decodeOp fmt funct
     decodeOp 0 _ = (Mfc1, Single)
     decodeOp 4 _ = (Mtc1, Single)
+    decodeOp fmt 0 = (FAdd, toFormat fmt)
     decodeOp fmt 6 = (Mov, toFormat fmt)
     decodeOp fmt 0x20 = (CvtS, toFormat fmt)
     decodeOp fmt 0x21 = (CvtD, toFormat fmt)

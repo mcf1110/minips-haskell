@@ -91,6 +91,7 @@ data FFunct
   | CvtD
   | CvtS
   | CvtW
+  | FAdd
   deriving (Show, Eq)
 
 data FIOp
