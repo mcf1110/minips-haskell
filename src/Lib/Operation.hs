@@ -8,7 +8,7 @@ import           Control.Monad.State.Lazy
 import qualified Data.Bifunctor           as B
 import qualified Data.BitVector           as BV
 import qualified Data.Word                as W
-import           Prelude                  hiding (or)
+import           Prelude                  hiding (and, or)
 
 import           Lib.Decode
 import qualified Lib.Memory               as M
@@ -66,6 +66,7 @@ runOperation (IInstr Swc1 rs rt im) = swc1 rs rt im
 runOperation (RInstr Add rs rt rd _) = add rs rt rd
 runOperation (RInstr Addu rs rt rd _) = add rs rt rd
 runOperation (RInstr Slt rs rt rd _) = slt rs rt rd
+runOperation (RInstr And rs rt rd _) = and rs rt rd
 runOperation (RInstr Or rs rt rd _) = or rs rt rd
 runOperation (RInstr Xor rs rt rd _) = xor rs rt rd
 runOperation (RInstr Mult rs rt _ _) = mult rs rt

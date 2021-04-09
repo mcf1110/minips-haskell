@@ -70,6 +70,19 @@ rTests =
           (regAt 10 $ runSegInitial [0x2408002a, 0x2409ff38, 0x01285026])
       ]
   , testGroup
+      "And"
+      [ testCase "42 & 55 == 34" $
+        assertEqual
+          ""
+          34
+          (regAt 10 $ runSegInitial [0x2408002a, 0x24090037, 0x01285024])
+      , testCase "42 & -200 == 40" $
+        assertEqual
+          ""
+          40
+          (regAt 10 $ runSegInitial [0x2408002a, 0x2409ff38, 0x01285024])
+      ]
+  , testGroup
       "Mult"
       [ testGroup
           "42*42 == 1764"
