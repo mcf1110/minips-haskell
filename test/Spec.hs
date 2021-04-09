@@ -142,6 +142,16 @@ frTests =
     , [ (0x46221080, "add.d $f2, $f2, $f2", fr FAdd Double 2 2 2)
       , (0x46020000, "add.s $f0, $f0, $f2", fr FAdd Single 2 0 0)
       ])
+  , ( "FP Div"
+    , [ (0x46222083, "div.d $f2, $f4, $f2", fr FDiv Double 2 4 2)
+      , (0x46022083, "div.s $f2, $f4, $f2", fr FDiv Single 2 4 2)
+      ])
+  , ( "FP Mult"
+    , [ (0x46220002, "mul.d $f0, $f0, $f2", fr FMul Double 2 0 0)
+      , (0x46020002, "mul.s $f0, $f0, $f2", fr FMul Single 2 0 0)
+      ])
+      -- 46222083        div.d $f2, $f4, $f2
+      -- 46020002        mul.s $f0, $f0, $f2
   ]
 
 decodingTests =

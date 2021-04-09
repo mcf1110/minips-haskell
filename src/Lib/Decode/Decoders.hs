@@ -95,6 +95,8 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
       where
         (operation, format) = decodeOp fmt funct
     decodeOp 0 _ = (Mfc1, Single)
+    decodeOp fmt 2 = (FMul, toFormat fmt)
+    decodeOp fmt 3 = (FDiv, toFormat fmt)
     decodeOp 4 _ = (Mtc1, Single)
     decodeOp fmt 0 = (FAdd, toFormat fmt)
     decodeOp fmt 6 = (Mov, toFormat fmt)

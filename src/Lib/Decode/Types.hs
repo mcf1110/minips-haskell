@@ -93,6 +93,8 @@ data FFunct
   | CvtS
   | CvtW
   | FAdd
+  | FMul
+  | FDiv
   deriving (Show, Eq)
 
 data FIOp
