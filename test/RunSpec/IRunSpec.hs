@@ -157,6 +157,17 @@ iTests =
           2.142699
           (floatAt 1 $ runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000])
       ]
+  , testGroup
+      "Store Word from Floating Point"
+      [ testCase "Can store 2*pi" $
+        assertEqual
+          ""
+          0x40c90fdb
+          (regAt 15 $
+           runSeg
+             [0x40490fdb]
+             [0x3c011001, 0xc4200000, 0x46000000, 0xe4200000, 0x8c2f0000])
+      ]
   ]
 
 loadByteComputer :: Computer

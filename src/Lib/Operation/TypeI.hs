@@ -71,5 +71,15 @@ ldc1 base ft offset = do
   ft $.= word1
   (ft + 1) $.= word2
 
+swc1 :: RegNum -> RegNum -> Immediate -> Operation ()
+swc1 base ft offset = do
+  (r, m) <- get
+  let baseValue = R.get base r
+      sign = BV.zeroExtend 32 offset
+      pos = addEnum baseValue sign
+      word = R.getCop ft r
+      m' = M.set pos word m
+  put (r, m')
+
 slti :: RegNum -> RegNum -> Immediate -> Operation ()
 slti rs rt im = rt $<- rs $<: im
