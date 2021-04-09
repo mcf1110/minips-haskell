@@ -80,6 +80,7 @@ decodeIFormat = fromList . getFields [6, 5, 5, 16]
     decodeOp 0xa  = Slti
     decodeOp 0x31 = Lwc1
     decodeOp 0x35 = Ldc1
+    decodeOp 0x39 = Swc1
 
 decodeJFormat :: BV.BitVector -> Instr
 decodeJFormat = fromList . getFields [6, 26]

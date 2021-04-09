@@ -115,6 +115,8 @@ iTests =
     , [ (0xd42c0008, "ldc1 $f12, 8($at)", i Ldc1 1 12 8)
       , (0xd4200000, "ldc1 $f0, 0($at)", i Ldc1 1 0 0)
       ])
+  , ( "Store Word From Floating Point"
+    , [(0xe7cc0008, "swc1 $f12, 8($fp)", i Swc1 30 12 8)])
   ]
 
 frTests =

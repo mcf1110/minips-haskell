@@ -77,6 +77,7 @@ data IOp
   | Sw
   | Slti
   | Lwc1
+  | Swc1
   | Ldc1
   deriving (Show, Eq)
 
