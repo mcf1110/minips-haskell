@@ -72,6 +72,7 @@ decodeIFormat = fromList . getFields [6, 5, 5, 16]
     decodeOp 0xc  = Andi
     decodeOp 0x4  = Beq
     decodeOp 0x5  = Bne
+    decodeOp 0x6  = Blez
     decodeOp 0xf  = Lui
     decodeOp 0xd  = Ori
     decodeOp 0x23 = Lw

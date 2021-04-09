@@ -14,8 +14,9 @@ import           Lib.Decode
 import qualified Lib.Memory               as M
 import qualified Lib.Registers            as R
 
+import           Debug.Trace
 import           Lib.Operation.Helpers    (addToPC, calcJumpAddr, incPC,
-                                           modifyReg)
+                                           modifyReg, w32ToSigned)
 import           Lib.Operation.TypeFR
 import           Lib.Operation.TypeI
 import           Lib.Operation.TypeR
@@ -29,20 +30,16 @@ evalInstruction Syscall = do
       a0 = R.get 4 r
   return $
     case v0 of
-      1 ->
-        PutInt $
-        if a0 > 0x0fffffff
-          then -(fromEnum (0xffffffff - a0 + 1))
-          else fromEnum a0
-      4 -> PutStr $ M.getString a0 m
+      1  -> PutInt $ w32ToSigned a0
+      4  -> PutStr $ M.getString a0 m
       11 -> PutChar $ toEnum . fromEnum $ a0
-      5 -> GetInt
+      5  -> GetInt
       10 -> Die
-      2 -> PutFloat $ R.getF 12 r
-      3 -> PutDouble $ R.getD 12 r
-      6 -> GetFloat
-      7 -> GetDouble
-      x -> error $ "Syscall desconhecida: " <> show x
+      2  -> PutFloat $ R.getF 12 r
+      3  -> PutDouble $ R.getD 12 r
+      6  -> GetFloat
+      7  -> GetDouble
+      x  -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC
   runOperation ins
@@ -51,6 +48,7 @@ evalInstruction ins = do
 runOperation :: Instr -> Operation ()
 runOperation (IInstr Beq rs rt im) = beq rs rt im
 runOperation (IInstr Bne rs rt im) = bne rs rt im
+runOperation (IInstr Blez rs _ im) = blez rs im
 runOperation (IInstr Addi rs rt im) = addi rs rt im
 runOperation (IInstr Addiu rs rt im) = addiu rs rt im
 runOperation (IInstr Andi rs rt im) = andi rs rt im
@@ -103,14 +101,10 @@ runBranchDelaySlot = do
 
 -- jumps must be in this module to avoid circular dependencies, because of BranchDelaySlot
 branchOn ::
-     (W.Word32 -> W.Word32 -> Bool)
-  -> RegNum
-  -> RegNum
-  -> Immediate
-  -> Operation ()
+     (Int -> Int -> Bool) -> RegNum -> RegNum -> Immediate -> Operation ()
 branchOn op rs rt im = do
   (r, m) <- get
-  when (R.get rs r `op` R.get rt r) $ do
+  when (w32ToSigned (R.get rs r) `op` w32ToSigned (R.get rt r)) $ do
     runBranchDelaySlot
     addToPC (-1)
     addToPC $ BV.int im
@@ -120,6 +114,9 @@ beq = branchOn (==)
 
 bne :: RegNum -> RegNum -> Immediate -> Operation ()
 bne = branchOn (/=)
+
+blez :: RegNum -> Immediate -> Operation ()
+blez = branchOn (>) 0 -- branchOn $zero > $x
 
 jr :: RegNum -> Operation ()
 jr rnum = do

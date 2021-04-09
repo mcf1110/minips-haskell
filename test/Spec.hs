@@ -101,6 +101,8 @@ iTests =
       , (0x15310005, "bne $t1, $s1, 5", i Bne 9 17 5)
       , (0x1487fff4, "bne $a0, $a3, -12", i Bne 4 7 $ BV.bitVec 16 (-12))
       ])
+  , ( "Branch on Less Than or Equal to Zero"
+    , [(0x1b200017, "blez $t9, 23", i Blez 25 0 23)])
   , ( "Load Upper Immediate"
     , [ (0x3c011001, "lui $at, 4097", i Lui 0 1 4097)
       , (0x3c068000, "lui $a2, -32768", i Lui 0 6 (tc 32768))

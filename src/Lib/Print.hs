@@ -147,13 +147,14 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
   | otherwise = mkIns [rName rd, rName rs, rName rt]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
-showInstruction ins@(IInstr op rs rt rd)
-  | op `elem` [Lui] = mkIns [rName rt, dec rd]
-  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, dec rd]
-  | op `elem` [Lw, Sw, Lb] = mkIns [rName rt, dec rd <> "(" <> rName rs <> ")"]
+showInstruction ins@(IInstr op rs rt im)
+  | op `elem` [Lui] = mkIns [rName rt, dec im]
+  | op `elem` [Blez] = mkIns [rName rs, dec im]
+  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, dec im]
+  | op `elem` [Lw, Sw, Lb] = mkIns [rName rt, dec im <> "(" <> rName rs <> ")"]
   | op `elem` [Lwc1, Ldc1, Swc1] =
-    mkIns [fName rt, dec rd <> "(" <> rName rs <> ")"]
-  | otherwise = mkIns [rName rt, rName rs, dec rd]
+    mkIns [fName rt, dec im <> "(" <> rName rs <> ")"]
+  | otherwise = mkIns [rName rt, rName rs, dec im]
   where
     mkIns ls = (toLower <$> show op) <> " " <> intercalate ", " ls
     dec = show . BV.int

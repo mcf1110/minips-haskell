@@ -94,6 +94,27 @@ iTests =
              [0x24090001, 0x15200002, 0x2409000f, 0x240a0002, 0x240b0003])
       ]
   , testGroup
+      "Branch on Less Than or Equal to Zero"
+      [ testCase "Branches on negatives" $
+        assertEqual
+          ""
+          0
+          (regAt 9 $
+           runSegInitial [0x2408ffd6, 0x19000002, 0x240a0007, 0x2409000f])
+      , testCase "Does not branch on positives" $
+        assertEqual
+          ""
+          15
+          (regAt 9 $
+           runSegInitial [0x2408002a, 0x19000002, 0x240a0007, 0x2409000f])
+      , testCase "BDS" $
+        assertEqual
+          ""
+          7
+          (regAt 10 $
+           runSegInitial [0x2408ffd6, 0x19000002, 0x240a0007, 0x2409000f])
+      ]
+  , testGroup
       "Load Word"
       [ testCase "lw $t0, ans" $
         assertEqual "" 0x2a (regAt 8 $ runSeg [0x2a] [0x3c011001, 0x8c280000])
