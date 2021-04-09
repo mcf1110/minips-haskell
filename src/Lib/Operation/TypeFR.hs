@@ -1,6 +1,7 @@
 module Lib.Operation.TypeFR where
 
 import           Control.Monad.State.Lazy (get)
+import           GHC.Float
 import           Lib.Decode               (FFmt (Double, Single, Word))
 import           Lib.Operation.Helpers    (modifyReg)
 import           Lib.Operation.Infixes    (($.=))
@@ -20,18 +21,22 @@ mov Double fs fd = do
   mov Single (fs + 1) (fd + 1)
 
 cvtd :: FFmt -> RegNum -> RegNum -> Operation ()
-cvtd Single = convertWith R.getF R.setD
-cvtd Word   = convertWith R.getCop R.setD
+cvtd Single = convertWith float2Double R.getF R.setD
+cvtd Word   = convertWith realToFrac R.getCop R.setD
 
 cvts :: FFmt -> RegNum -> RegNum -> Operation ()
-cvts Double = convertWith R.getD R.setF
-cvts Word   = convertWith R.getCop R.setF
+cvts Double = convertWith double2Float R.getD R.setF
+cvts Word   = convertWith realToFrac R.getCop R.setF
+
+cvtw :: FFmt -> RegNum -> RegNum -> Operation ()
+cvtw Double = convertWith truncate R.getD R.setCop
+cvtw Single = convertWith truncate R.getF R.setCop
 
 convertWith ::
-     (Real a, Fractional t1)
-  => (t2 -> R.Registers -> a)
-  -> (t3 -> t1 -> R.Registers -> R.Registers)
-  -> t2
+     (t1 -> t2)
+  -> (t3 -> R.Registers -> t1)
+  -> (t4 -> t2 -> R.Registers -> R.Registers)
   -> t3
+  -> t4
   -> Operation ()
-convertWith get set fs fd = modifyReg (\r -> set fd (realToFrac $ get fs r) r)
+convertWith cvtFn get set fs fd = modifyReg (\r -> set fd (cvtFn $ get fs r) r)

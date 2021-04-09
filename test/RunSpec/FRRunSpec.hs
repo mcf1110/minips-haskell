@@ -74,4 +74,22 @@ frTests =
            runSegInitial
              [0x3c013ade, 0x342868b1, 0x44880000, 0x44880800, 0x462000a0])
       ]
+  , testGroup
+      "Convert to Word"
+      [ testCase "Converts single to word" $
+        assertEqual
+          ""
+          0x580B750
+          (regAt 9 $
+           runSegInitial
+             [0x3c014cb0, 0x342816ea, 0x44880000, 0x460000a4, 0x44091000])
+      , testCase "Converts double to word" $
+        assertEqual
+          ""
+          3
+          (regAt 9 $
+           runSeg
+             [0x5444261e, 0x400921fb]
+             [0x3c011001, 0xd4200000, 0x462000a4, 0x44091000])
+      ]
   ]

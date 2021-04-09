@@ -81,6 +81,7 @@ runOperation (FRInstr Mtc1 _ rt fs _) = mtc1 rt fs
 runOperation (FRInstr Mov fmt _ fs fd) = mov fmt fs fd
 runOperation (FRInstr CvtD fmt _ fs fd) = cvtd fmt fs fd
 runOperation (FRInstr CvtS fmt _ fs fd) = cvts fmt fs fd
+runOperation (FRInstr CvtW fmt _ fs fd) = cvtw fmt fs fd
 runOperation Nop = return ()
 runOperation Break = return ()
 runOperation a = error $ "Falta implementar: " <> show a
