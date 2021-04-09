@@ -125,6 +125,10 @@ frTests =
     , [ (0x46000306, "mov.s $f12, $f0", fr Mov Single 0 0 12)
       , (0x46200306, "mov.d $f12, $f0", fr Mov Double 0 0 12)
       ])
+  , ( "Floating Point Convert to Double Floating Point"
+    , [ (0x468010a1, "cvt.d.w $f2, $f2", fr CvtD Word 0 2 2)
+      , (0x460010a1, "cvt.d.s $f2, $f2", fr CvtD Single 0 2 2)
+      ])
   ]
 
 decodingTests =

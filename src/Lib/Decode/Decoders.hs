@@ -96,8 +96,10 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeOp 0 _ = (Mfc1, Single)
     decodeOp 4 _ = (Mtc1, Single)
     decodeOp fmt 6 = (Mov, toFormat fmt)
+    decodeOp fmt 0x21 = (CvtD, toFormat fmt)
     decodeOp fmt funct =
       error $
       "FR: falta implementar fmt=" <> show fmt <> " e funct=" <> show funct
-    toFormat 16 = Single
-    toFormat 17 = Double
+    toFormat 0x10 = Single
+    toFormat 0x11 = Double
+    toFormat 0x14 = Word

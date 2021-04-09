@@ -10,8 +10,9 @@ import qualified Data.BitVector   as BV
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.Vector      as V
 
-import           Data.Char        (toLower)
+import           Data.Char        (isUpper, toLower)
 import           Data.List        (intercalate)
+import           Data.List.Split  (keepDelimsL, split, whenElt)
 import           Data.Maybe       (fromMaybe)
 import           Text.Printf      (printf)
 
@@ -159,11 +160,16 @@ showInstruction ins@(JInstr op tgt) =
   (toLower <$> show op) <> " " <> printf "0x%08x" (BV.int tgt)
 showInstruction ins@(FRInstr funct fmt ft fs fd)
   | funct `elem` [Mfc1, Mtc1] = mkIns [rName ft, fName fs]
-  | funct `elem` [Mov] = mkInsWithFormat [fName fd, fName fs]
+  | funct `elem` [Mov, CvtD] = mkInsWithFormat [fName fd, fName fs]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls
+    insWithFormatName =
+      toLower <$>
+      intercalate
+        "."
+        (tail $ split (keepDelimsL $ whenElt isUpper) $ show funct)
     mkInsWithFormat ls =
-      (toLower <$> show funct) <>
+      insWithFormatName <>
       ['.', toLower (head $ show fmt)] <> " " <> intercalate ", " ls
 showInstruction Syscall = "syscall"
 showInstruction Nop = "nop"

@@ -40,6 +40,7 @@ data Instr
 data FFmt
   = Single
   | Double
+  | Word
   deriving (Show, Eq)
 
 data Funct
@@ -87,6 +88,7 @@ data FFunct
   = Mfc1
   | Mtc1
   | Mov
+  | CvtD
   deriving (Show, Eq)
 
 data FIOp
