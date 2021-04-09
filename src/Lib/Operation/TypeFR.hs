@@ -1,12 +1,18 @@
 module Lib.Operation.TypeFR where
 
-import           Control.Monad.State.Lazy (get)
+import           Control.Monad.State.Lazy (get, put)
 import           GHC.Float
 import           Lib.Decode               (FFmt (Double, Single, Word))
 import           Lib.Operation.Helpers    (modifyReg)
 import           Lib.Operation.Infixes    (($.=))
 import           Lib.Operation.Types      (Operation, RegNum)
 import qualified Lib.Registers            as R
+
+type Getter a = RegNum -> R.Registers -> a
+
+type Setter a = RegNum -> a -> R.Registers -> R.Registers
+
+type Calc a = a -> a -> a
 
 mfc1 :: RegNum -> RegNum -> Operation ()
 mfc1 rt fs = modifyReg (\r -> R.set rt (R.getCop fs r) r)
@@ -33,10 +39,24 @@ cvtw Double = convertWith truncate R.getD R.setCop
 cvtw Single = convertWith truncate R.getF R.setCop
 
 convertWith ::
-     (t1 -> t2)
-  -> (t3 -> R.Registers -> t1)
-  -> (t4 -> t2 -> R.Registers -> R.Registers)
-  -> t3
-  -> t4
+     (a -> b) -> Getter a -> Setter b -> RegNum -> RegNum -> Operation ()
+convertWith cvtFn getFn setFn fs fd =
+  modifyReg (\r -> setFn fd (cvtFn $ getFn fs r) r)
+
+fadd :: FFmt -> RegNum -> RegNum -> RegNum -> Operation ()
+fadd Double = applyCalculation (+) R.getD R.setD
+fadd Single = applyCalculation (+) R.getF R.setF
+
+applyCalculation ::
+     Calc a
+  -> Getter a
+  -> Setter a
+  -> RegNum
+  -> RegNum
+  -> RegNum
   -> Operation ()
-convertWith cvtFn get set fs fd = modifyReg (\r -> set fd (cvtFn $ get fs r) r)
+applyCalculation calc getter setter fs ft fd = do
+  (r, m) <- get
+  let a = getter fs r
+      b = getter ft r
+  put (setter fd (a `calc` b) r, m)

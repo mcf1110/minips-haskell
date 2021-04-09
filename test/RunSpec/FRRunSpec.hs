@@ -92,4 +92,18 @@ frTests =
              [0x5444261e, 0x400921fb]
              [0x3c011001, 0xd4200000, 0x462000a4, 0x44091000])
       ]
+  , testGroup
+      "FP Add"
+      [ testCase "Adds float" $
+        assertEqual
+          ""
+          (2 * pi)
+          (floatAt 2 $ runSeg [0x40490fdb] [0x3c011001, 0xc4200000, 0x46000080])
+      ]
+  , testCase "Adds double" $
+    assertEqual
+      ""
+      (2 * pi)
+      (doubleAt 2 $
+       runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000, 0x46200080])
   ]
