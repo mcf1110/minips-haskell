@@ -106,4 +106,80 @@ frTests =
           (doubleAt 2 $
            runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000, 0x46200080])
       ]
+  , testGroup
+      "FP Mult"
+      [ testCase "Multiplies float" $
+        assertEqual
+          ""
+          (7 * pi)
+          (floatAt 4 $
+           runSeg
+             [0x40490fdb]
+             [ 0x3c011001
+             , 0xc4200000
+             , 0x24080007
+             , 0x44881000
+             , 0x468010a0
+             , 0x46001102
+             ])
+      , testCase "Multiplies double" $
+        assertEqual
+          ""
+          (7 * pi)
+          (doubleAt 4 $
+           runSeg
+             [0x54442d18, 0x400921fb]
+             [ 0x3c011001
+             , 0xd4200000
+             , 0x24080007
+             , 0x44881000
+             , 0x468010a1
+             , 0x46201102
+             ])
+      ]
+  , testGroup
+      "FP Div"
+      [ testCase "Divides float" $
+        assertEqual
+          ""
+          (7 * pi)
+          (floatAt 4 $
+           runSeg
+             [0x40490fdb]
+             [ 0x3c011001
+             , 0xc4200000
+             , 0x24080007
+             , 0x44881000
+             , 0x468010a0
+             , 0x46001102
+             ])
+      , testCase "Divides double" $
+        assertEqual
+          ""
+          (7 / pi)
+          (doubleAt 4 $
+           runSeg
+             [0x54442d18, 0x400921fb]
+             [ 0x3c011001
+             , 0xd4200000
+             , 0x24080007
+             , 0x44881000
+             , 0x468010a1
+             , 0x46220103
+             ])
+      , testCase "Divides double" $
+        assertEqual
+          ""
+          (pi / 7)
+          (doubleAt 4 $
+           runSeg
+             [0x54442d18, 0x400921fb]
+             [ 0x3c011001
+             , 0xd4200000
+             , 0x24080007
+             , 0x44881000
+             , 0x468010a1
+             , 0x46201103
+             ])
+      ]
   ]
