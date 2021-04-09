@@ -15,6 +15,9 @@ add rs rt rd = rd $<- rs $+$ rt
 slt :: RegNum -> RegNum -> RegNum -> Operation ()
 slt rs rt rd = rd $<- rs $<$ rt
 
+sltu :: RegNum -> RegNum -> RegNum -> Operation ()
+sltu rs rt rd = rd $<- rs $+<$ rt
+
 and :: RegNum -> RegNum -> RegNum -> Operation ()
 and rs rt rd = rd $<- rs $&$ rt
 

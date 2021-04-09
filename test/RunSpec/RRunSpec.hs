@@ -24,21 +24,32 @@ rTests =
       , testCase "BDL" $ assertEqual "" 42 (regAt 8 jrComputer)
       , testCase "Not BDL+1" $ assertEqual "" 0 (regAt 11 jrComputer)
       ]
-  , testCase "slt $t2, 10, 10" $
-    assertEqual
-      ""
-      0
-      (regAt 10 $ runSegInitial [0x2408000a, 0x2409000a, 0x0109502a])
-  , testCase "slt $t2, 2, 10" $
-    assertEqual
-      ""
-      1
-      (regAt 10 $ runSegInitial [0x24080002, 0x2409000a, 0x0109502a])
-  , testCase "slt $t3, 0xffffffff, 0" $
-    assertEqual
-      ""
-      1
-      (regAt 11 $ runSegInitial [0x24080000, 0x2409ffff, 0x0128582a])
+  , testGroup
+      "Set Less Than"
+      [ testCase "slt $t2, 10, 10" $
+        assertEqual
+          ""
+          0
+          (regAt 10 $ runSegInitial [0x2408000a, 0x2409000a, 0x0109502a])
+      , testCase "slt $t2, 2, 10" $
+        assertEqual
+          ""
+          1
+          (regAt 10 $ runSegInitial [0x24080002, 0x2409000a, 0x0109502a])
+      , testCase "slt $t3, 0xffffffff, 0" $
+        assertEqual
+          ""
+          1
+          (regAt 11 $ runSegInitial [0x24080000, 0x2409ffff, 0x0128582a])
+      ]
+  , testGroup
+      "Set Less Than Unsigned"
+      [ testCase "sltu $t2, 42, -200" $
+        assertEqual
+          ""
+          1
+          (regAt 10 $ runSegInitial [0x2408002a, 0x2409ff38, 0x0109502b])
+      ]
   , testCase "srl $t1, $t0, 2" $
     assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
   , testCase "sll $t1, $t0, 2" $

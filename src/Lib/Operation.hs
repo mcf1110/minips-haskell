@@ -66,6 +66,7 @@ runOperation (IInstr Swc1 rs rt im) = swc1 rs rt im
 runOperation (RInstr Add rs rt rd _) = add rs rt rd
 runOperation (RInstr Addu rs rt rd _) = add rs rt rd
 runOperation (RInstr Slt rs rt rd _) = slt rs rt rd
+runOperation (RInstr Sltu rs rt rd _) = sltu rs rt rd
 runOperation (RInstr And rs rt rd _) = and rs rt rd
 runOperation (RInstr Or rs rt rd _) = or rs rt rd
 runOperation (RInstr Xor rs rt rd _) = xor rs rt rd

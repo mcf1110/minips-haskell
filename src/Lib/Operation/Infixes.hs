@@ -74,6 +74,15 @@ bitwiseWithRegNum op ra rb = do
       then 1
       else 0
 
+($+<$) :: RegNum -> RegNum -> Operation W.Word32
+($+<$) ra rb = do
+  (r, m) <- get
+  let unsigned rx = BV.nat $ BV.bitVec 32 $ R.get rx r
+  return $
+    if unsigned ra < unsigned rb
+      then 1
+      else 0
+
 ($<:) :: RegNum -> Immediate -> Operation W.Word32
 ($<:) ra im = do
   (r, m) <- get
