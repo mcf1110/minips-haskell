@@ -58,6 +58,7 @@ rTests =
   , ("Move From Low", [(0x00001012, "mflo $v0", r Mflo 0 0 2 0)])
   , ("Move From High", [(0x00001010, "mfhi $v0", r Mfhi 0 0 2 0)])
   , ("Div", [(0x0082001a, "div $a0, $v0", r Div 4 2 0 0)])
+  , ("Xor", [(0x00662826, "xor $a1, $v1, $a2", r Xor 3 6 5 0)])
   ]
 
 jTests =

@@ -49,6 +49,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeFunct 0x08 = Jr
     -- decodeFunct 0x27 = Nor
     decodeFunct 0x25 = Or
+    decodeFunct 0x26 = Xor
     decodeFunct 0x2a = Slt
     -- decodeFunct 0x2b = Sltu
     decodeFunct 0x00 = Sll

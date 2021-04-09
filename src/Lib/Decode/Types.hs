@@ -50,6 +50,7 @@ data Funct
   | Jr
   | Nor
   | Or
+  | Xor
   | Slt
   | Sltu
   | Sll
