@@ -20,5 +20,18 @@ mov Double fs fd = do
   mov Single (fs + 1) (fd + 1)
 
 cvtd :: FFmt -> RegNum -> RegNum -> Operation ()
-cvtd Single fs fd = modifyReg (\r -> R.setD fd (realToFrac $ R.getF fs r) r)
-cvtd Word fs fd   = modifyReg (\r -> R.setD fd (realToFrac $ R.getCop fs r) r)
+cvtd Single = convertWith R.getF R.setD
+cvtd Word   = convertWith R.getCop R.setD
+
+cvts :: FFmt -> RegNum -> RegNum -> Operation ()
+cvts Double = convertWith R.getD R.setF
+cvts Word   = convertWith R.getCop R.setF
+
+convertWith ::
+     (Real a, Fractional t1)
+  => (t2 -> R.Registers -> a)
+  -> (t3 -> t1 -> R.Registers -> R.Registers)
+  -> t2
+  -> t3
+  -> Operation ()
+convertWith get set fs fd = modifyReg (\r -> set fd (realToFrac $ get fs r) r)

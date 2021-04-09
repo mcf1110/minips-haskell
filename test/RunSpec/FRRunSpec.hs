@@ -58,4 +58,20 @@ frTests =
           (doubleAt 4 $
            runSegInitial [0x3c013ade, 0x342868b1, 0x44880000, 0x46000121])
       ]
+  , testGroup
+      "Convert to Single"
+      [ testCase "Converts word to single" $
+        assertEqual
+          ""
+          9.8765434E8
+          (floatAt 2 $
+           runSegInitial [0x3c013ade, 0x342868b1, 0x44880000, 0x468000a0])
+      , testCase "Converts double to single" $
+        assertEqual
+          ""
+          3.9302653E-25
+          (floatAt 2 $
+           runSegInitial
+             [0x3c013ade, 0x342868b1, 0x44880000, 0x44880800, 0x462000a0])
+      ]
   ]
