@@ -75,6 +75,7 @@ data IOp
   | Ori
   | Lw
   | Lb
+  | Sb
   | Sw
   | Slti
   | Lwc1

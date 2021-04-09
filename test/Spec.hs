@@ -128,6 +128,7 @@ iTests =
       ])
   , ( "Store Word From Floating Point"
     , [(0xe7cc0008, "swc1 $f12, 8($fp)", i Swc1 30 12 8)])
+  , ("Store Byte", [(0xa3c20008, "sb $fp, $v0, 8", i Sb 30 2 8)])
   ]
 
 frTests =

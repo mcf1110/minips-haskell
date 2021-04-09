@@ -136,11 +136,26 @@ iTests =
       , testCase "Fourth byte" $
         assertEqual "" 0xffffffaa (regAt 11 loadByteComputer)
       ]
-  , testCase "sw $t0, ans" $
-    assertEqual
-      ""
-      0x2a
-      (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
+  , testGroup
+      "Store Word"
+      [ testCase "sw $t0, ans" $
+        assertEqual
+          ""
+          0x2a
+          (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
+      ]
+  , testGroup
+      "Store Byte"
+      [ testCase "First byte" $
+        assertEqual
+          ""
+          0xd6
+          (regAt
+             9
+             (runSeg
+                [0xaabbccdd]
+                [0x2408ffd6, 0x3c011001, 0xa0280000, 0x8c290000]))
+      ]
   , testGroup
       "slti"
       [ testCase "Sets reg to True" $

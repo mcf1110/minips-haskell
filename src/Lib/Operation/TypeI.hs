@@ -3,6 +3,7 @@ module Lib.Operation.TypeI where
 import           Control.Monad.State.Lazy
 import qualified Data.BitVector           as BV
 
+import           Data.Bits                (Bits ((.&.)))
 import qualified Lib.Memory               as M
 import           Lib.Operation.Helpers    (addEnum)
 import           Lib.Operation.Infixes
@@ -48,6 +49,15 @@ sw rs rt im = do
   (r, m) <- get
   let rsv = R.get rs r
       rtv = R.get rt r
+      sign = BV.zeroExtend 32 im
+      m' = M.set (addEnum rsv sign) rtv m
+  put (r, m')
+
+sb :: RegNum -> RegNum -> Immediate -> Operation ()
+sb base rt im = do
+  (r, m) <- get
+  let rsv = R.get base r
+      rtv = 0x000000FF .&. R.get rt r
       sign = BV.zeroExtend 32 im
       m' = M.set (addEnum rsv sign) rtv m
   put (r, m')

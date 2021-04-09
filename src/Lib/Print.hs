@@ -150,7 +150,7 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
 showInstruction ins@(IInstr op rs rt im)
   | op `elem` [Lui] = mkIns [rName rt, dec im]
   | op `elem` [Blez] = mkIns [rName rs, dec im]
-  | op `elem` [Beq, Bne] = mkIns [rName rs, rName rt, dec im]
+  | op `elem` [Beq, Bne, Sb] = mkIns [rName rs, rName rt, dec im]
   | op `elem` [Lw, Sw, Lb] = mkIns [rName rt, dec im <> "(" <> rName rs <> ")"]
   | op `elem` [Lwc1, Ldc1, Swc1] =
     mkIns [fName rt, dec im <> "(" <> rName rs <> ")"]
