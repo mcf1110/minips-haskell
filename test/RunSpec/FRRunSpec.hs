@@ -83,6 +83,14 @@ frTests =
           (regAt 9 $
            runSegInitial
              [0x3c014cb0, 0x342816ea, 0x44880000, 0x460000a4, 0x44091000])
+      , testCase "Converts single to word" $
+        assertEqual
+          ""
+          2.0
+          (floatAt 1 $
+           runSeg
+             [2]
+             [0x3c011001, 0xc4200004, 0x8c280000, 0x44880800, 0x46800860])
       , testCase "Converts double to word" $
         assertEqual
           ""
