@@ -45,7 +45,7 @@ decodeRFormat = fromList . getFields [6, 5, 5, 5, 5, 6]
     decodeFunct :: BV.BitVector -> Funct
     decodeFunct 0x20 = Add
     decodeFunct 0x21 = Addu
-    -- decodeFunct 0x24 = And
+    decodeFunct 0x24 = And
     decodeFunct 0x08 = Jr
     -- decodeFunct 0x27 = Nor
     decodeFunct 0x25 = Or

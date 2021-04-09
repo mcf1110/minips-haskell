@@ -59,6 +59,12 @@ rTests =
   , ("Move From High", [(0x00001010, "mfhi $v0", r Mfhi 0 0 2 0)])
   , ("Div", [(0x0082001a, "div $a0, $v0", r Div 4 2 0 0)])
   , ("Xor", [(0x00662826, "xor $a1, $v1, $a2", r Xor 3 6 5 0)])
+  , ( "And"
+    , [ (0x00834024, "and $t0, $a0, $v1", r And 4 3 8 0)
+      , (0x00e43824, "and $a3, $a3, $a0", r And 7 4 7 0)
+      , (0x00c43024, "and $a2, $a2, $a0", r And 6 4 6 0)
+      , (0x00a42824, "and $a1, $a1, $a0", r And 5 4 5 0)
+      ])
   ]
 
 jTests =
