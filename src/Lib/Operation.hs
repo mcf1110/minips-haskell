@@ -118,7 +118,7 @@ bne :: RegNum -> RegNum -> Immediate -> Operation ()
 bne = branchOn (/=)
 
 blez :: RegNum -> Immediate -> Operation ()
-blez = branchOn (>) 0 -- branchOn $zero > $x
+blez = branchOn (>=) 0 -- branchOn $zero >= $x
 
 jr :: RegNum -> Operation ()
 jr rnum = do

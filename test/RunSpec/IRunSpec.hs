@@ -113,6 +113,20 @@ iTests =
           7
           (regAt 10 $
            runSegInitial [0x2408ffd6, 0x19000002, 0x240a0007, 0x2409000f])
+      , testCase "Treats zero correclty" $
+        assertEqual
+          ""
+          0
+          (regAt 9 $
+           runSegInitial
+             [0x24080000, 0x19000002, 0x00000000, 0x2409000b, 0x240a0016])
+      , testCase "Treats zero correctly" $
+        assertEqual
+          ""
+          22
+          (regAt 10 $
+           runSegInitial
+             [0x24080000, 0x19000002, 0x00000000, 0x2409000b, 0x240a0016])
       ]
   , testGroup
       "Load Word"
