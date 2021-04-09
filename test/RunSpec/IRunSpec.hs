@@ -135,6 +135,19 @@ iTests =
         assertEqual "" 0xffffffbb (regAt 10 loadByteComputer)
       , testCase "Fourth byte" $
         assertEqual "" 0xffffffaa (regAt 11 loadByteComputer)
+      , testCase "Sign extends" $
+        assertEqual
+          ""
+          0xfffffffb
+          (regAt 8 $ runSeg [0xfffffffb] [0x3c011001, 0x80280000])
+      ]
+  , testGroup
+      "Load Byte Unsigned"
+      [ testCase "Zero extends" $
+        assertEqual
+          ""
+          0x0fb
+          (regAt 8 $ runSeg [0xfffffffb] [0x3c011001, 0x90280000])
       ]
   , testGroup
       "Store Word"

@@ -35,14 +35,25 @@ lw rs rt im = do
       word = M.get (addEnum rsv sign) m
   rt $= word
 
-lb :: RegNum -> RegNum -> Immediate -> Operation ()
-lb rs rt off = do
+loadByteWith ::
+     (Int -> BV.BitVector -> BV.BitVector)
+  -> RegNum
+  -> RegNum
+  -> Immediate
+  -> Operation ()
+loadByteWith extFn rs rt off = do
   (r, m) <- get
   let rsv = R.get rs r
       sign = BV.zeroExtend 32 off
       byte = M.getQuarter (addEnum rsv sign) m
-      word = toEnum $ fromEnum $ BV.signExtend (32 - 8) $ BV.bitVec 8 byte
+      word = toEnum $ fromEnum $ extFn (32 - 8) $ BV.bitVec 8 byte
   rt $= word
+
+lb :: RegNum -> RegNum -> Immediate -> Operation ()
+lb = loadByteWith BV.signExtend
+
+lbu :: RegNum -> RegNum -> Immediate -> Operation ()
+lbu = loadByteWith BV.zeroExtend
 
 sw :: RegNum -> RegNum -> Immediate -> Operation ()
 sw rs rt im = do
