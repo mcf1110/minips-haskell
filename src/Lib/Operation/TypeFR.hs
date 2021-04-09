@@ -63,7 +63,7 @@ applyCalculation ::
   -> RegNum
   -> RegNum
   -> Operation ()
-applyCalculation calc getter setter fs ft fd = do
+applyCalculation calc getter setter ft fs fd = do
   (r, m) <- get
   let a = getter fs r
       b = getter ft r

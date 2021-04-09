@@ -164,7 +164,7 @@ frTests =
       , testCase "Divides double" $
         assertEqual
           ""
-          (7 / pi)
+          (pi / 7)
           (doubleAt 4 $
            runSeg
              [0x54442d18, 0x400921fb]
@@ -178,7 +178,7 @@ frTests =
       , testCase "Divides double" $
         assertEqual
           ""
-          (pi / 7)
+          (7 / pi)
           (doubleAt 4 $
            runSeg
              [0x54442d18, 0x400921fb]
@@ -188,6 +188,20 @@ frTests =
              , 0x44881000
              , 0x468010a1
              , 0x46201103
+             ])
+      , testCase "Converts int and divides" $
+        assertEqual
+          ""
+          0.5
+          (floatAt 2 $
+           runSeg
+             [2, 0x3f800000]
+             [ 0x3c011001
+             , 0xc4200004
+             , 0x8c280000
+             , 0x44880800
+             , 0x46800860
+             , 0x46010083
              ])
       ]
   ]
