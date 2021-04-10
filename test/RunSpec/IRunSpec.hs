@@ -170,6 +170,22 @@ iTests =
           ""
           0x2a
           (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
+      , testCase "Works with negative indexes" $
+        assertEqual
+          ""
+          42
+          (regAt 10 $
+           runSeg
+             [1 .. 5]
+             [ 0x3c011001
+             , 0x34280000
+             , 0x3c010000
+             , 0x3421000c
+             , 0x01014021
+             , 0x2409002a
+             , 0xad09fffc
+             , 0x8d0afffc
+             ])
       ]
   , testGroup
       "Store Byte"
