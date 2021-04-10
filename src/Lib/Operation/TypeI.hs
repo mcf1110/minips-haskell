@@ -78,7 +78,7 @@ lwc1 :: RegNum -> RegNum -> Immediate -> Operation ()
 lwc1 base ft offset = do
   (r, m) <- get
   let baseValue = R.get base r
-      sign = BV.zeroExtend 32 offset
+      sign = bvToSigned offset
       word = M.get (addEnum baseValue sign) m
   ft $.= word
 
@@ -86,7 +86,7 @@ ldc1 :: RegNum -> RegNum -> Immediate -> Operation ()
 ldc1 base ft offset = do
   (r, m) <- get
   let baseValue = R.get base r
-      sign = BV.zeroExtend 32 offset
+      sign = bvToSigned offset
       pos = addEnum baseValue sign
       word1 = M.get pos m
       word2 = M.get (pos + 4) m
@@ -97,7 +97,7 @@ swc1 :: RegNum -> RegNum -> Immediate -> Operation ()
 swc1 base ft offset = do
   (r, m) <- get
   let baseValue = R.get base r
-      sign = BV.zeroExtend 32 offset
+      sign = bvToSigned offset
       pos = addEnum baseValue sign
       word = R.getCop ft r
       m' = M.set pos word m
