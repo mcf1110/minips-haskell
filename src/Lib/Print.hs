@@ -25,7 +25,7 @@ showMemory m =
   , "│    Addr    │    Code    │"
   , "╞════════════╪════════════╡"
   ] <>
-  map line (filter (\(k, _) -> k >= 0x10010000 && k < 0x7fffef1c) (IM.assocs m)) <>
+  map line (filter (\(k, _) -> k >= 0x00800000 && k < 0x7fffef1c) (IM.assocs m)) <>
   ["└────────────┴────────────┘"]
   where
     line (addr, val) = printf "│ 0x%08x │ 0x%08x │" addr val
