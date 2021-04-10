@@ -35,3 +35,6 @@ w32ToSigned w =
   if w > 0x0fffffff
     then -(fromEnum (0xffffffff - w + 1))
     else fromEnum w
+
+bvToSigned :: BV.BitVector -> Integer
+bvToSigned bv = BV.int $ BV.signExtend (32 - BV.size bv) bv

@@ -5,7 +5,7 @@ import qualified Data.BitVector           as BV
 
 import           Data.Bits                (Bits ((.&.)))
 import qualified Lib.Memory               as M
-import           Lib.Operation.Helpers    (addEnum)
+import           Lib.Operation.Helpers    (addEnum, bvToSigned)
 import           Lib.Operation.Infixes
 import           Lib.Operation.Types      (Immediate, Operation, RegNum)
 import qualified Lib.Registers            as R
@@ -31,7 +31,7 @@ lw :: RegNum -> RegNum -> Immediate -> Operation ()
 lw rs rt im = do
   (r, m) <- get
   let rsv = R.get rs r
-      sign = BV.zeroExtend 32 im
+      sign = bvToSigned im
       word = M.get (addEnum rsv sign) m
   rt $= word
 
@@ -44,7 +44,7 @@ loadByteWith ::
 loadByteWith extFn rs rt off = do
   (r, m) <- get
   let rsv = R.get rs r
-      sign = BV.zeroExtend 32 off
+      sign = bvToSigned off
       byte = M.getQuarter (addEnum rsv sign) m
       word = toEnum $ fromEnum $ extFn (32 - 8) $ BV.bitVec 8 byte
   rt $= word
@@ -60,7 +60,7 @@ sw rs rt im = do
   (r, m) <- get
   let rsv = R.get rs r
       rtv = R.get rt r
-      sign = BV.zeroExtend 32 im
+      sign = bvToSigned im
       m' = M.set (addEnum rsv sign) rtv m
   put (r, m')
 
@@ -69,7 +69,7 @@ sb base rt im = do
   (r, m) <- get
   let rsv = R.get base r
       rtv = 0x000000FF .&. R.get rt r
-      sign = BV.zeroExtend 32 im
+      sign = bvToSigned im
       m' = M.set (addEnum rsv sign) rtv m
   put (r, m')
 

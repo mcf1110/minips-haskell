@@ -14,7 +14,6 @@ import           Lib.Decode
 import qualified Lib.Memory               as M
 import qualified Lib.Registers            as R
 
-import           Debug.Trace
 import           Lib.Operation.Helpers    (addToPC, calcJumpAddr, incPC,
                                            modifyReg, w32ToSigned)
 import           Lib.Operation.TypeFR

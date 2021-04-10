@@ -3,7 +3,7 @@ module RunSpec.IRunSpec
   ) where
 
 import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (doubleAt, floatAt, regAt, runSeg,
+import           RunSpec.Helpers  (doubleAt, floatAt, memAt, regAt, runSeg,
                                    runSegInitial)
 import           Test.Tasty       (TestTree, testGroup)
 import           Test.Tasty.HUnit (assertEqual, testCase)
@@ -170,7 +170,7 @@ iTests =
           ""
           0x2a
           (regAt 8 $ runSegInitial [0x2408002a, 0x3c011001, 0xac280000])
-      , testCase "Works with negative indexes" $
+      , testCase "Works with negative indexes - register" $
         assertEqual
           ""
           42
@@ -185,6 +185,21 @@ iTests =
              , 0x2409002a
              , 0xad09fffc
              , 0x8d0afffc
+             ])
+      , testCase "Works with negative indexes - memory" $
+        assertEqual
+          ""
+          42
+          (memAt 0x10010008 $
+           runSeg
+             [1 .. 5]
+             [ 0x3c011001
+             , 0x34280000
+             , 0x3c010000
+             , 0x3421000c
+             , 0x01014021
+             , 0x2409002a
+             , 0xad09fffc
              ])
       ]
   , testGroup
