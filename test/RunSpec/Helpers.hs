@@ -31,11 +31,14 @@ runSegInitial = runSeg []
 getSC :: Segment -> Segment -> SC
 getSC dataS textS = fst $ runInstruction Syscall $ runSeg dataS textS
 
-regAt :: Enum a => a -> (R.Registers, b) -> W.Word32
+regAt :: Enum a => a -> Computer -> W.Word32
 regAt ix = R.get ix . fst
 
-floatAt :: Enum a => a -> (R.Registers, b) -> Float
+floatAt :: Enum a => a -> Computer -> Float
 floatAt ix = R.getF ix . fst
 
-doubleAt :: (Num a, Enum a) => a -> (R.Registers, b) -> Double
+doubleAt :: (Num a, Enum a) => a -> Computer -> Double
 doubleAt ix = R.getD ix . fst
+
+memAt :: Enum a => a -> Computer -> W.Word32
+memAt ix = M.get ix . snd
