@@ -6,7 +6,8 @@ import qualified Data.BitVector           as BV
 import           Data.Bits                (Bits ((.&.)))
 import qualified Lib.Memory               as M
 import           Lib.Operation.Helpers    (addEnum, bvToSigned)
-import           Lib.Operation.Infixes
+import           Lib.Operation.Infixes    (($&:), ($+:), ($.=), ($<-), ($<:),
+                                           ($=), ($|:))
 import           Lib.Operation.Types      (Immediate, Operation, RegNum)
 import qualified Lib.Registers            as R
 
