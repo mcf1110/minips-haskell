@@ -5,3 +5,4 @@ linker_script.ld
 *.h
 *.elf
 *.o
+*.native
