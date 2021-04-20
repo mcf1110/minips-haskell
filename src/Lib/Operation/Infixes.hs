@@ -28,6 +28,11 @@ infixr 1 $.=
   (r, m) <- get
   return $ addEnum (R.get ra r) (R.get rb r)
 
+($-$) :: RegNum -> RegNum -> Operation W.Word32
+($-$) ra rb = do
+  (r, m) <- get
+  return $ addEnum (R.get ra r) (1 + 0xffffffff - R.get rb r)
+
 bitwiseWithRegNum ::
      (BV.BitVector -> BV.BitVector -> BV.BitVector)
   -> RegNum

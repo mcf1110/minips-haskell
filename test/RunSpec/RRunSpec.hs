@@ -195,6 +195,49 @@ rTests =
           (regAt 11 $
            runSegInitial [0x2409000b, 0x240affea, 0x012a0018, 0x00005810])
       ]
+  , testGroup
+      "Subtract unsigned"
+      [ testCase "55-42" $
+        assertEqual
+          ""
+          13
+          (regAt 10 $ runSegInitial [0x2408002a, 0x24090037, 0x01285023])
+      , testCase "42-55" $
+        assertEqual
+          ""
+          (tc 13)
+          (regAt 10 $ runSegInitial [0x2408002a, 0x24090037, 0x01095023])
+      , testCase "(-55)-42" $
+        assertEqual
+          ""
+          (tc 97)
+          (regAt 10 $ runSegInitial [0x2408002a, 0x2409ffc9, 0x01285023])
+      , testCase "42-(-55)" $
+        assertEqual
+          ""
+          97
+          (regAt 10 $ runSegInitial [0x2408002a, 0x2409ffc9, 0x01095023])
+      , testCase "55-(-42)" $
+        assertEqual
+          ""
+          97
+          (regAt 10 $ runSegInitial [0x2408ffd6, 0x24090037, 0x01285023])
+      , testCase "(-42)-55" $
+        assertEqual
+          ""
+          (tc 97)
+          (regAt 10 $ runSegInitial [0x2408ffd6, 0x24090037, 0x01095023])
+      , testCase "(-55)-(-42)" $
+        assertEqual
+          ""
+          (tc 13)
+          (regAt 10 $ runSegInitial [0x2408ffd6, 0x2409ffc9, 0x01285023])
+      , testCase "(-42)-(-55)" $
+        assertEqual
+          ""
+          13
+          (regAt 10 $ runSegInitial [0x2408ffd6, 0x2409ffc9, 0x01095023])
+      ]
   ]
 
 jrComputer :: Computer

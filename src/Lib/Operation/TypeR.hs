@@ -12,6 +12,9 @@ import qualified Lib.Registers            as R
 add :: RegNum -> RegNum -> RegNum -> Operation ()
 add rs rt rd = rd $<- rs $+$ rt
 
+subu :: RegNum -> RegNum -> RegNum -> Operation ()
+subu rs rt rd = rd $<- rs $-$ rt
+
 slt :: RegNum -> RegNum -> RegNum -> Operation ()
 slt rs rt rd = rd $<- rs $<$ rt
 
