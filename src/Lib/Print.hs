@@ -143,7 +143,8 @@ showInstruction ins@(RInstr funct rs rt rd shamt)
   | funct `elem` [Mflo, Mfhi] = mkIns [rName rd]
   | funct `elem` [Jr] = mkIns [rName rs]
   | funct `elem` [Jalr] = mkIns [rName rd, rName rs]
-  | funct `elem` [Srl, Sll] = mkIns [rName rd, rName rt, show $ BV.nat shamt]
+  | funct `elem` [Srl, Sra, Sll] =
+    mkIns [rName rd, rName rt, show $ BV.nat shamt]
   | otherwise = mkIns [rName rd, rName rs, rName rt]
   where
     mkIns ls = (toLower <$> show funct) <> " " <> intercalate ", " ls

@@ -50,14 +50,14 @@ rTests =
     , [ (0x00441021, "addu $v0, $v0, $a0", r Addu 2 4 2 0)
       , (0x00641821, "addu $v1, $v1, $a0", r Addu 3 4 3 0)
       ])
-      ,("Subtract Unsigned", [
-        (0x01285023, "subu $t2, $t1, $t0", r Subu 9 8 10 0)
-      ])
+  , ("Subtract Unsigned", [(0x01285023, "subu $t2, $t1, $t0", r Subu 9 8 10 0)])
   , ("Jump Register", [(0x03e00008, "jr $ra", r Jr 31 0 0 0)])
   , ("Set Less Than", [(0x0150582a, "slt $t3, $t2, $s0", r Slt 10 16 11 0)])
   , ( "Set Less Than Unsigned"
     , [(0x0109502b, "sltu $t2, $t0, $t1", r Sltu 8 9 10 0)])
   , ("Shift Right Logical", [(0x00041fc2, "srl $v1, $a0, 31", r Srl 0 4 3 31)])
+  , ( "Shift Right Arithmetic"
+    , [(0x00063403, "sra $a2, $a2, 16", r Sra 0 6 6 16)])
   , ("Shift Left Logical", [(0x00041040, "sll $v0, $a0, 1", r Sll 0 4 2 1)])
   , ("Jump and Link Register", [(0x01008009, "jalr $s0, $t0", r Jalr 8 0 16 0)])
   , ("Mult", [(0x00840018, "mult $a0, $a0", r Mult 4 4 0 0)])

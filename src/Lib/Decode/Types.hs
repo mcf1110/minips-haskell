@@ -55,6 +55,7 @@ data Funct
   | Sltu
   | Sll
   | Srl
+  | Sra
   | Sub
   | Subu
   | Jalr
