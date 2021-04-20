@@ -32,7 +32,7 @@ modifyReg = modify . B.first
 
 w32ToSigned :: W.Word32 -> Int
 w32ToSigned w =
-  if w > 0x0fffffff
+  if w > 0x7fffffff
     then -(fromEnum (0xffffffff - w + 1))
     else fromEnum w
 
