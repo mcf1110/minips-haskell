@@ -33,6 +33,9 @@ xor rs rt rd = rd $<- rs $^$ rt
 srl :: RegNum -> RegNum -> Immediate -> Operation ()
 srl rt rd sh = rd $<- rt $>>: sh
 
+sra :: RegNum -> RegNum -> Immediate -> Operation ()
+sra rt rd sh = rd $<- rt `ashift` sh
+
 sll :: RegNum -> RegNum -> Immediate -> Operation ()
 sll rt rd sh = rd $<- rt $<<: sh
 

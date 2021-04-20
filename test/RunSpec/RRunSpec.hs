@@ -50,8 +50,26 @@ rTests =
           1
           (regAt 10 $ runSegInitial [0x2408002a, 0x2409ff38, 0x0109502b])
       ]
-  , testCase "srl $t1, $t0, 2" $
-    assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
+  , testGroup
+      "Shift Right Logical"
+      [ testCase "srl $t1, 8, 2" $
+        assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084882])
+      , testCase "srl $t1, -42, 2" $
+        assertEqual
+          ""
+          1073741813
+          (regAt 9 $ runSegInitial [0x2408ffd6, 0x00084882])
+      ]
+  , testGroup
+      "Shift Right Arithmetic"
+      [ testCase "sra $t1, 8, 2" $
+        assertEqual "" 4 (regAt 9 $ runSegInitial [0x24080010, 0x00084883])
+      , testCase "sra $t1, -42, 2" $
+        assertEqual
+          ""
+          (tc 11)
+          (regAt 9 $ runSegInitial [0x2408ffd6, 0x00084883])
+      ]
   , testCase "sll $t1, $t0, 2" $
     assertEqual "" 0x40 (regAt 9 $ runSegInitial [0x24080010, 0x00084880])
   , testGroup

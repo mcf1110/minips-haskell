@@ -76,6 +76,7 @@ runOperation (RInstr Mflo _ _ rd _) = moveFromTo 34 rd
 runOperation (RInstr Mfhi _ _ rd _) = moveFromTo 33 rd
 runOperation (RInstr Jr rs _ _ _) = jr rs
 runOperation (RInstr Srl _ rt rd sh) = srl rt rd sh
+runOperation (RInstr Sra _ rt rd sh) = sra rt rd sh
 runOperation (RInstr Sll _ rt rd sh) = sll rt rd sh
 runOperation (RInstr Jalr rs _ rd _) = jalr rd rs
 runOperation (JInstr J tgt) = jump tgt

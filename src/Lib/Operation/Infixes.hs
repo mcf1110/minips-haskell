@@ -135,3 +135,6 @@ shiftWith op ra im = do
 
 ($<<:) :: RegNum -> Immediate -> Operation W.Word32
 ($<<:) = shiftWith BV.shl
+
+ashift :: RegNum -> Immediate -> Operation W.Word32
+ashift = shiftWith BV.ashr
