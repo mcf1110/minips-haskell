@@ -106,8 +106,8 @@ iTests =
       ])
   , ( "Branch on Less Than or Equal to Zero"
     , [(0x1b200017, "blez $t9, 23", i Blez 25 0 23)])
-    , ( "Branch on Greater Than or Equal to Zero"
-      , [(0x04410007, "bgez $v0, 7", i Bgez 2 1 7)])
+  , ( "Branch on Greater Than or Equal to Zero"
+    , [(0x04410007, "bgez $v0, 7", i Bgez 2 1 7)])
   , ( "Load Upper Immediate"
     , [ (0x3c011001, "lui $at, 4097", i Lui 0 1 4097)
       , (0x3c068000, "lui $a2, -32768", i Lui 0 6 (tc 32768))
@@ -162,6 +162,10 @@ frTests =
     , [ (0x46221080, "add.d $f2, $f2, $f2", fr FAdd Double 2 2 2)
       , (0x46020000, "add.s $f0, $f0, $f2", fr FAdd Single 2 0 0)
       ])
+  , ( "FP Sub"
+    , [ (0x46262101, "sub.d $f4, $f4, $f6", fr FSub Double 6 4 4)
+      , (0x46062101, "sub.s $f4, $f4, $f6", fr FSub Single 6 4 4)
+      ])
   , ( "FP Div"
     , [ (0x46222083, "div.d $f2, $f4, $f2", fr FDiv Double 2 4 2)
       , (0x46022083, "div.s $f2, $f4, $f2", fr FDiv Single 2 4 2)
@@ -170,8 +174,6 @@ frTests =
     , [ (0x46220002, "mul.d $f0, $f0, $f2", fr FMul Double 2 0 0)
       , (0x46020002, "mul.s $f0, $f0, $f2", fr FMul Single 2 0 0)
       ])
-      -- 46222083        div.d $f2, $f4, $f2
-      -- 46020002        mul.s $f0, $f0, $f2
   ]
 
 decodingTests =

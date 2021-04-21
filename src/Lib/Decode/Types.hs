@@ -99,6 +99,7 @@ data FFunct
   | CvtS
   | CvtW
   | FAdd
+  | FSub
   | FMul
   | FDiv
   deriving (Show, Eq)
