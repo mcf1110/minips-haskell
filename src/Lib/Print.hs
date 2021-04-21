@@ -165,6 +165,7 @@ showInstruction ins@(JInstr op tgt) =
 showInstruction ins@(FRInstr funct fmt ft fs fd)
   | funct `elem` [Mfc1, Mtc1] = mkIns [rName ft, fName fs]
   | funct `elem` [Mov, CvtD, CvtS, CvtW] = mkInsWithFormat [fName fd, fName fs]
+  | funct `elem` [CLt] = mkInsWithFormat [fName fs, fName ft]
   | funct `elem` [FAdd, FSub, FMul, FDiv] =
     mkAliasedInsWithFormat [fName fd, fName fs, fName ft]
   where

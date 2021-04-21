@@ -102,6 +102,7 @@ data FFunct
   | FSub
   | FMul
   | FDiv
+  | CLt
   deriving (Show, Eq)
 
 data FIOp

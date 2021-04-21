@@ -174,6 +174,10 @@ frTests =
     , [ (0x46220002, "mul.d $f0, $f0, $f2", fr FMul Double 2 0 0)
       , (0x46020002, "mul.s $f0, $f0, $f2", fr FMul Single 2 0 0)
       ])
+  , ( "FP Compare"
+    , [ (0x460e403c, "c.lt.s $f8, $f14", fr CLt Single 14 8 0)
+      , (0x4610003c, "c.lt.s $f0, $f16", fr CLt Single 16 0 0)
+      ])
   ]
 
 decodingTests =
