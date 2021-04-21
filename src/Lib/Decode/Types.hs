@@ -72,6 +72,7 @@ data IOp
   | Beq
   | Bne
   | Blez
+  | Bgez
   | Lui
   | Ori
   | Lw

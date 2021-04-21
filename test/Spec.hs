@@ -106,6 +106,8 @@ iTests =
       ])
   , ( "Branch on Less Than or Equal to Zero"
     , [(0x1b200017, "blez $t9, 23", i Blez 25 0 23)])
+    , ( "Branch on Greater Than or Equal to Zero"
+      , [(0x04410007, "bgez $v0, 7", i Bgez 2 1 7)])
   , ( "Load Upper Immediate"
     , [ (0x3c011001, "lui $at, 4097", i Lui 0 1 4097)
       , (0x3c068000, "lui $a2, -32768", i Lui 0 6 (tc 32768))
