@@ -3,7 +3,7 @@ module Lib.Operation.TypeFR where
 import           Control.Monad.State.Lazy (get, put)
 import           GHC.Float
 import           Lib.Decode               (FFmt (Double, Single, Word))
-import           Lib.Operation.Helpers    (modifyReg)
+import           Lib.Operation.Helpers    (modifyReg, w32ToSigned)
 import           Lib.Operation.Infixes    (($.=))
 import           Lib.Operation.Types      (Operation, RegNum)
 import qualified Lib.Registers            as R
@@ -28,11 +28,11 @@ mov Double fs fd = do
 
 cvtd :: FFmt -> RegNum -> RegNum -> Operation ()
 cvtd Single = convertWith float2Double R.getF R.setD
-cvtd Word   = convertWith realToFrac R.getCop R.setD
+cvtd Word   = convertWith (realToFrac . w32ToSigned) R.getCop R.setD
 
 cvts :: FFmt -> RegNum -> RegNum -> Operation ()
 cvts Double = convertWith double2Float R.getD R.setF
-cvts Word   = convertWith realToFrac R.getCop R.setF
+cvts Word   = convertWith (realToFrac . w32ToSigned) R.getCop R.setF
 
 cvtw :: FFmt -> RegNum -> RegNum -> Operation ()
 cvtw Double = convertWith truncate R.getD R.setCop

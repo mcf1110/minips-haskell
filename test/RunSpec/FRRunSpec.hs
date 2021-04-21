@@ -4,7 +4,7 @@ module RunSpec.FRRunSpec
 
 import           Lib.Computer     (Computer)
 import           RunSpec.Helpers  (doubleAt, floatAt, regAt, runSeg,
-                                   runSegInitial)
+                                   runSegInitial, tc)
 import           Test.Tasty       (TestTree, testGroup)
 import           Test.Tasty.HUnit (assertEqual, testCase)
 
@@ -51,12 +51,22 @@ frTests =
           987654321
           (doubleAt 2 $
            runSegInitial [0x3c013ade, 0x342868b1, 0x44880000, 0x468000a1])
+      , testCase "Converts negative word to double" $
+        assertEqual
+          ""
+          (-42.0)
+          (doubleAt 2 $ runSeg [0xffffffd6] [0x3c011001, 0xd4200000, 0x468000a1])
       , testCase "Converts single to double" $
         assertEqual
           ""
           0.0016968456329777837
           (doubleAt 4 $
            runSegInitial [0x3c013ade, 0x342868b1, 0x44880000, 0x46000121])
+      , testCase "Converts negative single to double" $
+        assertEqual
+          ""
+          (-3.1415927410125732)
+          (doubleAt 2 $ runSeg [0xc0490fdb] [0x3c011001, 0xd4200000, 0x460000a1])
       ]
   , testGroup
       "Convert to Single"
@@ -66,6 +76,11 @@ frTests =
           9.8765434E8
           (floatAt 2 $
            runSegInitial [0x3c013ade, 0x342868b1, 0x44880000, 0x468000a0])
+      , testCase "Converts negative word to single" $
+        assertEqual
+          ""
+          (-42.0)
+          (floatAt 2 $ runSeg [0xffffffd6] [0x3c011001, 0xd4200000, 0x468000a0])
       , testCase "Converts double to single" $
         assertEqual
           ""
@@ -73,6 +88,12 @@ frTests =
           (floatAt 2 $
            runSegInitial
              [0x3c013ade, 0x342868b1, 0x44880000, 0x44880800, 0x462000a0])
+      , testCase "Converts negative double to single" $
+        assertEqual
+          ""
+          (-pi)
+          (floatAt 2 $
+           runSeg [0x54442d18, 0xc00921fb] [0x3c011001, 0xd4200000, 0x462000a0])
       ]
   , testGroup
       "Convert to Word"
@@ -99,6 +120,20 @@ frTests =
            runSeg
              [0x5444261e, 0x400921fb]
              [0x3c011001, 0xd4200000, 0x462000a4, 0x44091000])
+      , testCase "Converts negative single to word" $
+        assertEqual
+          ""
+          (tc 3)
+          (regAt 8 $
+           runSeg [0xc0490fdb] [0x3c011001, 0xd4200000, 0x460000a4, 0x44081000])
+      , testCase "Converts negative double to word" $
+        assertEqual
+          ""
+          (tc 3)
+          (regAt 8 $
+           runSeg
+             [0x54442d18, 0xc00921fb]
+             [0x3c011001, 0xd4200000, 0x462000a4, 0x44081000])
       ]
   , testGroup
       "FP Add"
