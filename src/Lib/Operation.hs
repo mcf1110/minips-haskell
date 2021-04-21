@@ -48,6 +48,7 @@ runOperation :: Instr -> Operation ()
 runOperation (IInstr Beq rs rt im) = beq rs rt im
 runOperation (IInstr Bne rs rt im) = bne rs rt im
 runOperation (IInstr Blez rs _ im) = blez rs im
+runOperation (IInstr Bgez rs _ im) = bgez rs im
 runOperation (IInstr Addi rs rt im) = addi rs rt im
 runOperation (IInstr Addiu rs rt im) = addiu rs rt im
 runOperation (IInstr Andi rs rt im) = andi rs rt im
@@ -120,6 +121,9 @@ bne = branchOn (/=)
 
 blez :: RegNum -> Immediate -> Operation ()
 blez = branchOn (>=) 0 -- branchOn $zero >= $x
+
+bgez :: RegNum -> Immediate -> Operation ()
+bgez = branchOn (<=) 0 -- branchOn $zero <= $x
 
 jr :: RegNum -> Operation ()
 jr rnum = do
