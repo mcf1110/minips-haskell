@@ -83,6 +83,7 @@ runOperation (RInstr Jalr rs _ rd _) = jalr rd rs
 runOperation (JInstr J tgt) = jump tgt
 runOperation (JInstr Jal tgt) = jal tgt
 runOperation (FRInstr FAdd fmt ft fs fd) = fadd fmt ft fs fd
+runOperation (FRInstr FSub fmt ft fs fd) = fsub fmt ft fs fd
 runOperation (FRInstr FMul fmt ft fs fd) = fmul fmt ft fs fd
 runOperation (FRInstr FDiv fmt ft fs fd) = fdiv fmt ft fs fd
 runOperation (FRInstr Mfc1 _ rt fs _) = mfc1 rt fs

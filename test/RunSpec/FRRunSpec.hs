@@ -150,6 +150,76 @@ frTests =
            runSeg [0x54442d18, 0x400921fb] [0x3c011001, 0xd4200000, 0x46200080])
       ]
   , testGroup
+      "FP Sub"
+      [ testGroup
+          "Double"
+          [ testCase "42 - pi" $
+            assertEqual
+              ""
+              (42 - pi)
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0x400921fb, 0, 0x40450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46201101])
+          , testCase "pi - 42" $
+            assertEqual
+              ""
+              (pi - 42)
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0x400921fb, 0, 0x40450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46220101])
+          , testCase "42 - (-pi)" $
+            assertEqual
+              ""
+              (42 - (-pi))
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0xc00921fb, 0, 0x40450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46201101])
+          , testCase "(-pi) - 42" $
+            assertEqual
+              ""
+              ((-pi) - 42)
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0xc00921fb, 0, 0x40450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46220101])
+          , testCase "(-42) - pi" $
+            assertEqual
+              ""
+              ((-42) - pi)
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0x400921fb, 0, 0xc0450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46201101])
+          , testCase "pi - (-42)" $
+            assertEqual
+              ""
+              (pi - (-42))
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0x400921fb, 0, 0xc0450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46220101])
+          , testCase "(-42) - (-pi)" $
+            assertEqual
+              ""
+              ((-42) - (-pi))
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0xc00921fb, 0, 0xc0450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46201101])
+          , testCase "(-pi) - (-42)" $
+            assertEqual
+              ""
+              ((-pi) - (-42))
+              (doubleAt 4 $
+               runSeg
+                 [0x54442d18, 0xc00921fb, 0, 0xc0450000]
+                 [0x3c011001, 0xd4200000, 0xd4220008, 0x46220101])
+          ]
+      ]
+  , testGroup
       "FP Mult"
       [ testCase "Multiplies float" $
         assertEqual

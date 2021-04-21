@@ -47,6 +47,10 @@ fadd :: FFmt -> RegNum -> RegNum -> RegNum -> Operation ()
 fadd Double = applyCalculation (+) R.getD R.setD
 fadd Single = applyCalculation (+) R.getF R.setF
 
+fsub :: FFmt -> RegNum -> RegNum -> RegNum -> Operation ()
+fsub Double = applyCalculation (-) R.getD R.setD
+fsub Single = applyCalculation (-) R.getF R.setF
+
 fdiv :: FFmt -> RegNum -> RegNum -> RegNum -> Operation ()
 fdiv Double = applyCalculation (/) R.getD R.setD
 fdiv Single = applyCalculation (/) R.getF R.setF
