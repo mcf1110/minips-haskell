@@ -94,6 +94,7 @@ runOperation (FRInstr CvtS fmt _ fs fd) = cvts fmt fs fd
 runOperation (FRInstr CvtW fmt _ fs fd) = cvtw fmt fs fd
 runOperation (FRInstr CLt fmt ft fs fd) = clt fmt ft fs
 runOperation i@(FIInstr Bc1t _ imm) = branchOnFlag True imm
+runOperation i@(FIInstr Bc1f _ imm) = branchOnFlag False imm
 runOperation Nop = return ()
 runOperation Break = return ()
 runOperation a = error $ "Falta implementar: " <> show a
