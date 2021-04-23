@@ -38,6 +38,18 @@ cvtw :: FFmt -> RegNum -> RegNum -> Operation ()
 cvtw Double = convertWith truncate R.getD R.setCop
 cvtw Single = convertWith truncate R.getF R.setCop
 
+clt :: FFmt -> RegNum -> RegNum -> Operation ()
+clt Single = condition R.getF (<)
+clt Double = condition R.getD (<)
+
+condition :: Getter a -> (a -> a -> Bool) -> RegNum -> RegNum -> Operation ()
+condition getter compare ft fs =
+  modifyReg
+    (\r ->
+       let a = getter fs r
+           b = getter ft r
+        in R.setFlag 0 (compare a b) r)
+
 convertWith ::
      (a -> b) -> Getter a -> Setter b -> RegNum -> RegNum -> Operation ()
 convertWith cvtFn getFn setFn fs fd =

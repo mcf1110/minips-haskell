@@ -3,10 +3,10 @@ module RunSpec.FRRunSpec
   ) where
 
 import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (doubleAt, floatAt, regAt, runSeg,
+import           RunSpec.Helpers  (doubleAt, flagAt, floatAt, regAt, runSeg,
                                    runSegInitial, tc)
 import           Test.Tasty       (TestTree, testGroup)
-import           Test.Tasty.HUnit (assertEqual, testCase)
+import           Test.Tasty.HUnit (assertBool, assertEqual, testCase)
 
 frTests :: [TestTree]
 frTests =
@@ -319,5 +319,26 @@ frTests =
              , 0x46800860
              , 0x46010083
              ])
+      ]
+  , testGroup
+      "Condition: Less Than"
+      [ testGroup
+          "Single"
+          [ testCase "pi < 42" $
+            assertBool
+              ""
+              (flagAt 0 $
+               runSeg
+                 [0x42280000, 0x405a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4602003c])
+          , testCase "42 < pi" $
+            assertBool
+              ""
+              (not $
+               flagAt 0 $
+               runSeg
+                 [0x42280000, 0x405a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4600103c])
+          ]
       ]
   ]

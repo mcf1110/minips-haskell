@@ -40,5 +40,8 @@ floatAt ix = R.getF ix . fst
 doubleAt :: (Num a, Enum a) => a -> Computer -> Double
 doubleAt ix = R.getD ix . fst
 
+flagAt :: (Num a, Enum a) => a -> Computer -> Bool
+flagAt ix = R.getFlag ix . fst
+
 memAt :: Enum a => a -> Computer -> W.Word32
 memAt ix = M.get ix . snd

@@ -92,6 +92,7 @@ runOperation (FRInstr Mov fmt _ fs fd) = mov fmt fs fd
 runOperation (FRInstr CvtD fmt _ fs fd) = cvtd fmt fs fd
 runOperation (FRInstr CvtS fmt _ fs fd) = cvts fmt fs fd
 runOperation (FRInstr CvtW fmt _ fs fd) = cvtw fmt fs fd
+runOperation (FRInstr CLt fmt ft fs fd) = clt fmt ft fs
 runOperation Nop = return ()
 runOperation Break = return ()
 runOperation a = error $ "Falta implementar: " <> show a

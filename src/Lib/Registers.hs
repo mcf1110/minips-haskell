@@ -8,7 +8,13 @@ import qualified Data.Binary.IEEE754 as F
 import           Data.Bits           (shiftL, shiftR, (.&.))
 import           Data.Either         (fromRight)
 
-type Registers = (V.Vector W.Word32, V.Vector W.Word32)
+type GPR = V.Vector W.Word32
+
+type FPR = V.Vector W.Word32
+
+type CCFlags = V.Vector Bool
+
+type Registers = (GPR, (FPR, CCFlags)) -- oh god why
 
 startingRegisters :: Registers
 startingRegisters = (gpr, coprocessor)
@@ -16,7 +22,7 @@ startingRegisters = (gpr, coprocessor)
     gpr =
       V.replicate 35 0 V.//
       [(29, 0x7fffeffc), (28, 0x10008000), (32, 0x00400000)]
-    coprocessor = V.replicate 32 0
+    coprocessor = (V.replicate 32 0, V.replicate 8 False)
 
 get :: Enum a => a -> Registers -> W.Word32
 get ix r = fst r V.! fromEnum ix
@@ -26,10 +32,10 @@ set 0 _  = id
 set ix v = B.first (\gpr -> gpr V.// [(fromEnum ix, v)])
 
 getCop :: Enum a => a -> Registers -> W.Word32
-getCop ix r = snd r V.! fromEnum ix
+getCop ix r = fst (snd r) V.! fromEnum ix
 
 setCop :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Registers -> Registers
-setCop ix v = B.second (\fpr -> fpr V.// [(fromEnum ix, v)])
+setCop ix v = B.second (\(fpr, cc) -> (fpr V.// [(fromEnum ix, v)], cc))
 
 getF :: Enum a => a -> Registers -> Float
 getF ix r = F.wordToFloat $ getCop ix r
@@ -53,3 +59,9 @@ setD ix d r = setCop (ix + 1) w2 (setCop ix w1 r)
     w2, w1 :: W.Word32
     w1 = toEnum . fromEnum $ bitMask .&. word
     w2 = toEnum . fromEnum $ shiftR word 32
+
+getFlag :: (Enum a, Num a) => a -> Registers -> Bool
+getFlag ix r = snd (snd r) V.! fromEnum ix
+
+setFlag :: (Eq a, Num a, Enum a) => a -> Bool -> Registers -> Registers
+setFlag ix v = B.second (\(fpr, cc) -> (fpr, cc V.// [(fromEnum ix, v)]))
