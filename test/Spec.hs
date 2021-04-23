@@ -194,6 +194,11 @@ fiTests =
       , (0x4501fff2, "bc1t -14", fi Bc1t 8 (0xffff - 14 + 1))
       , (0x45010001, "bc1t 1", fi Bc1t 8 1)
       ])
+  , ( "Branch on FP False"
+    , [ (0x4500fffe, "bc1f -2", fi Bc1f 8 (0xffff - 2 + 1))
+      , (0x4500fff2, "bc1f -14", fi Bc1f 8 (0xffff - 14 + 1))
+      , (0x45000001, "bc1f 1", fi Bc1f 8 1)
+      ])
   ]
 
 decodingTests =
