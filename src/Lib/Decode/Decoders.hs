@@ -3,6 +3,7 @@ module Lib.Decode.Decoders where
 import qualified Data.BitVector   as BV
 import qualified Data.Word        as W
 
+import           Debug.Trace      (trace, traceShow)
 import           Lib.Decode.Types
 import           Lib.Segment      (Segment)
 
@@ -97,7 +98,9 @@ decodeJFormat = fromList . getFields [6, 26]
 decodeCoprocessor :: BV.BitVector -> Instr
 decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
   where
-    fromList [op, fmt, ft, fs, fd, funct] = FRInstr operation format ft fs fd
+    fromList [op, fmt, ft, fs, fd, funct]
+      | fmt == 8 = FIInstr (fiOp ft) fmt $ BV.concat [fs, fd, funct]
+      | otherwise = FRInstr operation format ft fs fd
       where
         (operation, format) = decodeOp fmt funct
     decodeOp 0 _ = (Mfc1, Single)
@@ -117,3 +120,5 @@ decodeCoprocessor = fromList . getFields [6, 5, 5, 5, 5, 6]
     toFormat 0x10 = Single
     toFormat 0x11 = Double
     toFormat 0x14 = Word
+    fiOp 0 = Bc1f
+    fiOp 1 = Bc1t

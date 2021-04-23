@@ -181,6 +181,8 @@ showInstruction ins@(FRInstr funct fmt ft fs fd)
       intercalate
         "."
         (tail $ split (keepDelimsL $ whenElt isUpper) $ show funct)
+showInstruction ins@(FIInstr iop ft imm) =
+  toLower <$> show iop <> " " <> show (BV.int imm)
 showInstruction Syscall = "syscall"
 showInstruction Nop = "nop"
 showInstruction Break = "break"

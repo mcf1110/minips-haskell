@@ -8,6 +8,7 @@ import qualified Lib.Memory       as M
 import           Lib.Print
 import qualified Lib.Registers    as R
 
+import           Debug.Trace      (traceShowId)
 import           RunSpec
 import           RunSpec.Helpers  (tc)
 
@@ -30,16 +31,23 @@ tests =
       replicate 5 True <> replicate 9 False <> [True] <> replicate 5 False
 
 -- helpers
+b :: Integral a => Int -> a -> BV.BitVector
 b = BV.bitVec
 
+r :: (Integral a) => Funct -> a -> a -> a -> a -> Instr
 r f s t d a = RInstr f (b 5 s) (b 5 t) (b 5 d) (b 5 a)
 
+j :: Integral a => JOp -> a -> Instr
 j o t = JInstr o (b 26 t)
 
+i :: (Integral a) => IOp -> a -> a -> a -> Instr
 i o s t im = IInstr o (b 5 s) (b 5 t) (b 16 im)
 
 fr :: FFunct -> FFmt -> BV.BV -> BV.BV -> BV.BV -> Instr
 fr f fmt t d a = FRInstr f fmt (b 5 t) (b 5 d) (b 6 a)
+
+fi :: Integral a => FIOp -> a -> a -> Instr
+fi o s im = FIInstr o (b 5 s) (b 16 im)
 
 rTests =
   [ ( "Add"
@@ -180,11 +188,20 @@ frTests =
       ])
   ]
 
+fiTests =
+  [ ( "Branch on FP True"
+    , [ (0x4501fffe, "bc1t -2", fi Bc1t 8 (0xffff - 2 + 1))
+      , (0x4501fff2, "bc1t -14", fi Bc1t 8 (0xffff - 14 + 1))
+      , (0x45010001, "bc1t 1", fi Bc1t 8 1)
+      ])
+  ]
+
 decodingTests =
   [ testGroup "R Instructions" $ map makeDecTest rTests
   , testGroup "J Instructions" $ map makeDecTest iTests
   , testGroup "I Instructions" $ map makeDecTest jTests
   , testGroup "FR Instructions" $ map makeDecTest frTests
+  , testGroup "FI Instructions" $ map makeDecTest fiTests
   , testCase "Syscall" $ assertEqual "" Syscall (decode 0x0000000c)
   , testCase "Break" $ assertEqual "" Break (decode 0x0000000d)
   , testCase "Nop" $ assertEqual "" Nop (decode 0x00000000)
@@ -198,6 +215,7 @@ printingTests =
   , testGroup "J Instructions" $ map makePrintTest iTests
   , testGroup "I Instructions" $ map makePrintTest jTests
   , testGroup "FR Instructions" $ map makePrintTest frTests
+  , testGroup "FI Instructions" $ map makePrintTest fiTests
   , testCase "Syscall" $ assertEqual "" "syscall" (showInstruction Syscall)
   , testCase "Nop" $ assertEqual "" "nop" (showInstruction Nop)
   , testCase "Break" $ assertEqual "" "break" (showInstruction Break)
