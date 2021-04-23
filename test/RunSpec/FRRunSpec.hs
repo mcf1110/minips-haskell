@@ -334,10 +334,51 @@ frTests =
           , testCase "42 < pi" $
             assertBool
               ""
-              (not $
-               flagAt 0 $
+              (not . flagAt 0 $
                runSeg
                  [0x42280000, 0x405a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4600103c])
+          , testCase "(-pi) < 42" $
+            assertBool
+              ""
+              (flagAt 0 $
+               runSeg
+                 [0x42280000, 0xc05a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4602003c])
+          , testCase "42 < (-pi)" $
+            assertBool
+              ""
+              (not . flagAt 0 $
+               runSeg
+                 [0x42280000, 0xc05a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4600103c])
+          , testCase "pi < (-42)" $
+            assertBool
+              ""
+              (not . flagAt 0 $
+               runSeg
+                 [0xc2280000, 0x405a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4602003c])
+          , testCase "(-42) < pi" $
+            assertBool
+              ""
+              (flagAt 0 $
+               runSeg
+                 [0xc2280000, 0x405a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4600103c])
+          , testCase "(-pi) < (-42)" $
+            assertBool
+              ""
+              (not . flagAt 0 $
+               runSeg
+                 [0xc2280000, 0xc05a9e8a]
+                 [0x3c011001, 0xc4200004, 0xc4220000, 0x4602003c])
+          , testCase "(-42) < (-pi)" $
+            assertBool
+              ""
+              (flagAt 0 $
+               runSeg
+                 [0xc2280000, 0xc05a9e8a]
                  [0x3c011001, 0xc4200004, 0xc4220000, 0x4600103c])
           ]
       ]
