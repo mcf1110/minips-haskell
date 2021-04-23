@@ -113,7 +113,7 @@ iTests =
           7
           (regAt 10 $
            runSegInitial [0x2408ffd6, 0x19000002, 0x240a0007, 0x2409000f])
-      , testCase "Treats zero correclty" $
+      , testCase "Treats zero correctly" $
         assertEqual
           ""
           0
@@ -128,41 +128,41 @@ iTests =
            runSegInitial
              [0x24080000, 0x19000002, 0x00000000, 0x2409000b, 0x240a0016])
       ]
-      , testGroup
-          "Branch on Greater Than or Equal to Zero"
-          [ testCase "Branches on positives" $
-            assertEqual
-              ""
-              0
-              (regAt 9 $
-               runSegInitial [0x2408002a, 0x05010002, 0x240a0007, 0x2409000f])
-          , testCase "Does not branch on negatives" $
-            assertEqual
-              ""
-              15
-              (regAt 9 $
-               runSegInitial [0x2408ffd6, 0x05010002, 0x240a0007, 0x2409000f])
-          , testCase "BDS" $
-            assertEqual
-              ""
-              7
-              (regAt 10 $
-               runSegInitial [0x2408002a, 0x05010002, 0x240a0007, 0x2409000f])
-          , testCase "Treats zero correclty" $
-            assertEqual
-              ""
-              0
-              (regAt 9 $
-               runSegInitial
-                 [0x24080000, 0x05010002, 0x00000000, 0x2409000b, 0x240a0016])
-          , testCase "Treats zero correctly" $
-            assertEqual
-              ""
-              22
-              (regAt 10 $
-               runSegInitial
-                 [0x24080000, 0x05010002, 0x00000000, 0x2409000b, 0x240a0016])
-          ]
+  , testGroup
+      "Branch on Greater Than or Equal to Zero"
+      [ testCase "Branches on positives" $
+        assertEqual
+          ""
+          0
+          (regAt 9 $
+           runSegInitial [0x2408002a, 0x05010002, 0x240a0007, 0x2409000f])
+      , testCase "Does not branch on negatives" $
+        assertEqual
+          ""
+          15
+          (regAt 9 $
+           runSegInitial [0x2408ffd6, 0x05010002, 0x240a0007, 0x2409000f])
+      , testCase "BDS" $
+        assertEqual
+          ""
+          7
+          (regAt 10 $
+           runSegInitial [0x2408002a, 0x05010002, 0x240a0007, 0x2409000f])
+      , testCase "Treats zero correclty" $
+        assertEqual
+          ""
+          0
+          (regAt 9 $
+           runSegInitial
+             [0x24080000, 0x05010002, 0x00000000, 0x2409000b, 0x240a0016])
+      , testCase "Treats zero correctly" $
+        assertEqual
+          ""
+          22
+          (regAt 10 $
+           runSegInitial
+             [0x24080000, 0x05010002, 0x00000000, 0x2409000b, 0x240a0016])
+      ]
   , testGroup
       "Load Word"
       [ testCase "lw $t0, ans" $
