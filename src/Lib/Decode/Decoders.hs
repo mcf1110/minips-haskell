@@ -3,7 +3,6 @@ module Lib.Decode.Decoders where
 import qualified Data.BitVector   as BV
 import qualified Data.Word        as W
 
-import           Debug.Trace      (trace, traceShow)
 import           Lib.Decode.Types
 import           Lib.Segment      (Segment)
 

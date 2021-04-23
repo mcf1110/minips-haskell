@@ -93,6 +93,7 @@ runOperation (FRInstr CvtD fmt _ fs fd) = cvtd fmt fs fd
 runOperation (FRInstr CvtS fmt _ fs fd) = cvts fmt fs fd
 runOperation (FRInstr CvtW fmt _ fs fd) = cvtw fmt fs fd
 runOperation (FRInstr CLt fmt ft fs fd) = clt fmt ft fs
+runOperation i@(FIInstr Bc1t _ imm) = branchOnFlag True imm
 runOperation Nop = return ()
 runOperation Break = return ()
 runOperation a = error $ "Falta implementar: " <> show a
@@ -146,3 +147,11 @@ jal :: Immediate -> Operation ()
 jal tgt = do
   runBranchDelaySlot
   modifyReg (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
+
+branchOnFlag :: Bool -> BV.BV -> Operation ()
+branchOnFlag bool imm = do
+  (r, m) <- get
+  when (R.getFlag 0 r == bool) $ do
+    runBranchDelaySlot
+    addToPC (-1)
+    addToPC $ BV.int imm

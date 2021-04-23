@@ -4,6 +4,7 @@ module RunSpec
 
 import           Test.Tasty              (TestTree, testGroup)
 
+import           RunSpec.FIRunSpec       (fiTests)
 import           RunSpec.FRRunSpec       (frTests)
 import           RunSpec.IRunSpec        (iTests)
 import           RunSpec.JRunSpec        (jTests)
@@ -16,5 +17,6 @@ runningTests =
   , testGroup "I Instructions" iTests
   , testGroup "J Instructions" jTests
   , testGroup "FR Instructions" frTests
+  , testGroup "FI Instructions" fiTests
   , testGroup "System Calls" systemCallTests
   ]

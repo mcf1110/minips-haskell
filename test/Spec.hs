@@ -8,7 +8,6 @@ import qualified Lib.Memory       as M
 import           Lib.Print
 import qualified Lib.Registers    as R
 
-import           Debug.Trace      (traceShowId)
 import           RunSpec
 import           RunSpec.Helpers  (tc)
 
@@ -193,6 +192,7 @@ fiTests =
     , [ (0x4501fffe, "bc1t -2", fi Bc1t 8 (0xffff - 2 + 1))
       , (0x4501fff2, "bc1t -14", fi Bc1t 8 (0xffff - 14 + 1))
       , (0x45010001, "bc1t 1", fi Bc1t 8 1)
+      , (0x4501fffa, "bc1t -6", fi Bc1t 8 (0xffff - 6 + 1))
       ])
   , ( "Branch on FP False"
     , [ (0x4500fffe, "bc1f -2", fi Bc1f 8 (0xffff - 2 + 1))

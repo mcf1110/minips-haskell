@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a98bce7e4ceec6f939d81af5e55864b2f0d4fd5b6aed4c7857e3ae57bf71dfd9
+-- hash: bcba9efb0c3377e52eada624b8e1a961f7e9cce042be69e891fd59bbd92a5937
 
 name:           minips
 version:        0.1.0.0
@@ -84,6 +84,7 @@ test-suite minips-test
   main-is: Spec.hs
   other-modules:
       RunSpec
+      RunSpec.FIRunSpec
       RunSpec.FRRunSpec
       RunSpec.Helpers
       RunSpec.IRunSpec
