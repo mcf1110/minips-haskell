@@ -2,11 +2,11 @@ module RunSpec.FIRunSpec
   ( fiTests
   ) where
 
-import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (doubleAt, flagAt, floatAt, regAt, runSeg,
-                                   runSegInitial, tc)
-import           Test.Tasty       (TestTree, testGroup)
-import           Test.Tasty.HUnit (assertBool, assertEqual, testCase)
+import           Lib.Computer.Types (Computer)
+import           RunSpec.Helpers    (doubleAt, flagAt, floatAt, regAt, runSeg,
+                                     runSegInitial, tc)
+import           Test.Tasty         (TestTree, testGroup)
+import           Test.Tasty.HUnit   (assertBool, assertEqual, testCase)
 
 fiTests :: [TestTree]
 fiTests =

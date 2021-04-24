@@ -28,6 +28,7 @@ dependencies:
 - bv
 - mtl
 - data-binary-ieee754
+- optics
 
 library:
   source-dirs: src

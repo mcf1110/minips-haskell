@@ -2,7 +2,7 @@ module Lib.Operation.Types where
 
 import           Control.Monad.State.Lazy
 import qualified Data.BitVector           as BV
-import           Lib.Computer             (Computer)
+import           Lib.Computer.Types       (Computer)
 
 data SC
   = PutInt Int

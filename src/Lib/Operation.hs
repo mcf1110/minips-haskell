@@ -24,18 +24,18 @@ import           Lib.Operation.Types
 evalInstruction :: Instr -> Operation SC
 evalInstruction Syscall = do
   incPC
-  (r, m) <- get
-  let v0 = R.get 2 r
-      a0 = R.get 4 r
+  comp <- get
+  let v0 = R.get 2 comp
+      a0 = R.get 4 comp
   return $
     case v0 of
       1  -> PutInt $ w32ToSigned a0
-      4  -> PutStr $ M.getString a0 m
+      4  -> PutStr $ M.getString a0 comp
       11 -> PutChar $ toEnum . fromEnum $ a0
       5  -> GetInt
       10 -> Die
-      2  -> PutFloat $ R.getF 12 r
-      3  -> PutDouble $ R.getD 12 r
+      2  -> PutFloat $ R.getF 12 comp
+      3  -> PutDouble $ R.getD 12 comp
       6  -> GetFloat
       7  -> GetDouble
       x  -> error $ "Syscall desconhecida: " <> show x
@@ -101,9 +101,9 @@ runOperation a = error $ "Falta implementar: " <> show a
 
 runBranchDelaySlot :: Operation ()
 runBranchDelaySlot = do
-  (r, m) <- get
-  let pc = R.get 32 r
-      ins = decodeInstruction $ M.get pc m
+  comp <- get
+  let pc = R.get 32 comp
+      ins = decodeInstruction $ M.get pc comp
   evalInstruction ins
   return ()
 
@@ -111,8 +111,8 @@ runBranchDelaySlot = do
 branchOn ::
      (Int -> Int -> Bool) -> RegNum -> RegNum -> Immediate -> Operation ()
 branchOn op rs rt im = do
-  (r, m) <- get
-  when (w32ToSigned (R.get rs r) `op` w32ToSigned (R.get rt r)) $ do
+  comp <- get
+  when (w32ToSigned (R.get rs comp) `op` w32ToSigned (R.get rt comp)) $ do
     runBranchDelaySlot
     addToPC (-1)
     addToPC $ BV.int im
@@ -132,27 +132,28 @@ bgez = branchOn (<=) 0 -- branchOn $zero <= $x
 jr :: RegNum -> Operation ()
 jr rnum = do
   runBranchDelaySlot
-  modifyReg (\r -> R.set 32 (R.get rnum r) r)
+  modify (\comp -> R.set 32 (R.get rnum comp) comp)
 
 jalr :: RegNum -> RegNum -> Operation ()
 jalr rd rs = do
-  modifyReg (\r -> R.set rd (4 + R.get 32 r) r)
+  modify (\comp -> R.set rd (4 + R.get 32 comp) comp)
   jr rs
 
 jump :: Immediate -> Operation ()
 jump tgt = do
   runBranchDelaySlot
-  modifyReg (\r -> R.set 32 (calcJumpAddr tgt r) r)
+  modify (\comp -> R.set 32 (calcJumpAddr tgt comp) comp)
 
 jal :: Immediate -> Operation ()
 jal tgt = do
   runBranchDelaySlot
-  modifyReg (\r -> R.set 32 (calcJumpAddr tgt r) $ R.set 31 (R.get 32 r) r)
+  modify
+    (\comp -> R.set 32 (calcJumpAddr tgt comp) $ R.set 31 (R.get 32 comp) comp)
 
 branchOnFlag :: Bool -> BV.BV -> Operation ()
 branchOnFlag bool imm = do
-  (r, m) <- get
-  when (R.getFlag 0 r == bool) $ do
+  comp <- get
+  when (R.getFlag 0 comp == bool) $ do
     runBranchDelaySlot
     addToPC (-1)
     addToPC $ BV.int imm

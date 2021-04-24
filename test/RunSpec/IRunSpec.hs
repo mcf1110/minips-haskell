@@ -2,11 +2,11 @@ module RunSpec.IRunSpec
   ( iTests
   ) where
 
-import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (doubleAt, floatAt, memAt, regAt, runSeg,
-                                   runSegInitial)
-import           Test.Tasty       (TestTree, testGroup)
-import           Test.Tasty.HUnit (assertEqual, testCase)
+import           Lib.Computer.Types (Computer)
+import           RunSpec.Helpers    (doubleAt, floatAt, memAt, regAt, runSeg,
+                                     runSegInitial)
+import           Test.Tasty         (TestTree, testGroup)
+import           Test.Tasty.HUnit   (assertEqual, testCase)
 
 iTests :: [TestTree]
 iTests =

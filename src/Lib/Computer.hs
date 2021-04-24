@@ -1,18 +1,25 @@
 module Lib.Computer where
 
-import qualified Data.IntMap.Lazy as IM
+import qualified Data.IntMap.Lazy   as IM
 
-import           Lib.Memory
-import           Lib.Registers
+import qualified Data.Vector        as V
+import qualified Data.Word          as W
+import           Lib.Computer.Types
 import           Lib.Segment
-
-type Computer = (Registers, Memory)
 
 initialComputer :: Segment -> Segment -> Segment -> Computer
 initialComputer dataSegment textSegment roDataSegment =
-  (startingRegisters, startingMemory)
+  Computer initialRegisters initialMemory $ Stats 0 0 0 0 0
   where
-    startingMemory =
+    initialMemory =
       IM.filter (/= 0) $
       loadSegment 0x00800000 roDataSegment <>
       loadSegment 0x10010000 dataSegment <> loadSegment 0x00400000 textSegment
+    initialRegisters :: Registers
+    initialRegisters = Registers gpr coprocessor flags
+      where
+        gpr =
+          V.replicate 35 0 V.//
+          [(29, 0x7fffeffc), (28, 0x10008000), (32, 0x00400000)]
+        coprocessor = V.replicate 32 0
+        flags = V.replicate 8 False

@@ -1,21 +1,21 @@
 module Lib.Memory where
 
-import qualified Data.BitVector   as BV
-import qualified Data.IntMap.Lazy as IM
-import qualified Data.Word        as W
+import qualified Data.BitVector     as BV
+import qualified Data.IntMap.Lazy   as IM
+import qualified Data.Word          as W
 
-import           Data.List.Split  (chunksOf)
-import           Data.Maybe       (fromMaybe)
+import           Data.List.Split    (chunksOf)
+import           Data.Maybe         (fromMaybe)
+import           Lib.Computer.Types (Computer, Memory, mem)
+import           Optics             (over, (^.))
 
-type Memory = IM.IntMap W.Word32
+set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Computer -> Computer
+set ix v = over mem $ IM.insert (fromEnum ix) v
 
-set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Memory -> Memory
-set ix = IM.insert (fromEnum ix)
+get :: Enum a => a -> Computer -> W.Word32
+get n comp = fromMaybe 0 $ (comp ^. mem) IM.!? fromEnum n
 
-get :: Enum a => a -> Memory -> W.Word32
-get n m = fromMaybe 0 $ m IM.!? fromEnum n
-
-getQuarter :: Enum a => a -> Memory -> W.Word8
+getQuarter :: Enum a => a -> Computer -> W.Word8
 getQuarter n m = toEnum $ fromEnum $ quarterWords !! i
   where
     s = 4 * div (fromEnum n) 4
@@ -24,7 +24,7 @@ getQuarter n m = toEnum $ fromEnum $ quarterWords !! i
       let bv = BV.bitVec 32 (get s m)
        in [bv BV.@: ix | ix <- map reverse $ chunksOf 8 [0 .. 31]]
 
-getString :: Enum a => a -> Memory -> String
+getString :: Enum a => a -> Computer -> String
 getString n m =
   map (toEnum . fromEnum) $ takeWhile (/= 0) $ [getQuarter a m | a <- [ix ..]]
   where

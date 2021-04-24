@@ -57,4 +57,4 @@ divide :: RegNum -> RegNum -> Operation ()
 divide = setHiLo ($/$)
 
 moveFromTo :: RegNum -> RegNum -> Operation ()
-moveFromTo from to = modifyReg (\r -> R.set to (R.get from r) r)
+moveFromTo from to = modify (\comp -> R.set to (R.get from comp) comp)

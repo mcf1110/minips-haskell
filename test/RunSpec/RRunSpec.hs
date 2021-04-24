@@ -2,10 +2,10 @@ module RunSpec.RRunSpec
   ( rTests
   ) where
 
-import           Lib.Computer     (Computer)
-import           RunSpec.Helpers  (regAt, runSegInitial, tc)
-import           Test.Tasty       (TestTree, testGroup)
-import           Test.Tasty.HUnit (assertEqual, testCase)
+import           Lib.Computer.Types (Computer)
+import           RunSpec.Helpers    (regAt, runSegInitial, tc)
+import           Test.Tasty         (TestTree, testGroup)
+import           Test.Tasty.HUnit   (assertEqual, testCase)
 
 rTests :: [TestTree]
 rTests =

@@ -1,6 +1,5 @@
 module Lib.Run where
 
-import           Lib.Computer
 import           Lib.Decode
 import qualified Lib.Memory               as M
 import           Lib.Operation
@@ -13,6 +12,7 @@ import           System.IO
 import           Text.Printf              (printf)
 
 import qualified Data.Word                as W
+import           Lib.Computer.Types       (Computer)
 
 data SyscallInput
   = GotInt Int
@@ -28,7 +28,7 @@ runWithBreakpoints bps c0 = do
   let (sc, c1) = tick c0
   syscallInput <- runSyscall sc
   let c2 = storeInput syscallInput c1
-      pc = R.get 32 $ fst c2
+      pc = R.get 32 c2
   when (pc `elem` bps) $ do
     putStrLn $ "pc: " <> printf "0x%08x" pc
     printComputer c2
@@ -47,13 +47,13 @@ storeInput syscallInput c =
     GotNothing  -> c
 
 gotInt :: Computer -> Int -> Computer
-gotInt (r, m) i = (R.set 2 (toEnum i) r, m)
+gotInt comp i = R.set 2 (toEnum i) comp
 
 gotFloat :: Computer -> Float -> Computer
-gotFloat (r, m) f = (R.setF 0 f r, m)
+gotFloat comp f = R.setF 0 f comp
 
 gotDouble :: Computer -> Double -> Computer
-gotDouble (r, m) d = (R.setD 0 d r, m)
+gotDouble comp d = R.setD 0 d comp
 
 runSyscall :: SC -> IO SyscallInput
 runSyscall GetInt = GotInt . read <$> getLine
@@ -75,9 +75,8 @@ runSyscall sc = do
 tick :: Computer -> (SC, Computer)
 tick c0 = runInstruction ins c0
   where
-    (r, m) = c0
-    pc = R.get 32 r
-    ins = decodeInstruction $ M.get pc m
+    pc = R.get 32 c0
+    ins = decodeInstruction $ M.get pc c0
 
 runInstruction :: Instr -> Computer -> (SC, Computer)
 runInstruction i = runState (evalInstruction i)

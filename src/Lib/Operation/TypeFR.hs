@@ -1,27 +1,29 @@
 module Lib.Operation.TypeFR where
 
+import           Control.Monad.State      (modify)
 import           Control.Monad.State.Lazy (get, put)
 import           GHC.Float
+import           Lib.Computer.Types       (Computer)
 import           Lib.Decode               (FFmt (Double, Single, Word))
 import           Lib.Operation.Helpers    (modifyReg, w32ToSigned)
 import           Lib.Operation.Infixes    (($.=))
 import           Lib.Operation.Types      (Operation, RegNum)
 import qualified Lib.Registers            as R
 
-type Getter a = RegNum -> R.Registers -> a
+type Getter a = RegNum -> Computer -> a
 
-type Setter a = RegNum -> a -> R.Registers -> R.Registers
+type Setter a = RegNum -> a -> Computer -> Computer
 
 type Calc a = a -> a -> a
 
 mfc1 :: RegNum -> RegNum -> Operation ()
-mfc1 rt fs = modifyReg (\r -> R.set rt (R.getCop fs r) r)
+mfc1 rt fs = modify (\comp -> R.set rt (R.getCop fs comp) comp)
 
 mtc1 :: RegNum -> RegNum -> Operation ()
-mtc1 rt fs = modifyReg (\r -> R.setCop fs (R.get rt r) r)
+mtc1 rt fs = modify (\comp -> R.setCop fs (R.get rt comp) comp)
 
 mov :: FFmt -> RegNum -> RegNum -> Operation ()
-mov Single fs fd = modifyReg (\r -> R.setCop fd (R.getCop fs r) r)
+mov Single fs fd = modify (\comp -> R.setCop fd (R.getCop fs comp) comp)
 mov Double fs fd = do
   mov Single fs fd
   mov Single (fs + 1) (fd + 1)
@@ -44,16 +46,16 @@ clt Double = condition R.getD (<)
 
 condition :: Getter a -> (a -> a -> Bool) -> RegNum -> RegNum -> Operation ()
 condition getter compare ft fs =
-  modifyReg
-    (\r ->
-       let a = getter fs r
-           b = getter ft r
-        in R.setFlag 0 (compare a b) r)
+  modify
+    (\comp ->
+       let a = getter fs comp
+           b = getter ft comp
+        in R.setFlag 0 (compare a b) comp)
 
 convertWith ::
      (a -> b) -> Getter a -> Setter b -> RegNum -> RegNum -> Operation ()
 convertWith cvtFn getFn setFn fs fd =
-  modifyReg (\r -> setFn fd (cvtFn $ getFn fs r) r)
+  modify (\comp -> setFn fd (cvtFn $ getFn fs comp) comp)
 
 fadd :: FFmt -> RegNum -> RegNum -> RegNum -> Operation ()
 fadd Double = applyCalculation (+) R.getD R.setD
@@ -80,7 +82,7 @@ applyCalculation ::
   -> RegNum
   -> Operation ()
 applyCalculation calc getter setter ft fs fd = do
-  (r, m) <- get
-  let a = getter fs r
-      b = getter ft r
-  put (setter fd (a `calc` b) r, m)
+  comp <- get
+  let a = getter fs comp
+      b = getter ft comp
+  put $ setter fd (a `calc` b) comp

@@ -1,13 +1,14 @@
 module RunSpec.Helpers where
 
-import qualified Data.Word     as W
-import           Lib.Computer  (Computer, initialComputer)
-import           Lib.Decode    (Instr (Syscall))
-import qualified Lib.Memory    as M
-import           Lib.Operation (SC (NoSC))
-import qualified Lib.Registers as R
-import           Lib.Run       (runInstruction, tick)
-import           Lib.Segment   (Segment)
+import qualified Data.Word          as W
+import           Lib.Computer       (initialComputer)
+import           Lib.Computer.Types
+import           Lib.Decode         (Instr (Syscall))
+import qualified Lib.Memory         as M
+import           Lib.Operation      (SC (NoSC))
+import qualified Lib.Registers      as R
+import           Lib.Run            (runInstruction, tick)
+import           Lib.Segment        (Segment)
 
 tc :: Num a => a -> a
 tc x = 0xffffffff - x + 1 -- twos complement
@@ -15,10 +16,10 @@ tc x = 0xffffffff - x + 1 -- twos complement
 testComputerUntilSyscall :: Computer -> (SC, Computer)
 testComputerUntilSyscall c =
   case tick c of
-    (NoSC, (r, m)) ->
-      if M.get (R.get 32 r) m == 0
-        then (NoSC, (r, m))
-        else testComputerUntilSyscall (r, m)
+    (NoSC, comp) ->
+      if M.get (R.get 32 comp) comp == 0
+        then (NoSC, comp)
+        else testComputerUntilSyscall comp
     x -> x
 
 runSeg :: Segment -> Segment -> Computer
@@ -32,16 +33,16 @@ getSC :: Segment -> Segment -> SC
 getSC dataS textS = fst $ runInstruction Syscall $ runSeg dataS textS
 
 regAt :: Enum a => a -> Computer -> W.Word32
-regAt ix = R.get ix . fst
+regAt ix = R.get ix
 
 floatAt :: Enum a => a -> Computer -> Float
-floatAt ix = R.getF ix . fst
+floatAt ix = R.getF ix
 
 doubleAt :: (Num a, Enum a) => a -> Computer -> Double
-doubleAt ix = R.getD ix . fst
+doubleAt ix = R.getD ix
 
 flagAt :: (Num a, Enum a) => a -> Computer -> Bool
-flagAt ix = R.getFlag ix . fst
+flagAt ix = R.getFlag ix
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt ix = M.get ix . snd
+memAt ix = M.get ix

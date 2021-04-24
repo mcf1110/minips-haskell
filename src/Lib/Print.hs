@@ -1,20 +1,20 @@
 module Lib.Print where
 
-import           Lib.Computer
 import           Lib.Decode
-import           Lib.Memory
 import           Lib.Registers
 import           Lib.Segment
 
-import qualified Data.BitVector   as BV
-import qualified Data.IntMap.Lazy as IM
-import qualified Data.Vector      as V
+import qualified Data.BitVector     as BV
+import qualified Data.IntMap.Lazy   as IM
+import qualified Data.Vector        as V
 
-import           Data.Char        (isUpper, toLower)
-import           Data.List        (intercalate)
-import           Data.List.Split  (keepDelimsL, split, whenElt)
-import           Data.Maybe       (fromMaybe)
-import           Text.Printf      (printf)
+import           Data.Char          (isUpper, toLower)
+import           Data.List          (intercalate)
+import           Data.List.Split    (keepDelimsL, split, whenElt)
+import           Data.Maybe         (fromMaybe)
+import           Lib.Computer.Types
+import           Optics             ((^.))
+import           Text.Printf        (printf)
 
 -- MEMORY
 showMemory :: Memory -> [String]
@@ -106,7 +106,8 @@ showRegisters r =
   , "\t│  Name  │ No │    Val     │"
   , "\t╞════════╪════╪════════════╡"
   ] <>
-  map line (V.toList $ V.indexed $ fst r) <> ["\t└────────┴────┴────────────┘"]
+  map line (V.toList $ V.indexed $ r ^. gpr) <>
+  ["\t└────────┴────┴────────────┘"]
   where
     line (num, val) = printf "\t│ %6s │ %02d │ 0x%08x │" (rName num) num val
 
@@ -115,8 +116,9 @@ printRegisters = mapM_ putStrLn . showRegisters
 
 -- STATE
 printComputer :: Computer -> IO ()
-printComputer (r, m) = do
-  mapM_ putStrLn $ zipWithDefault (showMemory m) (showRegisters r)
+printComputer comp = do
+  mapM_ putStrLn $
+    zipWithDefault (showMemory $ comp ^. mem) (showRegisters $ comp ^. reg)
   -- based on https://stackoverflow.com/a/21350444
   where
     memSpacing = replicate 23 ' ' <> "\t"

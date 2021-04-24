@@ -11,7 +11,7 @@ import qualified Lib.Registers            as R
 infixr 1 $=
 
 ($=) :: RegNum -> W.Word32 -> Operation ()
-($=) ad v = modifyReg $ R.set ad v
+($=) ad v = modify $ R.set ad v
 
 infixr 1 $<-
 
@@ -21,17 +21,17 @@ infixr 1 $<-
 infixr 1 $.=
 
 ($.=) :: RegNum -> W.Word32 -> Operation ()
-($.=) ad v = modifyReg $ R.setCop ad v
+($.=) ad v = modify $ R.setCop ad v
 
 ($+$) :: RegNum -> RegNum -> Operation W.Word32
 ($+$) ra rb = do
-  (r, m) <- get
-  return $ addEnum (R.get ra r) (R.get rb r)
+  comp <- get
+  return $ addEnum (R.get ra comp) (R.get rb comp)
 
 ($-$) :: RegNum -> RegNum -> Operation W.Word32
 ($-$) ra rb = do
-  (r, m) <- get
-  return $ addEnum (R.get ra r) (1 + 0xffffffff - R.get rb r)
+  comp <- get
+  return $ addEnum (R.get ra comp) (1 + 0xffffffff - R.get rb comp)
 
 bitwiseWithRegNum ::
      (BV.BitVector -> BV.BitVector -> BV.BitVector)
@@ -39,9 +39,10 @@ bitwiseWithRegNum ::
   -> RegNum
   -> Operation W.Word32
 bitwiseWithRegNum op ra rb = do
-  (r, m) <- get
+  comp <- get
   return $
-    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) `op` BV.bitVec 32 (R.get rb r)
+    toEnum $
+    fromEnum $ BV.bitVec 32 (R.get ra comp) `op` BV.bitVec 32 (R.get rb comp)
 
 ($|$) :: RegNum -> RegNum -> Operation W.Word32
 ($|$) = bitwiseWithRegNum (BV..|.)
@@ -54,26 +55,26 @@ bitwiseWithRegNum op ra rb = do
 
 ($*$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
 ($*$) ra rb = do
-  (r, m) <- get
-  let a = BV.signExtend 32 $ BV.bitVec 32 $ R.get ra r
-      b = BV.signExtend 32 $ BV.bitVec 32 $ R.get rb r
+  comp <- get
+  let a = BV.signExtend 32 $ BV.bitVec 32 $ R.get ra comp
+      b = BV.signExtend 32 $ BV.bitVec 32 $ R.get rb comp
       [hi, lo] = map (toEnum . fromEnum) $ BV.split 2 $ BV.least 64 $ a * b
   return (hi, lo)
 
 ($/$) :: RegNum -> RegNum -> Operation (W.Word32, W.Word32)
 ($/$) ra rb = do
-  (r, m) <- get
+  comp <- get
   let toSigned = fromInteger . BV.int . BV.bitVec 32
-      a = toSigned $ R.get ra r
-      b = toSigned $ R.get rb r
+      a = toSigned $ R.get ra comp
+      b = toSigned $ R.get rb comp
       cvt = toEnum . fromEnum . BV.bitVec 32
       (lo, hi) = B.bimap cvt cvt $ a `quotRem` b
   return (hi, lo)
 
 ($<$) :: RegNum -> RegNum -> Operation W.Word32
 ($<$) ra rb = do
-  (r, m) <- get
-  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx r
+  comp <- get
+  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx comp
   return $
     if signed ra < signed rb
       then 1
@@ -81,8 +82,8 @@ bitwiseWithRegNum op ra rb = do
 
 ($+<$) :: RegNum -> RegNum -> Operation W.Word32
 ($+<$) ra rb = do
-  (r, m) <- get
-  let unsigned rx = BV.nat $ BV.bitVec 32 $ R.get rx r
+  comp <- get
+  let unsigned rx = BV.nat $ BV.bitVec 32 $ R.get rx comp
   return $
     if unsigned ra < unsigned rb
       then 1
@@ -90,8 +91,8 @@ bitwiseWithRegNum op ra rb = do
 
 ($<:) :: RegNum -> Immediate -> Operation W.Word32
 ($<:) ra im = do
-  (r, m) <- get
-  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx r
+  comp <- get
+  let signed rx = BV.int $ BV.bitVec 32 $ R.get rx comp
       signedIm = BV.int $ BV.bitVec 32 im
   return $
     if signed ra < signedIm
@@ -100,8 +101,8 @@ bitwiseWithRegNum op ra rb = do
 
 ($+:) :: RegNum -> Immediate -> Operation W.Word32
 ($+:) ra im = do
-  (r, m) <- get
-  return $ addEnum (R.get ra r) (BV.int im)
+  comp <- get
+  return $ addEnum (R.get ra comp) (BV.int im)
 
 bitwiseWithImmediate ::
      (BV.BitVector -> BV.BitVector -> BV.BitVector)
@@ -109,9 +110,9 @@ bitwiseWithImmediate ::
   -> Immediate
   -> Operation W.Word32
 bitwiseWithImmediate op ra im = do
-  (r, m) <- get
+  comp <- get
   return $
-    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra r) `op` BV.zeroExtend 32 im
+    toEnum $ fromEnum $ BV.bitVec 32 (R.get ra comp) `op` BV.zeroExtend 32 im
 
 ($|:) :: RegNum -> Immediate -> Operation W.Word32
 ($|:) = bitwiseWithImmediate (BV..|.)
@@ -126,9 +127,10 @@ shiftWith ::
   -> Immediate
   -> Operation W.Word32
 shiftWith op ra im = do
-  (r, m) <- get
+  comp <- get
   return $
-    (toEnum . fromEnum) $ op (BV.bitVec 32 $ R.get ra r) $ BV.zeroExtend 32 im
+    (toEnum . fromEnum) $
+    op (BV.bitVec 32 $ R.get ra comp) $ BV.zeroExtend 32 im
 
 ($>>:) :: RegNum -> Immediate -> Operation W.Word32
 ($>>:) = shiftWith BV.shr

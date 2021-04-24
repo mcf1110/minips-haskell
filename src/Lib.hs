@@ -3,21 +3,18 @@ module Lib
   , run
   ) where
 
-import           Lib.Computer
-
-import           Lib.Decode        (Program, decodeProgram)
-import           Lib.Memory
+import           Lib.Computer       (initialComputer)
+import           Lib.Computer.Types (Computer)
+import           Lib.Decode         (Program, decodeProgram)
+import qualified Lib.File           as F
 import           Lib.Print
-import           Lib.Registers
 import           Lib.Run
 import           Lib.Segment
 
-import qualified Lib.File          as F
-
-import           Control.Exception (IOException, try)
-import           Control.Monad     ((>=>))
-import           Data.Either
-import           Data.Maybe        (fromMaybe)
+import           Control.Exception  (IOException, try)
+import           Control.Monad      ((>=>))
+import           Data.Either        (fromRight)
+import           Data.Maybe         (fromMaybe)
 
 run :: FilePath -> IO ()
 run = loadComputer >=> runComputer
