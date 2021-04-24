@@ -14,16 +14,19 @@ import           Lib.Decode
 import qualified Lib.Memory               as M
 import qualified Lib.Registers            as R
 
+import           Lib.Computer.Types
 import           Lib.Operation.Helpers    (addToPC, calcJumpAddr, incPC,
                                            modifyReg, w32ToSigned)
 import           Lib.Operation.TypeFR
 import           Lib.Operation.TypeI
 import           Lib.Operation.TypeR
 import           Lib.Operation.Types
+import           Optics                   (over, (%))
 
 evalInstruction :: Instr -> Operation SC
 evalInstruction Syscall = do
   incPC
+  incStat Syscall
   comp <- get
   let v0 = R.get 2 comp
       a0 = R.get 4 comp
@@ -41,6 +44,7 @@ evalInstruction Syscall = do
       x  -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC
+  incStat ins
   runOperation ins
   return NoSC
 
@@ -157,3 +161,14 @@ branchOnFlag bool imm = do
     runBranchDelaySlot
     addToPC (-1)
     addToPC $ BV.int imm
+
+incStat :: Instr -> Operation ()
+incStat ins = modify $ over (stats % lens) (+ 1)
+  where
+    lens =
+      case ins of
+        IInstr {}  -> iCounter
+        JInstr {}  -> jCounter
+        FRInstr {} -> frCounter
+        FIInstr {} -> fiCounter
+        _          -> rCounter

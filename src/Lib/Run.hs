@@ -11,6 +11,7 @@ import           Control.Monad.State.Lazy (runState)
 import           System.IO
 import           Text.Printf              (printf)
 
+import           Data.Time                (UTCTime)
 import qualified Data.Word                as W
 import           Lib.Computer.Types       (Computer)
 
@@ -20,11 +21,11 @@ data SyscallInput
   | GotDouble Double
   | GotNothing
 
-runComputer :: Computer -> IO ()
-runComputer = runWithBreakpoints []
+runComputer :: UTCTime -> Computer -> IO ()
+runComputer startTime = runWithBreakpoints startTime []
 
-runWithBreakpoints :: [W.Word32] -> Computer -> IO ()
-runWithBreakpoints bps c0 = do
+runWithBreakpoints :: UTCTime -> [W.Word32] -> Computer -> IO ()
+runWithBreakpoints startTime bps c0 = do
   let (sc, c1) = tick c0
   syscallInput <- runSyscall sc
   let c2 = storeInput syscallInput c1
@@ -35,8 +36,8 @@ runWithBreakpoints bps c0 = do
     getLine
     putStrLn "---------"
   if sc == Die
-    then putStrLn "\n--- Program Finished ---"
-    else runWithBreakpoints bps c2
+    then printStats startTime c2
+    else runWithBreakpoints startTime bps c2
 
 storeInput :: SyscallInput -> Computer -> Computer
 storeInput syscallInput c =

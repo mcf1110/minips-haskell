@@ -15,9 +15,13 @@ import           Control.Exception  (IOException, try)
 import           Control.Monad      ((>=>))
 import           Data.Either        (fromRight)
 import           Data.Maybe         (fromMaybe)
+import           Data.Time          (getCurrentTime)
 
 run :: FilePath -> IO ()
-run = loadComputer >=> runComputer
+run path = do
+  computer <- loadComputer path
+  startTime <- getCurrentTime
+  runComputer startTime computer
 
 loadComputer :: FilePath -> IO Computer
 loadComputer fp = do

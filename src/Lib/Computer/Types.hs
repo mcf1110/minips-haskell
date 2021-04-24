@@ -43,3 +43,23 @@ makeLenses ''Registers
 makeLenses ''Stats
 
 makeLenses ''Computer
+
+instance Show Stats where
+  show stats@(Stats r i j fr fi) =
+    unwords
+      [ "Instruction count:"
+      , show $ sumStats stats
+      , "(R:"
+      , show r
+      , "I:"
+      , show i
+      , "J:"
+      , show j
+      , "FR:"
+      , show fr
+      , "FI:"
+      , show fi <> ")"
+      ]
+
+sumStats :: Stats -> Int
+sumStats (Stats r i j fr fi) = sum [r, i, j, fr, fi]

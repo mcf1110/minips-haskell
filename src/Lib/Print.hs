@@ -12,8 +12,9 @@ import           Data.Char          (isUpper, toLower)
 import           Data.List          (intercalate)
 import           Data.List.Split    (keepDelimsL, split, whenElt)
 import           Data.Maybe         (fromMaybe)
+import           Data.Time          (UTCTime, diffUTCTime, getCurrentTime)
 import           Lib.Computer.Types
-import           Optics             ((^.))
+import           Optics             (view, (^.))
 import           Text.Printf        (printf)
 
 -- MEMORY
@@ -189,3 +190,16 @@ showInstruction Syscall = "syscall"
 showInstruction Nop = "nop"
 showInstruction Break = "break"
 showInstruction _ = "XXXXXXXXXXXXXXXXXX"
+
+printStats :: UTCTime -> Computer -> IO ()
+printStats startTime c = do
+  endTime <- getCurrentTime
+  let duration = diffUTCTime endTime startTime
+      st = view stats c
+  putStrLn
+    "\x1b[32m\nExecution finished successfully\n--------------------------\n"
+  print st
+  putStr "Simulation Time: "
+  print duration
+  putStr "Average IPS: "
+  print $ realToFrac (sumStats st) / realToFrac duration
