@@ -33,7 +33,7 @@ lw rs rt im = do
   comp <- get
   let rsv = R.get rs comp
       sign = bvToSigned im
-      word = M.get (addEnum rsv sign) comp
+  word <- M.get (addEnum rsv sign)
   rt $= word
 
 loadByteWith ::
@@ -46,8 +46,8 @@ loadByteWith extFn rs rt off = do
   comp <- get
   let rsv = R.get rs comp
       sign = bvToSigned off
-      byte = M.getQuarter (addEnum rsv sign) comp
-      word = toEnum $ fromEnum $ extFn (32 - 8) $ BV.bitVec 8 byte
+  byte <- M.getQuarter (addEnum rsv sign)
+  let word = toEnum $ fromEnum $ extFn (32 - 8) $ BV.bitVec 8 byte
   rt $= word
 
 lb :: RegNum -> RegNum -> Immediate -> Operation ()
@@ -62,8 +62,7 @@ sw rs rt im = do
   let rsv = R.get rs comp
       rtv = R.get rt comp
       sign = bvToSigned im
-      comp' = M.set (addEnum rsv sign) rtv comp
-  put comp'
+  M.set (addEnum rsv sign) rtv
 
 sb :: RegNum -> RegNum -> Immediate -> Operation ()
 sb base rt im = do
@@ -71,15 +70,14 @@ sb base rt im = do
   let rsv = R.get base comp
       rtv = 0x000000FF .&. R.get rt comp
       sign = bvToSigned im
-      comp' = M.set (addEnum rsv sign) rtv comp
-  put comp'
+  M.set (addEnum rsv sign) rtv
 
 lwc1 :: RegNum -> RegNum -> Immediate -> Operation ()
 lwc1 base ft offset = do
   comp <- get
   let baseValue = R.get base comp
       sign = bvToSigned offset
-      word = M.get (addEnum baseValue sign) comp
+  word <- M.get (addEnum baseValue sign)
   ft $.= word
 
 ldc1 :: RegNum -> RegNum -> Immediate -> Operation ()
@@ -88,8 +86,8 @@ ldc1 base ft offset = do
   let baseValue = R.get base comp
       sign = bvToSigned offset
       pos = addEnum baseValue sign
-      word1 = M.get pos comp
-      word2 = M.get (pos + 4) comp
+  word1 <- M.get pos
+  word2 <- M.get (pos + 4)
   ft $.= word1
   (ft + 1) $.= word2
 
@@ -100,8 +98,7 @@ swc1 base ft offset = do
       sign = bvToSigned offset
       pos = addEnum baseValue sign
       word = R.getCop ft comp
-      comp' = M.set pos word comp
-  put comp'
+  M.set pos word
 
 slti :: RegNum -> RegNum -> Immediate -> Operation ()
 slti rs rt im = rt $<- rs $<: im

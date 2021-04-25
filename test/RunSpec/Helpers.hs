@@ -17,7 +17,7 @@ testComputerUntilSyscall :: Computer -> (SC, Computer)
 testComputerUntilSyscall c =
   case tick c of
     (NoSC, comp) ->
-      if M.get (R.get 32 comp) comp == 0
+      if M._getWithoutLatency (R.get 32 comp) comp == 0
         then (NoSC, comp)
         else testComputerUntilSyscall comp
     x -> x
@@ -45,4 +45,4 @@ flagAt :: (Num a, Enum a) => a -> Computer -> Bool
 flagAt ix = R.getFlag ix
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt ix = M.get ix
+memAt ix = M._getWithoutLatency ix
