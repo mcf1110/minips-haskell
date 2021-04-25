@@ -1,15 +1,15 @@
 module Lib.Memory where
 
-import qualified Data.BitVector      as BV
-import qualified Data.IntMap.Lazy    as IM
-import qualified Data.Word           as W
+import qualified Data.BitVector           as BV
+import qualified Data.IntMap.Lazy         as IM
+import qualified Data.Word                as W
 
-import qualified Control.Monad.State as S
-import           Data.List.Split     (chunksOf)
-import           Data.Maybe          (fromMaybe)
-import           Lib.Computer.Types  (Computer, Memory, mem)
-import           Lib.Operation.Types (Operation)
-import           Optics              (over, (^.))
+import qualified Control.Monad.State.Lazy as S
+import           Data.List.Split          (chunksOf)
+import           Data.Maybe               (fromMaybe)
+import           Lib.Computer.Types       (Computer, Memory, mem)
+import           Lib.Operation.Types      (Operation)
+import           Optics                   (over, (^.))
 
 set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Operation ()
 set ix v = S.modify (over mem $ IM.insert (fromEnum ix) v)

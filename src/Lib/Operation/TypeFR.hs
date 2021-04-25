@@ -1,7 +1,6 @@
 module Lib.Operation.TypeFR where
 
-import           Control.Monad.State      (modify)
-import           Control.Monad.State.Lazy (get, put)
+import           Control.Monad.State.Lazy (get, modify, put)
 import           GHC.Float
 import           Lib.Computer.Types       (Computer)
 import           Lib.Decode               (FFmt (Double, Single, Word))
