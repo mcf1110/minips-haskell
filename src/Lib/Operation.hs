@@ -33,7 +33,7 @@ evalInstruction Syscall = do
   return $
     case v0 of
       1  -> PutInt $ w32ToSigned a0
-      4  -> PutStr $ M.getString a0 comp
+      4  -> PutStr $ M._getStringWithoutLatency a0 comp
       11 -> PutChar $ toEnum . fromEnum $ a0
       5  -> GetInt
       10 -> Die

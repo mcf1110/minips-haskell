@@ -32,9 +32,8 @@ _getQuarterWithoutLatency n m = toEnum $ fromEnum $ quarterWords !! i
       let bv = BV.bitVec 32 (_getWithoutLatency s m)
        in [bv BV.@: ix | ix <- map reverse $ chunksOf 8 [0 .. 31]]
 
--- PERGUNTA: SYSCALL CONTAM COMO ACESSOS A MEMORIA?
-getString :: Enum a => a -> Computer -> String
-getString n m =
+_getStringWithoutLatency :: Enum a => a -> Computer -> String
+_getStringWithoutLatency n m =
   map (toEnum . fromEnum) $
   takeWhile (/= 0) $ [_getQuarterWithoutLatency a m | a <- [ix ..]]
   where
