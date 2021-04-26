@@ -9,14 +9,16 @@ import           Data.List.Split          (chunksOf)
 import           Data.Maybe               (fromMaybe)
 import           Debug.Trace
 import           Lib.Computer.Types       (Computer, Memory,
-                                           MemoryTraceType (InstrFetch, Read),
+                                           MemoryTraceType (InstrFetch, Read, Write),
                                            mem, memTrace, stats)
 import           Lib.Operation.Types      (Operation)
 import           Optics                   (over, (%), (^.))
 import           Optics.State             (modifying)
 
 set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Operation ()
-set ix v = S.modify (over mem $ IM.insert (fromEnum ix) v)
+set ix v = do
+  _addLatencyAndTrace Write (\_ _ -> ()) ix
+  S.modify (over mem $ IM.insert (fromEnum ix) v)
 
 getInstruction :: Enum a => a -> Operation W.Word32
 getInstruction = _addLatencyAndTrace InstrFetch _getWithoutLatency
