@@ -9,7 +9,7 @@ import           Lib.Segment
 
 initialComputer :: Segment -> Segment -> Segment -> Computer
 initialComputer dataSegment textSegment roDataSegment =
-  Computer initialRegisters initialMemory $ Stats 0 0 0 0 0
+  Computer initialRegisters initialMemory initialStats
   where
     initialMemory =
       IM.filter (/= 0) $
@@ -23,3 +23,5 @@ initialComputer dataSegment textSegment roDataSegment =
           [(29, 0x7fffeffc), (28, 0x10008000), (32, 0x00400000)]
         coprocessor = V.replicate 32 0
         flags = V.replicate 8 False
+    initialStats :: Stats
+    initialStats = Stats 0 0 0 0 0 []

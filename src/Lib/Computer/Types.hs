@@ -5,6 +5,7 @@ module Lib.Computer.Types where
 import qualified Data.IntMap as IM
 import qualified Data.Vector as V
 import qualified Data.Word   as W
+import           Optics      ((^.))
 import           Optics.TH   (makeLenses)
 
 type Memory = IM.IntMap W.Word32
@@ -14,6 +15,18 @@ type GPR = V.Vector W.Word32
 type FPR = V.Vector W.Word32
 
 type CCFlags = V.Vector Bool
+
+type Address = W.Word32
+
+type Line = W.Word32
+
+type MemoryTrace = (MemoryTraceType, Address, W.Word32)
+
+data MemoryTraceType
+  = Read
+  | FetchInstr
+  | Write
+  deriving (Show)
 
 data Registers =
   Registers
@@ -29,6 +42,7 @@ data Stats =
     , _jCounter  :: Int
     , _frCounter :: Int
     , _fiCounter :: Int
+    , _memTrace  :: [MemoryTrace]
     }
 
 data Computer =
@@ -45,21 +59,23 @@ makeLenses ''Stats
 makeLenses ''Computer
 
 instance Show Stats where
-  show stats@(Stats r i j fr fi) =
+  show stats =
     unwords
       [ "Instruction count:"
       , show $ sumStats stats
       , "(R:"
-      , show r
+      , show (stats ^. rCounter)
       , "I:"
-      , show i
+      , show (stats ^. iCounter)
       , "J:"
-      , show j
+      , show (stats ^. jCounter)
       , "FR:"
-      , show fr
+      , show (stats ^. frCounter)
       , "FI:"
-      , show fi <> ")"
-      ]
+      , show (stats ^. fiCounter) <> ")"
+      ] ++
+    "\n" ++ show (stats ^. memTrace)
 
 sumStats :: Stats -> Int
-sumStats (Stats r i j fr fi) = sum [r, i, j, fr, fi]
+sumStats stats =
+  sum $ map (stats ^.) [rCounter, iCounter, jCounter, frCounter, fiCounter]

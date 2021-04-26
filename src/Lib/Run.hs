@@ -77,7 +77,7 @@ tick :: Computer -> (SC, Computer)
 tick c0 = runInstruction (decodeInstruction ins) c1
   where
     pc = R.get 32 c0
-    (ins, c1) = runState (M.get pc) c0
+    (ins, c1) = runState (M.getInstruction pc) c0
 
 runInstruction :: Instr -> Computer -> (SC, Computer)
 runInstruction i = runState (evalInstruction i)
