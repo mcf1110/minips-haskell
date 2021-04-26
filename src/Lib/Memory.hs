@@ -20,6 +20,9 @@ get n = S.gets (_getWithoutLatency n)
 getQuarter :: Enum a => a -> Operation W.Word8
 getQuarter n = S.gets (_getQuarterWithoutLatency n)
 
+getString :: Enum a => a -> Operation String
+getString n = S.gets (_getStringWithoutLatency n)
+
 _getWithoutLatency :: Enum a => a -> Computer -> W.Word32
 _getWithoutLatency n comp = fromMaybe 0 $ (comp ^. mem) IM.!? fromEnum n
 

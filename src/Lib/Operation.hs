@@ -30,18 +30,20 @@ evalInstruction Syscall = do
   comp <- get
   let v0 = R.get 2 comp
       a0 = R.get 4 comp
-  return $
-    case v0 of
-      1  -> PutInt $ w32ToSigned a0
-      4  -> PutStr $ M._getStringWithoutLatency a0 comp
-      11 -> PutChar $ toEnum . fromEnum $ a0
-      5  -> GetInt
-      10 -> Die
-      2  -> PutFloat $ R.getF 12 comp
-      3  -> PutDouble $ R.getD 12 comp
-      6  -> GetFloat
-      7  -> GetDouble
-      x  -> error $ "Syscall desconhecida: " <> show x
+  case v0 of
+    4 -> PutStr <$> M.getString a0
+    v0 ->
+      return $
+      case v0 of
+        1  -> PutInt $ w32ToSigned a0
+        11 -> PutChar $ toEnum . fromEnum $ a0
+        5  -> GetInt
+        10 -> Die
+        2  -> PutFloat $ R.getF 12 comp
+        3  -> PutDouble $ R.getD 12 comp
+        6  -> GetFloat
+        7  -> GetDouble
+        x  -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC
   incStat ins
