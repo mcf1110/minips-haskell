@@ -9,7 +9,7 @@ import           Data.List.Split          (chunksOf)
 import           Data.Maybe               (fromMaybe)
 import           Debug.Trace
 import           Lib.Computer.Types       (Computer, Memory,
-                                           MemoryTraceType (FetchInstr, Read),
+                                           MemoryTraceType (InstrFetch, Read),
                                            mem, memTrace, stats)
 import           Lib.Operation.Types      (Operation)
 import           Optics                   (over, (%), (^.))
@@ -19,7 +19,7 @@ set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Operation ()
 set ix v = S.modify (over mem $ IM.insert (fromEnum ix) v)
 
 getInstruction :: Enum a => a -> Operation W.Word32
-getInstruction = _addLatencyAndTrace FetchInstr _getWithoutLatency
+getInstruction = _addLatencyAndTrace InstrFetch _getWithoutLatency
 
 get :: Enum a => a -> Operation W.Word32
 get = _addLatencyAndTrace Read _getWithoutLatency
@@ -30,8 +30,10 @@ getQuarter = _addLatencyAndTrace Read _getQuarterWithoutLatency
 _addLatencyAndTrace ::
      Enum a => MemoryTraceType -> (a -> Computer -> b) -> a -> Operation b
 _addLatencyAndTrace accessType f n = do
-  modifying (stats % memTrace) ((accessType, toEnum $ fromEnum n, 0) :)
+  modifying (stats % memTrace) ((accessType, w32, w32 `div` 32) :)
   S.gets (f n)
+  where
+    w32 = toEnum $ fromEnum n
 
 _getWithoutLatency :: Enum a => a -> Computer -> W.Word32
 _getWithoutLatency n comp = fromMaybe 0 $ (comp ^. mem) IM.!? fromEnum n

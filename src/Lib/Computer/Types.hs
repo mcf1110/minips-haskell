@@ -24,7 +24,7 @@ type MemoryTrace = (MemoryTraceType, Address, W.Word32)
 
 data MemoryTraceType
   = Read
-  | FetchInstr
+  | InstrFetch
   | Write
   deriving (Show)
 
@@ -73,8 +73,7 @@ instance Show Stats where
       , show (stats ^. frCounter)
       , "FI:"
       , show (stats ^. fiCounter) <> ")"
-      ] ++
-    "\n" ++ show (stats ^. memTrace)
+      ]
 
 sumStats :: Stats -> Int
 sumStats stats =

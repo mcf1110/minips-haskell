@@ -9,6 +9,7 @@ main = do
   case args of
     ["decode", fileName] -> decode fileName
     ["run", fileName]    -> run fileName
+    ["trace", fileName]  -> runTrace fileName
     _                    -> usage
 
 usage :: IO ()

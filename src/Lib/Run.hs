@@ -21,10 +21,10 @@ data SyscallInput
   | GotDouble Double
   | GotNothing
 
-runComputer :: UTCTime -> Computer -> IO ()
+runComputer :: UTCTime -> Computer -> IO Computer
 runComputer startTime = runWithBreakpoints startTime []
 
-runWithBreakpoints :: UTCTime -> [W.Word32] -> Computer -> IO ()
+runWithBreakpoints :: UTCTime -> [W.Word32] -> Computer -> IO Computer
 runWithBreakpoints startTime bps c0 = do
   let (sc, c1) = tick c0
   syscallInput <- runSyscall sc
@@ -35,9 +35,11 @@ runWithBreakpoints startTime bps c0 = do
     printComputer c2
     getLine
     putStrLn "---------"
-  if sc == Die
-    then printStats startTime c2
-    else runWithBreakpoints startTime bps c2
+  if sc /= Die
+    then runWithBreakpoints startTime bps c2
+    else do
+      printStats startTime c2
+      return c2
 
 storeInput :: SyscallInput -> Computer -> Computer
 storeInput syscallInput c =

@@ -203,3 +203,10 @@ printStats startTime c = do
   print duration
   putStr "Average IPS: "
   print $ realToFrac (sumStats st) / realToFrac duration
+
+printTrace :: MemoryTrace -> String
+printTrace (tp, address, line) =
+  unwords [short, hex address, "(line# " <> hex line <> ")"]
+  where
+    short = [head $ show tp]
+    hex = printf "0x%08x"
