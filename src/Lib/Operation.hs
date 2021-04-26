@@ -109,7 +109,7 @@ runBranchDelaySlot :: Operation ()
 runBranchDelaySlot = do
   comp <- get
   let pc = R.get 32 comp
-  ins <- decodeInstruction <$> M.get pc
+  ins <- decodeInstruction <$> M.getInstruction pc
   evalInstruction ins
   return ()
 
