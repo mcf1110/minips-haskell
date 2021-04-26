@@ -6,3 +6,4 @@ linker_script.ld
 *.elf
 *.o
 *.native
+*.trace
