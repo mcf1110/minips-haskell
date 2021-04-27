@@ -195,7 +195,9 @@ printStats :: UTCTime -> Computer -> IO ()
 printStats startTime c = do
   endTime <- getCurrentTime
   let duration = diffUTCTime endTime startTime
-      st = view stats c
+      st = c ^. stats
+      cyc = st ^. nCycles
+      speedUp = (fromIntegral cyc / freqMono) / (fromIntegral (cyc + 4) / freq)
   putStrLn
     "\x1b[32m\nExecution finished successfully\n--------------------------\n"
   print $ st ^. insCounter
@@ -206,20 +208,22 @@ printStats startTime c = do
     realToFrac (sumInstructionCounters $ st ^. insCounter) / realToFrac duration
   putStrLn "Simulated execution times for:\n--------------------------"
   putStrLn "Monocycle"
-  printEstimatedExecTime st nCycles freqMono
+  printEstimatedExecTime st cyc freqMono
+  putStrLn "Pipelined"
+  printEstimatedExecTime st (4 + cyc) freq
+  putStrLn $ "Speedup Monocycle/Pipelined: " <> printf "%.2f" speedUp <> "x"
   where
     freq = 33.8688
     freqMono = freq / 4
 
-printEstimatedExecTime :: Stats -> Lens' Stats Int -> Float -> IO ()
-printEstimatedExecTime st lens freq = do
+printEstimatedExecTime :: Stats -> Int -> Float -> IO ()
+printEstimatedExecTime st cyc freq = do
   putStrLn $ "\tCycles: " <> show cyc
   putStrLn $ "\tFrequency: " <> printf "%.4f" freq <> " MHz"
   putStrLn $ "\tEstimated execution time: " <> printf "%.4f" seconds <> " sec."
   putStrLn $ "\tIPC: " <> printf "%.2f" ipc
   putStrLn $ "\tMIPS: " <> printf "%.2f" mips
   where
-    cyc = st ^. lens
     seconds = fromIntegral cyc / (freq * 10 ^ 6)
     ins = sumInstructionCounters (st ^. insCounter)
     ipc :: Float
