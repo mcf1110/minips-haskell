@@ -14,7 +14,7 @@ import           Data.List.Split    (keepDelimsL, split, whenElt)
 import           Data.Maybe         (fromMaybe)
 import           Data.Time          (UTCTime, diffUTCTime, getCurrentTime)
 import           Lib.Computer.Types
-import           Optics             (view, (^.))
+import           Optics             (Lens', view, (^.))
 import           Text.Printf        (printf)
 
 -- MEMORY
@@ -204,8 +204,27 @@ printStats startTime c = do
   putStr "Average IPS: "
   print $
     realToFrac (sumInstructionCounters $ st ^. insCounter) / realToFrac duration
-  putStrLn "Cycles"
-  print $ st ^. nCycles
+  putStrLn "Simulated execution times for:\n--------------------------"
+  putStrLn "Monocycle"
+  printEstimatedExecTime st nCycles freqMono
+  where
+    freq = 33.8688
+    freqMono = freq / 4
+
+printEstimatedExecTime :: Stats -> Lens' Stats Int -> Float -> IO ()
+printEstimatedExecTime st lens freq = do
+  putStrLn $ "\tCycles: " <> show cyc
+  putStrLn $ "\tFrequency: " <> printf "%.4f" freq <> " MHz"
+  putStrLn $ "\tEstimated execution time: " <> printf "%.4f" seconds <> " sec."
+  putStrLn $ "\tIPC: " <> printf "%.2f" ipc
+  putStrLn $ "\tMIPS: " <> printf "%.2f" mips
+  where
+    cyc = st ^. lens
+    seconds = fromIntegral cyc / (freq * 10 ^ 6)
+    ins = sumInstructionCounters (st ^. insCounter)
+    ipc :: Float
+    ipc = fromIntegral ins / fromIntegral cyc
+    mips = fromIntegral ins / (seconds * 10 ^ 6)
 
 printTrace :: MemoryTrace -> String
 printTrace (tp, address, line) =
