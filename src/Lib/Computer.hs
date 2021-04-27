@@ -24,4 +24,6 @@ initialComputer dataSegment textSegment roDataSegment =
         coprocessor = V.replicate 32 0
         flags = V.replicate 8 False
     initialStats :: Stats
-    initialStats = Stats 0 0 0 0 0 []
+    initialStats = Stats counter [] 0
+      where
+        counter = InstructionCounter 0 0 0 0 0

@@ -21,7 +21,7 @@ import           Lib.Operation.TypeFR
 import           Lib.Operation.TypeI
 import           Lib.Operation.TypeR
 import           Lib.Operation.Types
-import           Optics                   (over, (%))
+import           Optics                   (modifying, over, (%))
 
 evalInstruction :: Instr -> Operation SC
 evalInstruction Syscall = do
@@ -32,21 +32,23 @@ evalInstruction Syscall = do
       a0 = R.get 4 comp
   case v0 of
     4 -> PutStr <$> M.getString a0
-    v0 ->
+    v0 -> do
+      incNCycles Syscall
       return $
-      case v0 of
-        1  -> PutInt $ w32ToSigned a0
-        11 -> PutChar $ toEnum . fromEnum $ a0
-        5  -> GetInt
-        10 -> Die
-        2  -> PutFloat $ R.getF 12 comp
-        3  -> PutDouble $ R.getD 12 comp
-        6  -> GetFloat
-        7  -> GetDouble
-        x  -> error $ "Syscall desconhecida: " <> show x
+        case v0 of
+          1  -> PutInt $ w32ToSigned a0
+          11 -> PutChar $ toEnum . fromEnum $ a0
+          5  -> GetInt
+          10 -> Die
+          2  -> PutFloat $ R.getF 12 comp
+          3  -> PutDouble $ R.getD 12 comp
+          6  -> GetFloat
+          7  -> GetDouble
+          x  -> error $ "Syscall desconhecida: " <> show x
 evalInstruction ins = do
   incPC
   incStat ins
+  incNCycles ins
   runOperation ins
   return NoSC
 
@@ -165,7 +167,8 @@ branchOnFlag bool imm = do
     addToPC $ BV.int imm
 
 incStat :: Instr -> Operation ()
-incStat ins = modify $ over (stats % lens) (+ 1)
+incStat ins = do
+  modifying (stats % insCounter % lens) (+ 1)
   where
     lens =
       case ins of
@@ -174,3 +177,9 @@ incStat ins = modify $ over (stats % lens) (+ 1)
         FRInstr {} -> frCounter
         FIInstr {} -> fiCounter
         _          -> rCounter
+
+incNCycles :: Instr -> Operation ()
+incNCycles ins = unless (usesMemory ins) $ modifying (stats % nCycles) (+ 1)
+  where
+    usesMemory (IInstr iop _ _ _) = iop `elem` [Lw, Lb, Lbu, Lwc1, Ldc1]
+    usesMemory _                  = False

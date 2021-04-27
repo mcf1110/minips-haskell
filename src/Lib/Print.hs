@@ -198,11 +198,14 @@ printStats startTime c = do
       st = view stats c
   putStrLn
     "\x1b[32m\nExecution finished successfully\n--------------------------\n"
-  print st
+  print $ st ^. insCounter
   putStr "Simulation Time: "
   print duration
   putStr "Average IPS: "
-  print $ realToFrac (sumStats st) / realToFrac duration
+  print $
+    realToFrac (sumInstructionCounters $ st ^. insCounter) / realToFrac duration
+  putStrLn "Cycles"
+  print $ st ^. nCycles
 
 printTrace :: MemoryTrace -> String
 printTrace (tp, address, line) =

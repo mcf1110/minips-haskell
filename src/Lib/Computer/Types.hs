@@ -5,7 +5,7 @@ module Lib.Computer.Types where
 import qualified Data.IntMap as IM
 import qualified Data.Vector as V
 import qualified Data.Word   as W
-import           Optics      ((^.))
+import           Optics      ((%), (^.))
 import           Optics.TH   (makeLenses)
 
 type Memory = IM.IntMap W.Word32
@@ -35,14 +35,20 @@ data Registers =
     , _ccFlags :: CCFlags
     }
 
-data Stats =
-  Stats
+data InstructionCounter =
+  InstructionCounter
     { _rCounter  :: Int
     , _iCounter  :: Int
     , _jCounter  :: Int
     , _frCounter :: Int
     , _fiCounter :: Int
-    , _memTrace  :: [MemoryTrace]
+    }
+
+data Stats =
+  Stats
+    { _insCounter :: InstructionCounter
+    , _memTrace   :: [MemoryTrace]
+    , _nCycles    :: Int
     }
 
 data Computer =
@@ -54,27 +60,29 @@ data Computer =
 
 makeLenses ''Registers
 
+makeLenses ''InstructionCounter
+
 makeLenses ''Stats
 
 makeLenses ''Computer
 
-instance Show Stats where
-  show stats =
+instance Show InstructionCounter where
+  show counters =
     unwords
       [ "Instruction count:"
-      , show $ sumStats stats
+      , show $ sumInstructionCounters counters
       , "(R:"
-      , show (stats ^. rCounter)
+      , show (counters ^. rCounter)
       , "I:"
-      , show (stats ^. iCounter)
+      , show (counters ^. iCounter)
       , "J:"
-      , show (stats ^. jCounter)
+      , show (counters ^. jCounter)
       , "FR:"
-      , show (stats ^. frCounter)
+      , show (counters ^. frCounter)
       , "FI:"
-      , show (stats ^. fiCounter) <> ")"
+      , show (counters ^. fiCounter) <> ")"
       ]
 
-sumStats :: Stats -> Int
-sumStats stats =
-  sum $ map (stats ^.) [rCounter, iCounter, jCounter, frCounter, fiCounter]
+sumInstructionCounters :: InstructionCounter -> Int
+sumInstructionCounters counters =
+  sum $ map (counters ^.) [rCounter, iCounter, jCounter, frCounter, fiCounter]

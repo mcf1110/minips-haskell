@@ -10,7 +10,7 @@ import           Data.Maybe               (fromMaybe)
 import           Debug.Trace
 import           Lib.Computer.Types       (Computer, Memory,
                                            MemoryTraceType (InstrFetch, Read, Write),
-                                           mem, memTrace, stats)
+                                           mem, memTrace, nCycles, stats)
 import           Lib.Operation.Types      (Operation)
 import           Optics                   (over, (%), (^.))
 import           Optics.State             (modifying)
@@ -33,6 +33,7 @@ _addLatencyAndTrace ::
      Enum a => MemoryTraceType -> (a -> Computer -> b) -> a -> Operation b
 _addLatencyAndTrace accessType f n = do
   modifying (stats % memTrace) ((accessType, w32, w32 `div` 32) :)
+  modifying (stats % nCycles) (+ 100) -- add latency
   S.gets (f n)
   where
     w32 = toEnum $ fromEnum n
