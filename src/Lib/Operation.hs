@@ -181,5 +181,6 @@ incStat ins = do
 incNCycles :: Instr -> Operation ()
 incNCycles ins = unless (usesMemory ins) $ modifying (stats % nCycles) (+ 1)
   where
-    usesMemory (IInstr iop _ _ _) = iop `elem` [Lw, Lb, Lbu, Lwc1, Ldc1]
-    usesMemory _                  = False
+    usesMemory (IInstr iop _ _ _) =
+      iop `elem` [Lw, Lb, Lbu, Lwc1, Ldc1, Sw, Sb, Swc1]
+    usesMemory _ = False
