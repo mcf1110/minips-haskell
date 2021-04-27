@@ -33,16 +33,16 @@ getSC :: Segment -> Segment -> SC
 getSC dataS textS = fst $ runInstruction Syscall $ runSeg dataS textS
 
 regAt :: Enum a => a -> Computer -> W.Word32
-regAt ix = R.get ix
+regAt = R.get
 
 floatAt :: Enum a => a -> Computer -> Float
-floatAt ix = R.getF ix
+floatAt = R.getF
 
 doubleAt :: (Num a, Enum a) => a -> Computer -> Double
-doubleAt ix = R.getD ix
+doubleAt = R.getD
 
 flagAt :: (Num a, Enum a) => a -> Computer -> Bool
-flagAt ix = R.getFlag ix
+flagAt = R.getFlag
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt ix = M._getWithoutLatency ix
+memAt = M._getWithoutLatency
