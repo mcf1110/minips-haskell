@@ -8,62 +8,82 @@ import qualified Control.Monad.State.Lazy as S
 import           Data.List.Split          (chunksOf)
 import           Data.Maybe               (fromMaybe)
 import           Debug.Trace
-import           Lib.Computer.Types       (Computer, Memory,
+import           Lib.Computer.Types       (Computer, Latency, Memory (RAM),
                                            MemoryTraceType (InstrFetch, Read, Write),
                                            mem, memTrace, nCycles, stats)
 import           Lib.Operation.Types      (Operation)
-import           Optics                   (over, (%), (^.))
+import           Optics                   (assign, over, (%), (.~), (^.))
 import           Optics.State             (modifying)
 
-set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Operation ()
-set ix v = do
-  _addLatencyAndTrace Write (\_ _ -> ()) ix
-  S.modify (over mem $ IM.insert (fromEnum ix) v)
+get :: Enum i => i -> Operation W.Word32
+get = updatingLatencyAndTrace Read fetchMemory
 
-getInstruction :: Enum a => a -> Operation W.Word32
-getInstruction = _addLatencyAndTrace InstrFetch _getWithoutLatency
+getQuarter :: Enum i => i -> Operation W.Word8
+getQuarter = updatingLatencyAndTrace Read fetchQuarter
 
-get :: Enum a => a -> Operation W.Word32
-get = _addLatencyAndTrace Read _getWithoutLatency
+getInstruction :: Enum i => i -> Operation W.Word32
+getInstruction = updatingLatencyAndTrace InstrFetch fetchMemory
 
-getQuarter :: Enum a => a -> Operation W.Word8
-getQuarter = _addLatencyAndTrace Read _getQuarterWithoutLatency
-
-_addLatencyAndTrace ::
-     Enum a => MemoryTraceType -> (a -> Computer -> b) -> a -> Operation b
-_addLatencyAndTrace accessType f n = do
-  modifying (stats % memTrace) ((accessType, w32, w32 `div` 32) :)
-  modifying (stats % nCycles) (+ 100) -- add latency
-  S.gets (f n)
-  where
-    w32 = toEnum $ fromEnum n
-
-_getWithoutLatency :: Enum a => a -> Computer -> W.Word32
-_getWithoutLatency n comp = fromMaybe 0 $ (comp ^. mem) IM.!? fromEnum n
-
-_getQuarterWithoutLatency :: Enum a => a -> Computer -> W.Word8
-_getQuarterWithoutLatency n m = toEnum $ fromEnum $ quarterWords !! i
-  where
-    s = 4 * div (fromEnum n) 4
-    i = mod (fromEnum n) 4
-    quarterWords =
-      let bv = BV.bitVec 32 (_getWithoutLatency s m)
-       in [bv BV.@: ix | ix <- map reverse $ chunksOf 8 [0 .. 31]]
-
-getString :: (Show a, Enum a) => a -> Operation String
+getString :: Enum i => i -> Operation String
 getString n = do
-  let address = 4 * div (fromEnum n) 4
-      offset = mod (fromEnum n) 4
-      toChars :: W.Word32 -> String
-      toChars w32 =
-        let bv = BV.bitVec 32 w32
-         in drop
-              offset
-              [ toEnum $ fromEnum $ bv BV.@: ix
-              | ix <- map reverse $ chunksOf 8 [0 .. 31]
-              ]
   chars <- toChars <$> get address
   let untilNull = takeWhile (/= '\NUL') chars
   if untilNull /= chars
     then return untilNull -- we've reached the end
     else (chars <>) <$> getString (address + 4) -- do another reading
+  where
+    address = 4 * div (fromEnum n) 4
+    offset = mod (fromEnum n) 4
+    toChars :: W.Word32 -> String
+    toChars w32 =
+      let bv = BV.bitVec 32 w32
+       in drop
+            offset
+            [ toEnum $ fromEnum $ bv BV.@: ix
+            | ix <- map reverse $ chunksOf 8 [0 .. 31]
+            ]
+
+set :: (Eq i, Num i, Enum i) => i -> W.Word32 -> Operation ()
+set ix v = do
+  (lat, newMem) <- S.gets $ writeMemory ix v
+  assign mem newMem
+  updateLatencyAndTrace Write ix lat
+  return ()
+
+updatingLatencyAndTrace ::
+     Enum i
+  => MemoryTraceType
+  -> (i -> Computer -> (Latency, a))
+  -> i
+  -> Operation a
+updatingLatencyAndTrace traceType operation ix = do
+  (lat, val) <- S.gets $ operation ix
+  updateLatencyAndTrace traceType ix lat
+  return val
+
+updateLatencyAndTrace ::
+     Enum i => MemoryTraceType -> i -> Latency -> Operation ()
+updateLatencyAndTrace accessType n lat = do
+  modifying (stats % memTrace) ((accessType, w32, w32 `div` 32) :) -- add trace
+  modifying (stats % nCycles) (+ lat) -- add latency
+  where
+    w32 = toEnum $ fromEnum n
+
+writeMemory :: Enum i => i -> W.Word32 -> Computer -> (Latency, Memory)
+writeMemory ix v comp = go $ comp ^. mem
+  where
+    go (RAM im) = (100, RAM $ IM.insert (fromEnum ix) v im)
+
+fetchMemory :: Enum i => i -> Computer -> (Latency, W.Word32)
+fetchMemory n comp = go $ comp ^. mem
+  where
+    go (RAM im) = (100, fromMaybe 0 $ im IM.!? fromEnum n)
+
+fetchQuarter :: Enum i => i -> Computer -> (Latency, W.Word8)
+fetchQuarter n m = (lat, toEnum $ fromEnum $ quarterWords !! i)
+  where
+    s = 4 * div (fromEnum n) 4
+    i = mod (fromEnum n) 4
+    (lat, v) = fetchMemory s m
+    bv = BV.bitVec 32 v
+    quarterWords = [bv BV.@: ix | ix <- map reverse $ chunksOf 8 [0 .. 31]]

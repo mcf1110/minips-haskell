@@ -5,10 +5,13 @@ module Lib.Computer.Types where
 import qualified Data.IntMap as IM
 import qualified Data.Vector as V
 import qualified Data.Word   as W
-import           Optics      ((%), (^.))
+import           Optics      (Lens', lens, (%), (^.))
 import           Optics.TH   (makeLenses)
 
-type Memory = IM.IntMap W.Word32
+type RAMIntMap = IM.IntMap W.Word32
+
+data Memory =
+  RAM RAMIntMap
 
 type GPR = V.Vector W.Word32
 
@@ -17,6 +20,8 @@ type FPR = V.Vector W.Word32
 type CCFlags = V.Vector Bool
 
 type Address = W.Word32
+
+type Latency = Int
 
 type Line = W.Word32
 
@@ -65,6 +70,9 @@ makeLenses ''InstructionCounter
 makeLenses ''Stats
 
 makeLenses ''Computer
+
+ram :: Lens' Memory (IM.IntMap W.Word32)
+ram = lens (\(RAM im) -> im) (\(RAM im) im' -> RAM im')
 
 instance Show InstructionCounter where
   show counters =
