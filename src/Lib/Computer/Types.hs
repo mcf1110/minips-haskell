@@ -2,52 +2,10 @@
 
 module Lib.Computer.Types where
 
-import qualified Data.IntMap as IM
-import qualified Data.Vector as V
-import qualified Data.Word   as W
-import           Optics      (Lens', lens, (%), (^.))
-import           Optics.TH   (makeLenses)
-
-type RAMIntMap = IM.IntMap W.Word32
-
-data MemInfo =
-  MemInfo
-    { _hits  :: Int
-    , _total :: Int
-    }
-
-data Memory =
-  RAM
-    { _info :: MemInfo
-    , _im   :: RAMIntMap
-    }
-
-type GPR = V.Vector W.Word32
-
-type FPR = V.Vector W.Word32
-
-type CCFlags = V.Vector Bool
-
-type Address = W.Word32
-
-type Latency = Int
-
-type Line = W.Word32
-
-type MemoryTrace = (MemoryTraceType, Address, W.Word32)
-
-data MemoryTraceType
-  = Read
-  | InstrFetch
-  | Write
-  deriving (Show)
-
-data Registers =
-  Registers
-    { _gpr     :: GPR
-    , _fpr     :: FPR
-    , _ccFlags :: CCFlags
-    }
+import           Lib.Computer.MemoryTraceTypes
+import           Lib.Computer.MemoryTypes
+import           Lib.Computer.RegisterTypes
+import           Optics                        (Lens', lens, makeLenses, (^.))
 
 data InstructionCounter =
   InstructionCounter
@@ -72,20 +30,18 @@ data Computer =
     , _stats :: Stats
     }
 
-makeLenses ''Registers
-
-makeLenses ''MemInfo
-
-makeLenses ''Memory
-
 makeLenses ''InstructionCounter
 
 makeLenses ''Stats
 
 makeLenses ''Computer
 
-ram :: Lens' Memory (IM.IntMap W.Word32)
+ram :: Lens' Memory RAMMap
 ram = lens (\(RAM info im) -> im) (\(RAM info im) im' -> RAM info im')
+
+sumInstructionCounters :: InstructionCounter -> Int
+sumInstructionCounters counters =
+  sum $ map (counters ^.) [rCounter, iCounter, jCounter, frCounter, fiCounter]
 
 instance Show InstructionCounter where
   show counters =
@@ -103,7 +59,3 @@ instance Show InstructionCounter where
       , "FI:"
       , show (counters ^. fiCounter) <> ")"
       ]
-
-sumInstructionCounters :: InstructionCounter -> Int
-sumInstructionCounters counters =
-  sum $ map (counters ^.) [rCounter, iCounter, jCounter, frCounter, fiCounter]
