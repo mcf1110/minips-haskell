@@ -1,6 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Lib.Computer.Types where
+module Lib.Computer.Types
+  ( module Lib.Computer.MemoryTraceTypes
+  , module Lib.Computer.MemoryTypes
+  , module Lib.Computer.RegisterTypes
+  , module Lib.Computer.Types
+  ) where
 
 import           Lib.Computer.MemoryTraceTypes
 import           Lib.Computer.MemoryTypes
