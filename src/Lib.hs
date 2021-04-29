@@ -19,28 +19,28 @@ import           Data.Maybe         (fromMaybe)
 import           Data.Time          (getCurrentTime)
 import           Optics             ((%), (^.))
 
-run :: FilePath -> IO ()
-run path = do
-  computer <- loadComputer path
+run :: Int -> FilePath -> IO ()
+run conf path = do
+  computer <- loadComputer conf path
   startTime <- getCurrentTime
   runComputer startTime computer
   return ()
 
-runTrace :: FilePath -> IO ()
-runTrace path = do
-  computer <- loadComputer path
+runTrace :: Int -> FilePath -> IO ()
+runTrace conf path = do
+  computer <- loadComputer conf path
   startTime <- getCurrentTime
   finalComputer <- runComputer startTime computer
   writeTraceToFile finalComputer
 
-loadComputer :: FilePath -> IO Computer
-loadComputer fp = do
+loadComputer :: Int -> FilePath -> IO Computer
+loadComputer conf fp = do
   dataSegment <- F.readFile $ fp <> ".data"
   textSegment <- F.readFile $ fp <> ".text"
   roDataSegment <-
     fromRight [] <$>
     (try $ F.readFile $ fp <> ".rodata" :: IO (Either IOException Segment))
-  return $ initialComputer dataSegment textSegment roDataSegment
+  return $ initialComputer conf dataSegment textSegment roDataSegment
 
 decode :: FilePath -> IO ()
 decode = readSegment >=> printProgramWithHexes

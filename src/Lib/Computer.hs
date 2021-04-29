@@ -5,14 +5,15 @@ import qualified Data.IntMap.Lazy   as IM
 import qualified Data.Vector        as V
 import qualified Data.Word          as W
 import           Lib.Computer.Types
+import           Lib.MemoryConfigs  (configs)
 import           Lib.Segment
 
-initialComputer :: Segment -> Segment -> Segment -> Computer
-initialComputer dataSegment textSegment roDataSegment =
+initialComputer :: Int -> Segment -> Segment -> Segment -> Computer
+initialComputer conf dataSegment textSegment roDataSegment =
   Computer initialRegisters initialMemory initialStats
   where
     initialMemory =
-      RAM emptyInfo $
+      (configs !! conf) $
       IM.filter (/= 0) $
       loadSegment 0x00800000 roDataSegment <>
       loadSegment 0x10010000 dataSegment <> loadSegment 0x00400000 textSegment

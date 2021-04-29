@@ -43,4 +43,4 @@ systemCallTests =
   ]
 
 testInput :: SyscallInput -> Computer
-testInput inp = storeInput inp $ initialComputer [] [] []
+testInput inp = storeInput inp $ initialComputer 0 [] [] []

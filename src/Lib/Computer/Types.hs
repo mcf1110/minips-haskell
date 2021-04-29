@@ -87,9 +87,6 @@ makeLenses ''Computer
 ram :: Lens' Memory (IM.IntMap W.Word32)
 ram = lens (\(RAM info im) -> im) (\(RAM info im) im' -> RAM info im')
 
-emptyInfo :: MemInfo
-emptyInfo = MemInfo 0 0
-
 instance Show InstructionCounter where
   show counters =
     unwords

@@ -8,8 +8,8 @@ main = do
   args <- take 2 <$> getArgs
   case args of
     ["decode", fileName] -> decode fileName
-    ["run", fileName]    -> run fileName
-    ["trace", fileName]  -> runTrace fileName
+    ["run", fileName]    -> run 0 fileName
+    ["trace", fileName]  -> runTrace 0 fileName
     _                    -> usage
 
 usage :: IO ()
