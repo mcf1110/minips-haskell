@@ -12,7 +12,7 @@ initialComputer dataSegment textSegment roDataSegment =
   Computer initialRegisters initialMemory initialStats
   where
     initialMemory =
-      RAM $
+      RAM emptyInfo $
       IM.filter (/= 0) $
       loadSegment 0x00800000 roDataSegment <>
       loadSegment 0x10010000 dataSegment <> loadSegment 0x00400000 textSegment

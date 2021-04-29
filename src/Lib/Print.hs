@@ -216,9 +216,24 @@ printStats startTime c = do
   putStrLn "Pipelined"
   printEstimatedExecTime st (4 + cyc) freq
   putStrLn $ "Speedup Monocycle/Pipelined: " <> printf "%.2f" speedUp <> "x"
+  putStrLn "\n\nMemory Information\n------------------"
+  putStrLn "Level  Hits          Misses        Total          Miss Rate"
+  putStrLn "-----  ------------  ------------  ------------   ---------"
+  printMemoryInfo (c ^. mem)
   where
     freq = 33.8688
     freqMono = freq / 4
+
+printMemoryInfo :: Memory -> IO ()
+printMemoryInfo mem = do
+  let minfo = mem ^. info
+      h = minfo ^. hits
+      t = minfo ^. total
+      m = t - h
+      mRate :: Double
+      mRate = 100 * fromIntegral m / fromIntegral t
+  printf "%5s %13d %13d %13d %10.2f%%\n" "RAM" h m t mRate
+  -- case m ^? nextMem
 
 printEstimatedExecTime :: Stats -> Int -> Float -> IO ()
 printEstimatedExecTime st cyc freq = do

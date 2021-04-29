@@ -10,8 +10,17 @@ import           Optics.TH   (makeLenses)
 
 type RAMIntMap = IM.IntMap W.Word32
 
+data MemInfo =
+  MemInfo
+    { _hits  :: Int
+    , _total :: Int
+    }
+
 data Memory =
-  RAM RAMIntMap
+  RAM
+    { _info :: MemInfo
+    , _im   :: RAMIntMap
+    }
 
 type GPR = V.Vector W.Word32
 
@@ -65,6 +74,10 @@ data Computer =
 
 makeLenses ''Registers
 
+makeLenses ''MemInfo
+
+makeLenses ''Memory
+
 makeLenses ''InstructionCounter
 
 makeLenses ''Stats
@@ -72,7 +85,10 @@ makeLenses ''Stats
 makeLenses ''Computer
 
 ram :: Lens' Memory (IM.IntMap W.Word32)
-ram = lens (\(RAM im) -> im) (\(RAM im) im' -> RAM im')
+ram = lens (\(RAM info im) -> im) (\(RAM info im) im' -> RAM info im')
+
+emptyInfo :: MemInfo
+emptyInfo = MemInfo 0 0
 
 instance Show InstructionCounter where
   show counters =

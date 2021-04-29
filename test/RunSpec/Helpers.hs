@@ -1,5 +1,6 @@
 module RunSpec.Helpers where
 
+import           Data.Tuple.Optics  (_3)
 import qualified Data.Word          as W
 import           Lib.Computer       (initialComputer)
 import           Lib.Computer.Types
@@ -9,6 +10,7 @@ import           Lib.Operation      (SC (NoSC))
 import qualified Lib.Registers      as R
 import           Lib.Run            (runInstruction, tick)
 import           Lib.Segment        (Segment)
+import           Optics             ((^.))
 
 tc :: Num a => a -> a
 tc x = 0xffffffff - x + 1 -- twos complement
@@ -45,4 +47,4 @@ flagAt :: (Num a, Enum a) => a -> Computer -> Bool
 flagAt = R.getFlag
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt = (snd .) . M.fetchMemory
+memAt = ((^. _3) .) . M.fetchMemory
