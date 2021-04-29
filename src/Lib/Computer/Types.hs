@@ -10,7 +10,7 @@ module Lib.Computer.Types
 import           Lib.Computer.MemoryTraceTypes
 import           Lib.Computer.MemoryTypes
 import           Lib.Computer.RegisterTypes
-import           Optics                        (Lens', lens, makeLenses, (^.))
+import           Optics                        (makeLenses, (^.))
 
 data InstructionCounter =
   InstructionCounter
@@ -40,9 +40,6 @@ makeLenses ''InstructionCounter
 makeLenses ''Stats
 
 makeLenses ''Computer
-
-ram :: Lens' Memory RAMMap
-ram = lens (\(RAM info im) -> im) (\(RAM info im) im' -> RAM info im')
 
 sumInstructionCounters :: InstructionCounter -> Int
 sumInstructionCounters counters =
