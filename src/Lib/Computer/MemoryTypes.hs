@@ -58,12 +58,15 @@ data Memory
 data CacheLevel
   = L1
   | L2
+  deriving (Show)
 
 data CacheStrategy
   = Random
   | LRU
 
 makeLenses ''MemInfo
+
+makeLenses ''CacheMap
 
 makeLenses ''CacheBlock
 

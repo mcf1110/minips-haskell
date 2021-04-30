@@ -4,7 +4,7 @@ import           Lib.Computer.Types
 import           Optics             (over, set, (.~))
 
 configs :: [RAMMap -> Memory]
-configs = mkConfig <$> [[], config2]
+configs = mkConfig <$> [config2]
 
 config2 :: [Memory -> Memory]
 config2 = [mkUnifiedCache L1 Random 1024 1 32]

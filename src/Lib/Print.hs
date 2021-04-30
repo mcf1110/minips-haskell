@@ -9,12 +9,13 @@ import qualified Data.IntMap.Lazy   as IM
 import qualified Data.Vector        as V
 
 import           Data.Char          (isUpper, toLower)
+import           Data.Foldable      (forM_)
 import           Data.List          (intercalate)
 import           Data.List.Split    (keepDelimsL, split, whenElt)
 import           Data.Maybe         (fromMaybe)
 import           Data.Time          (UTCTime, diffUTCTime, getCurrentTime)
 import           Lib.Computer.Types
-import           Optics             (Lens', view, (^.))
+import           Optics             (Lens', view, (^.), (^?))
 import           Text.Printf        (printf)
 
 -- MEMORY
@@ -206,10 +207,12 @@ printStats startTime c = do
     "\x1b[32m\nExecution finished successfully\n--------------------------\n"
   print $ st ^. insCounter
   putStr "Simulation Time: "
-  print duration
+  printf "%.2fs\n" (realToFrac duration :: Float)
   putStr "Average IPS: "
-  print $
-    realToFrac (sumInstructionCounters $ st ^. insCounter) / realToFrac duration
+  printf
+    "%.2f\n"
+    (realToFrac (sumInstructionCounters $ st ^. insCounter) /
+     realToFrac duration :: Float)
   putStrLn "Simulated execution times for:\n--------------------------"
   putStrLn "Monocycle"
   printEstimatedExecTime st cyc freqMono
@@ -232,8 +235,16 @@ printMemoryInfo mem = do
       m = t - h
       mRate :: Double
       mRate = 100 * fromIntegral m / fromIntegral t
-  printf "%5s %13d %13d %13d %10.2f%%\n" "RAM" h m t mRate
-  -- case m ^? nextMem
+  printf "%5s %13d %13d %13d %10.2f%%\n" (showMemoryName mem) h m t mRate
+  forM_ (mem ^? nextMem) printMemoryInfo
+
+showMemoryName :: Memory -> String
+showMemoryName RAM {} = "RAM"
+showMemoryName c@Cache {} = show (_level c) <> showCacheType (_cacheType c)
+  where
+    showCacheType Unified          = ""
+    showCacheType InstructionCache = "i"
+    showCacheType DataCache        = "d"
 
 printEstimatedExecTime :: Stats -> Int -> Float -> IO ()
 printEstimatedExecTime st cyc freq = do

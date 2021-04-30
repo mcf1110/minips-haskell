@@ -6,15 +6,18 @@ import qualified Data.Word                as W
 
 import qualified Control.Monad.State.Lazy as S
 import           Data.List.Split          (chunksOf)
-import           Data.Maybe               (fromMaybe)
+import           Data.Maybe               (fromJust, fromMaybe)
 import           Lib.Computer.Types       (Computer, Latency,
                                            Memory (Cache, RAM),
                                            MemoryTraceType (InstrFetch, Read, Write),
+                                           address, addresses, cacheMap,
                                            getLatency, hits, info, mem,
-                                           memTrace, nCycles, stats, total)
+                                           memTrace, nCycles, nextMem, ram,
+                                           stats, total)
 import           Lib.Operation.Types      (Operation)
-import           Optics                   (Each (each), assign, over, (%), (.~),
+import           Optics                   (assign, modifying, over, (%), (.~),
                                            (^.))
+import           Optics.Operators.Unsafe  ((^?!))
 import           Optics.State             (modifying)
 
 get :: Enum i => i -> Operation W.Word32
@@ -85,19 +88,26 @@ fetchMemory :: Enum i => i -> S.State (Latency, Memory) W.Word32
 fetchMemory n = do
   (l0, m0) <- S.get
   let l1 = l0 + getLatency m0
-      (m1, v) = readFromRam m0
-  S.put (l1, m1)
-  return v
+  if isHit m0
+      -- all done, just count a hit and go away
+    then do
+      S.put (l1, countHit m0)
+      return $ readFromRam $ m0 ^. ram
+    else do
+      let m1 = countMiss m0
+      -- fetch it from the next level
+      let (v, (l2, m2)) = S.runState (fetchMemory n) (l1, m1 ^?! nextMem) -- is safe because only Caches can have misses
+      S.put (l2, (nextMem .~ m2) m1)
+      return v
   where
-    readFromRam m@(RAM i im) = (countHit m, fromMaybe 0 $ im IM.!? fromEnum n)
-    -- go lat m@Cache {} =
-    --   if isHit m
-    --     then writeBack m
-    --     else undefined
-    -- writeBack m = undefined
-    -- if is not in cache, fetch it from upper levels
+    readFromRam im = fromMaybe 0 $ im IM.!? fromEnum n
+    isHit RAM {} = True
+    isHit c@Cache {} = False
+      where
+        addr = c ^?! cacheMap % addresses
+    -- if is not in cache, fetch it from upper level
       -- select block to put according to policy
-    -- if selected block is dirty, write back
+      -- if selected block is dirty, write back
     -- return
 
 countHit :: Memory -> Memory
