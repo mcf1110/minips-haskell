@@ -9,26 +9,27 @@ import           Optics      (Lens', lens, makeLenses, (^.))
 
 type RAMMap = IM.IntMap W.Word32
 
-type Size = Int
+type NLines = Int
 
-type Ways = Int
+type NWays = Int
 
-type BlockSize = Int
+type WordsPerLine = Int
 
 data CacheMap =
   CacheMap
-    { _addresses :: IM.IntMap (V.Vector (Maybe CacheBlock))
-    , _size      :: Size
-    , _ways      :: Ways
-    , _blockSize :: BlockSize
+    { _addresses    :: IM.IntMap (V.Vector (Maybe CacheLine))
+    , _nLines       :: NLines
+    , _nWays        :: NWays
+    , _wordsPerLine :: WordsPerLine
     }
 
-data CacheBlock =
-  CacheBlock
+data CacheLine =
+  CacheLine
     { _isDirty  :: Bool
     , _lastUsed :: Int
     , _address  :: Int
     }
+  deriving (Show)
 
 data MemInfo =
   MemInfo
@@ -68,7 +69,7 @@ makeLenses ''MemInfo
 
 makeLenses ''CacheMap
 
-makeLenses ''CacheBlock
+makeLenses ''CacheLine
 
 makeLenses ''Memory
 
@@ -89,17 +90,17 @@ mkRam = RAM emptyInfo mempty
 mkUnifiedCache ::
      CacheLevel
   -> CacheStrategy
-  -> Size
-  -> Ways
-  -> BlockSize
+  -> NLines
+  -> NWays
+  -> WordsPerLine
   -> Memory
   -> Memory
-mkUnifiedCache lvl strat size ways blockSize =
+mkUnifiedCache lvl strat size nways wordsPerLine =
   Cache emptyInfo lvl strat cm Unified
   where
-    cm = mkCacheMap size ways blockSize
+    cm = mkCacheMap size nways wordsPerLine
 
-mkCacheMap :: Size -> Ways -> BlockSize -> CacheMap
+mkCacheMap :: NLines -> NWays -> WordsPerLine -> CacheMap
 mkCacheMap = CacheMap mempty
 
 getLatency :: Memory -> Int
