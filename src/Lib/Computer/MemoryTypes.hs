@@ -88,17 +88,14 @@ mkRam :: Memory
 mkRam = RAM emptyInfo mempty
 
 mkUnifiedCache ::
-     CacheLevel
-  -> CacheStrategy
-  -> NLines
-  -> NWays
-  -> WordsPerLine
-  -> Memory
-  -> Memory
-mkUnifiedCache lvl strat size nways wordsPerLine =
+     CacheLevel -> CacheStrategy -> Int -> NWays -> Int -> Memory -> Memory
+mkUnifiedCache lvl strat nbytes nways bytesPerLine =
   Cache emptyInfo lvl strat cm Unified
   where
-    cm = mkCacheMap size nways wordsPerLine
+    bytesPerWord = 4
+    wpl = bytesPerLine `div` bytesPerWord
+    nLines = nbytes `div` (wpl * 32)
+    cm = mkCacheMap nLines nways wpl
 
 mkCacheMap :: NLines -> NWays -> WordsPerLine -> CacheMap
 mkCacheMap = CacheMap mempty

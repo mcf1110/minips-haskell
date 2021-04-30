@@ -116,7 +116,8 @@ updateOnExistingWord addr lens val = do
       nInt = fromEnum addr
       block = lineNumber addr cm
       way = getWay block cm
-      hasAddress v = (v ^. address) == nInt
+      withoutOffset = nInt `div` (cm ^. wordsPerLine * 8)
+      hasAddress v = (v ^. address) == withoutOffset
       idx = fromJust $ V.findIndex (maybe False hasAddress) way
       newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
       mem' = over (cacheMap % addresses) (IM.insert block newWay) mem
@@ -150,9 +151,13 @@ substituteInCurrentCache ix setDirty = do
       lruIndex = V.maxIndex $ V.mapMaybe (fmap (^. lastUsed)) w0
       selectedIndex = fromMaybe lruIndex firstEmptyIndex
       newCacheLine =
-        CacheLine {_isDirty = setDirty, _lastUsed = 0, _address = fromEnum ix}
+        CacheLine
+          { _isDirty = setDirty
+          , _lastUsed = 0
+          , _address = fromEnum ix `div` (cm ^. wordsPerLine * 8)
+          }
       w1 = w0 V.// [(selectedIndex, Just newCacheLine)]
-      w2 = fmap (over lastUsed (+ 1)) <$> w1 -- incrementLastUsedByOne
+      w2 = fmap (over lastUsed (+ 1)) <$> w1
       updateAddresses = IM.insert block w2
       shouldWriteBack = maybe False (^. isDirty) (w0 V.! selectedIndex)
       writeBack = propagateToNext $ writeMemory id ix
@@ -161,13 +166,16 @@ substituteInCurrentCache ix setDirty = do
 
 isHit :: Enum i => i -> Memory -> Bool
 isHit n RAM {} = True
-isHit n c@Cache {} = isJust $ V.findIndex (maybe False hasAddress) way
+isHit n c@Cache {} =
+  traceShow (nInt, block, withoutOffset) $
+  isJust $ V.findIndex (maybe False hasAddress) way
   where
     cm = c ^?! cacheMap
     nInt = fromEnum n
     block = lineNumber n cm
     way = getWay block cm
-    hasAddress v = (v ^. address) == nInt
+    withoutOffset = nInt `div` (cm ^. wordsPerLine * 8)
+    hasAddress v = (v ^. address) == withoutOffset
 
 getWay :: Int -> CacheMap -> V.Vector (Maybe CacheLine)
 getWay block cm =

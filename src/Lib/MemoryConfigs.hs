@@ -7,7 +7,7 @@ configs :: [RAMMap -> Memory]
 configs = mkConfig <$> [config2]
 
 config2 :: [Memory -> Memory]
-config2 = [mkUnifiedCache L1 Random 1024 1 1]
+config2 = [mkUnifiedCache L1 Random 1024 1 32]
 
 setRam :: Memory -> RAMMap -> Memory
 setRam = flip (ram .~)
