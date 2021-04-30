@@ -17,13 +17,18 @@ type BlockSize = Int
 
 data CacheMap =
   CacheMap
-    { _addresses :: IM.IntMap (V.Vector CacheSet)
+    { _addresses :: IM.IntMap (V.Vector (Maybe CacheBlock))
     , _size      :: Size
     , _ways      :: Ways
     , _blockSize :: BlockSize
     }
 
-type CacheSet = Maybe (Int, Int) -- Last Used, Address
+data CacheBlock =
+  CacheBlock
+    { _isDirty  :: Bool
+    , _lastUsed :: Int
+    , _address  :: Int
+    }
 
 data MemInfo =
   MemInfo
@@ -59,6 +64,8 @@ data CacheStrategy
   | LRU
 
 makeLenses ''MemInfo
+
+makeLenses ''CacheBlock
 
 makeLenses ''Memory
 

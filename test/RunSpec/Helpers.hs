@@ -1,16 +1,16 @@
 module RunSpec.Helpers where
 
-import           Data.Tuple.Optics  (_3)
-import qualified Data.Word          as W
-import           Lib.Computer       (initialComputer)
+import qualified Control.Monad.State.Lazy as S
+import qualified Data.Word                as W
+import           Lib.Computer             (initialComputer)
 import           Lib.Computer.Types
-import           Lib.Decode         (Instr (Syscall))
-import qualified Lib.Memory         as M
-import           Lib.Operation      (SC (NoSC))
-import qualified Lib.Registers      as R
-import           Lib.Run            (runInstruction, tick)
-import           Lib.Segment        (Segment)
-import           Optics             ((^.))
+import           Lib.Decode               (Instr (Syscall))
+import qualified Lib.Memory               as M
+import           Lib.Operation            (SC (NoSC))
+import qualified Lib.Registers            as R
+import           Lib.Run                  (runInstruction, tick)
+import           Lib.Segment              (Segment)
+import           Optics                   ((^.))
 
 tc :: Num a => a -> a
 tc x = 0xffffffff - x + 1 -- twos complement
@@ -47,4 +47,4 @@ flagAt :: (Num a, Enum a) => a -> Computer -> Bool
 flagAt = R.getFlag
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt = ((^. _3) .) . M.fetchMemory
+memAt ix comp = S.evalState (M.fetchMemory ix) (0, comp ^. mem)
