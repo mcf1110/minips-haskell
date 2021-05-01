@@ -46,7 +46,9 @@ getString n = do
             ]
 
 set :: (Eq i, Num i, Enum i) => i -> W.Word32 -> Operation ()
-set ix v = updatingLatencyAndTrace Write (writeMemory (const v)) ix
+set ix v = do
+  updatingLatencyAndTrace Write writeMemory ix
+  modifying (mem % ram) (IM.insert (fromEnum ix) v)
 
 updatingLatencyAndTrace ::
      Enum i
@@ -70,9 +72,9 @@ updateLatencyAndTrace accessType n lat = do
   where
     w32 = toEnum $ fromEnum n
 
-writeMemory ::
-     Enum i => (W.Word32 -> W.Word32) -> i -> S.State (Latency, Memory) ()
-writeMemory f ix = do
+-- despite the name, does not actually write anything!!
+writeMemory :: Enum i => i -> S.State (Latency, Memory) ()
+writeMemory ix = do
   (l0, m0) <- S.get
   let l1 = l0 + getLatency m0
   if isHit ix m0
@@ -84,10 +86,6 @@ writeMemory f ix = do
       S.put (l1, countMiss m0)
       propagateToNext $ fetchMemory ix
       addToCurrentCache ix True -- dirty, just written
-  writeToRam
-  where
-    writeToRam = do
-      modifying (_2 % ram) (IM.update (Just . f) (fromEnum ix))
 
 fetchMemory :: Enum i => i -> S.State (Latency, Memory) W.Word32
 fetchMemory ix = do
@@ -163,9 +161,7 @@ addToCurrentCache ix setDirty = do
       shouldWriteBack = maybe False (^. isDirty) justDeleted
       writeBack =
         propagateToNext $
-        writeMemory
-          id
-          (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
+        writeMemory (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
   modifying _2 (over (cacheMap % addresses) updateAddresses)
   when shouldWriteBack writeBack
 
