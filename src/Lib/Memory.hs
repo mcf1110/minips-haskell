@@ -82,31 +82,30 @@ writeMemory f ix = do
       updateOnExistingWord ix isDirty True
     else do
       S.put (l1, countMiss m0)
-      propagateToNext (fetchMemory ix)
-      substituteInCurrentCache ix True -- dirty, just written
+      propagateToNext $ fetchMemory ix
+      addToCurrentCache ix True -- dirty, just written
   writeToRam
   where
     writeToRam = do
       modifying (_2 % ram) (IM.update (Just . f) (fromEnum ix))
 
 fetchMemory :: Enum i => i -> S.State (Latency, Memory) W.Word32
-fetchMemory n = do
+fetchMemory ix = do
   (l0, m0) <- S.get
   let l1 = l0 + getLatency m0
-  if isHit n m0
+  if isHit ix m0
       -- all done, just count a hit and go away
     then do
       S.put (l1, countHit m0)
-      updateOnExistingWord n lastUsed 0
+      updateOnExistingWord ix lastUsed 0
       return $ readFromRam $ m0 ^. ram
     else do
       S.put (l1, countMiss m0)
-      -- fetch it from the next level
-      v <- propagateToNext $ fetchMemory n
-      substituteInCurrentCache n False -- notDirty, just loaded
+      v <- propagateToNext $ fetchMemory ix
+      addToCurrentCache ix False -- notDirty, just loaded
       return v
   where
-    readFromRam im = fromMaybe 0 $ im IM.!? fromEnum n
+    readFromRam im = fromMaybe 0 $ im IM.!? fromEnum ix
 
 updateOnExistingWord ::
      Enum i => i -> Lens' CacheLine a -> a -> S.State (Latency, Memory) ()
@@ -140,8 +139,8 @@ lineNumber ix cm = (addr `div` (bytesInAWord * wordsInALine)) `mod` linesInCache
     bytesInAWord = 4
 
 -- TODO: consider policy
-substituteInCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory) ()
-substituteInCurrentCache ix setDirty = do
+addToCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory) ()
+addToCurrentCache ix setDirty = do
   (lat, memory) <- S.get
   let cm = memory ^?! cacheMap
       block = lineNumber ix cm
@@ -159,16 +158,16 @@ substituteInCurrentCache ix setDirty = do
       w1 = w0 V.// [(selectedIndex, Just newCacheLine)]
       w2 = fmap (over lastUsed (+ 1)) <$> w1
       updateAddresses = IM.insert block w2
-      shouldWriteBack = maybe False (^. isDirty) (w0 V.! selectedIndex)
-      writeBack = propagateToNext $ writeMemory id ix
+      justDeleted = w0 V.! selectedIndex
+      shouldWriteBack = maybe False (^. isDirty) justDeleted
+      writeBack =
+        propagateToNext $ writeMemory id (fromJust justDeleted ^. address)
   modifying _2 (over (cacheMap % addresses) updateAddresses)
   when shouldWriteBack writeBack
 
 isHit :: Enum i => i -> Memory -> Bool
 isHit n RAM {} = True
-isHit n c@Cache {} =
-  traceShow (nInt, block, withoutOffset) $
-  isJust $ V.findIndex (maybe False hasAddress) way
+isHit n c@Cache {} = isJust $ V.findIndex (maybe False hasAddress) way
   where
     cm = c ^?! cacheMap
     nInt = fromEnum n

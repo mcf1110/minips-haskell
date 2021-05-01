@@ -94,7 +94,7 @@ mkUnifiedCache lvl strat nbytes nways bytesPerLine =
   where
     bytesPerWord = 4
     wpl = bytesPerLine `div` bytesPerWord
-    nLines = nbytes `div` (wpl * 32)
+    nLines = nbytes `div` bytesPerLine
     cm = mkCacheMap nLines nways wpl
 
 mkCacheMap :: NLines -> NWays -> WordsPerLine -> CacheMap
