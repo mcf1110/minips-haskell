@@ -115,7 +115,7 @@ updateOnExistingWord addr lens val = do
       nInt = fromEnum addr
       block = lineNumber addr cm
       way = getWay block cm
-      withoutOffset = nInt `div` (cm ^. wordsPerLine * 8)
+      withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
       hasAddress v = (v ^. address) == withoutOffset
       idx = fromJust $ V.findIndex (maybe False hasAddress) way
       newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
@@ -131,12 +131,13 @@ propagateToNext statefulFunction = do
   return v
 
 lineNumber :: Enum i => i -> CacheMap -> Int
-lineNumber ix cm = (addr `div` (bytesInAWord * wordsInALine)) `mod` linesInCache
+lineNumber ix cm = ifCacheWasInfinite `mod` linesInCache
   where
     addr = fromEnum ix
     linesInCache = cm ^. nLines
     wordsInALine = cm ^. wordsPerLine
     bytesInAWord = 4
+    ifCacheWasInfinite = addr `div` (bytesInAWord * wordsInALine)
 
 -- TODO: consider policy
 addToCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory) ()
@@ -153,7 +154,7 @@ addToCurrentCache ix setDirty = do
         CacheLine
           { _isDirty = setDirty
           , _lastUsed = 0
-          , _address = fromEnum ix `div` (cm ^. wordsPerLine * 8)
+          , _address = fromEnum ix `div` (cm ^. wordsPerLine * 4)
           }
       w1 = w0 V.// [(selectedIndex, Just newCacheLine)]
       w2 = fmap (over lastUsed (+ 1)) <$> w1
@@ -164,7 +165,7 @@ addToCurrentCache ix setDirty = do
         propagateToNext $
         writeMemory
           id
-          (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 8))
+          (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
   modifying _2 (over (cacheMap % addresses) updateAddresses)
   when shouldWriteBack writeBack
 
@@ -176,7 +177,7 @@ isHit n c@Cache {} = isJust $ V.findIndex (maybe False hasAddress) way
     nInt = fromEnum n
     block = lineNumber n cm
     way = getWay block cm
-    withoutOffset = nInt `div` (cm ^. wordsPerLine * 8)
+    withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
     hasAddress v = (v ^. address) == withoutOffset
 
 getWay :: Int -> CacheMap -> V.Vector (Maybe CacheLine)
