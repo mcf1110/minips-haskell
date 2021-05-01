@@ -161,7 +161,10 @@ addToCurrentCache ix setDirty = do
       justDeleted = w0 V.! selectedIndex
       shouldWriteBack = maybe False (^. isDirty) justDeleted
       writeBack =
-        propagateToNext $ writeMemory id (fromJust justDeleted ^. address)
+        propagateToNext $
+        writeMemory
+          id
+          (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 8))
   modifying _2 (over (cacheMap % addresses) updateAddresses)
   when shouldWriteBack writeBack
 
