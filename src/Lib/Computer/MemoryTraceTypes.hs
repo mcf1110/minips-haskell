@@ -8,9 +8,9 @@ type Latency = Int
 
 type Line = W.Word32
 
-type MemoryTrace = (MemoryTraceType, Address, Line)
+type MemoryTrace = (MemoryAccessType, Address, Line)
 
-data MemoryTraceType
+data MemoryAccessType
   = Read
   | InstrFetch
   | Write

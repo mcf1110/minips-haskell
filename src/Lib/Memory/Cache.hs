@@ -20,8 +20,8 @@ import           Optics                   (AffineTraversal', Field2 (_2),
                                            set, use, view, (%), (.~), (^.))
 import           Optics.Operators.Unsafe  ((^?!))
 
-triggerInCache :: Enum i => MemoryTraceType -> i -> Operation ()
-triggerInCache mtt ix = do
+triggerInCache :: Enum i => MemoryAccessType -> i -> Operation ()
+triggerInCache mat ix = do
   comp <- S.get
   -- state within a state, yay!
   let (val, (lat, newMem, newRng)) =
@@ -29,16 +29,16 @@ triggerInCache mtt ix = do
   assign mem newMem
   assign rng newRng
   modifying (stats % nCycles) (+ lat) -- update latency
-  addTrace mtt ix
+  addTrace mat ix
   where
     statefulFunction =
-      case mtt of
+      case mat of
         Write      -> triggerWrite
         Read       -> triggerFetch
         InstrFetch -> triggerFetchInstruction
 
-addTrace :: Enum i => MemoryTraceType -> i -> Operation ()
-addTrace mtt ix = modifying (stats % memTrace) ((mtt, w32, w32 `div` 32) :)
+addTrace :: Enum i => MemoryAccessType -> i -> Operation ()
+addTrace mat ix = modifying (stats % memTrace) ((mat, w32, w32 `div` 32) :)
   where
     w32 = toEnum $ fromEnum ix
 
@@ -86,17 +86,17 @@ triggerFetchInstruction ix = do
 
 updateOnExistingWord ::
      Enum i
-  => MemoryTraceType
+  => MemoryAccessType
   -> i
   -> Lens' CacheLine a
   -> a
   -> S.State (Latency, Memory, [Int]) ()
-updateOnExistingWord mtt addr lens val = do
+updateOnExistingWord mat addr lens val = do
   mem <- use _2
   case mem of
     RAM {} -> return ()
     _ -> assign _2 mem'
-      where cm = mem ^?! (getUnit mtt % cacheMap)
+      where cm = mem ^?! (getUnit mat % cacheMap)
             nInt = fromEnum addr
             block = lineNumber addr cm
             way = getWay block cm
@@ -106,7 +106,7 @@ updateOnExistingWord mtt addr lens val = do
             newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
             mem' =
               over
-                (getUnit mtt % cacheMap % addresses)
+                (getUnit mat % cacheMap % addresses)
                 (IM.insert block newWay)
                 mem
 
@@ -129,13 +129,13 @@ lineNumber ix cm = ifCacheWasInfinite `mod` linesInCache
 
 addToCurrentCache ::
      Enum i
-  => MemoryTraceType
+  => MemoryAccessType
   -> i
   -> Bool
   -> S.State (Latency, Memory, [Int]) ()
-addToCurrentCache mtt ix setDirty = do
+addToCurrentCache mat ix setDirty = do
   (lat, memory, rng) <- S.get
-  let cm = memory ^?! (getUnit mtt % cacheMap)
+  let cm = memory ^?! (getUnit mat % cacheMap)
       block = lineNumber ix cm
       w0 = getWay block cm
       firstEmptyIndex = V.findIndex isNothing w0
@@ -157,7 +157,7 @@ addToCurrentCache mtt ix setDirty = do
         propagateToNext $
         triggerWrite
           (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
-  modifying _2 (over (getUnit mtt % cacheMap % addresses) updateAddresses)
+  modifying _2 (over (getUnit mat % cacheMap % addresses) updateAddresses)
   assign _3 rng'
   when shouldWriteBack writeBack
 
@@ -168,11 +168,11 @@ selectIndexThroughStrategy LRU ways rng =
   (V.maxIndex $ V.mapMaybe (fmap (^. lastUsed)) ways, rng)
     --mapMaybe is equivalent to map, because none of the positions will be empty anyway
 
-isHit :: Enum i => MemoryTraceType -> i -> Memory -> Bool
-isHit mtt n RAM {} = True
-isHit mtt n c = isJust $ V.findIndex (maybe False hasAddress) way
+isHit :: Enum i => MemoryAccessType -> i -> Memory -> Bool
+isHit mat n RAM {} = True
+isHit mat n c = isJust $ V.findIndex (maybe False hasAddress) way
   where
-    cm = c ^?! (getUnit mtt % cacheMap)
+    cm = c ^?! (getUnit mat % cacheMap)
     nInt = fromEnum n
     block = lineNumber n cm
     way = getWay block cm
@@ -183,24 +183,24 @@ getWay :: Int -> CacheMap -> V.Vector (Maybe CacheLine)
 getWay block cm =
   fromMaybe (V.replicate (cm ^. nWays) Nothing) $ (cm ^. addresses) IM.!? block
 
-countHit :: MemoryTraceType -> Memory -> Memory
-countHit mtt = over (getInfo mtt % hits) (+ 1) . countMiss mtt
+countHit :: MemoryAccessType -> Memory -> Memory
+countHit mat = over (getInfo mat % hits) (+ 1) . countMiss mat
 
-countMiss :: MemoryTraceType -> Memory -> Memory
-countMiss mtt = over (getInfo mtt % total) (+ 1)
+countMiss :: MemoryAccessType -> Memory -> Memory
+countMiss mat = over (getInfo mat % total) (+ 1)
 
-getInfo :: MemoryTraceType -> AffineTraversal' Memory MemInfo
-getInfo mtt =
+getInfo :: MemoryAccessType -> AffineTraversal' Memory MemInfo
+getInfo mat =
   atraversal
     (\mem -> Right (mem ^?! l mem))
     (\mem mInfo -> set (l mem) mInfo mem)
   where
     l :: Memory -> AffineTraversal' Memory MemInfo
     l RAM {} = ramInfo
-    l _      = getUnit mtt % info
+    l _      = getUnit mat % info
 
-getUnit :: MemoryTraceType -> AffineTraversal' Memory CacheUnit
-getUnit mtt =
+getUnit :: MemoryAccessType -> AffineTraversal' Memory CacheUnit
+getUnit mat =
   atraversal
     (\mem -> Right (mem ^?! l mem))
     (\mem mInfo -> set (l mem) mInfo mem)
@@ -208,7 +208,7 @@ getUnit mtt =
     l :: Memory -> AffineTraversal' Memory CacheUnit
     l Cache {} = unit
     l SplitCache {} =
-      if mtt == InstrFetch
+      if mat == InstrFetch
         then instUnit
         else dataUnit
     l RAM {} = undefined
