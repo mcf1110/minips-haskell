@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a5fd0e70ced6d6384cac30f0a852b8609e80e18e720282586db4d2daff598af7
+-- hash: d4f5b772e2118b4fd83a8c39ea4c8a88bf8b7b3a8a60ec926d2a8f18c106d503
 
 name:           minips
 version:        0.1.0.0
@@ -39,6 +39,9 @@ library
       Lib.File
       Lib.Memory
       Lib.Memory.Cache
+      Lib.Memory.Cache.LensHelpers
+      Lib.Memory.Cache.PureHelpers
+      Lib.Memory.Cache.StatefulHelpers
       Lib.Memory.Configs
       Lib.Memory.Pure
       Lib.Operation
