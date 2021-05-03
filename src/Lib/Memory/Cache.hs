@@ -5,7 +5,7 @@ import qualified Data.IntMap.Lazy         as IM
 import qualified Data.Vector              as V
 import qualified Data.Word                as W
 
-import           Control.Monad            (join, when)
+import           Control.Monad            (join, unless, when)
 import qualified Control.Monad.State.Lazy as S
 import           Data.List.Split          (chunksOf)
 import           Data.Maybe               (fromJust, fromMaybe, isJust,
@@ -53,8 +53,10 @@ triggerWrite ix = do
       updateOnExistingWord Write ix isDirty True
     else do
       S.put (l1, countMiss Write m0, rng0)
-      propagateToNext $ triggerRead ix
+      snoopingWasSuccessful <- trySnooping Write ix m0
+      unless snoopingWasSuccessful $ propagateToNext $ triggerRead ix
       addToCurrentCache Write ix True -- dirty, just written
+  removeFromInstructionCache ix
 
 triggerRead :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
 triggerRead ix = do
@@ -67,7 +69,8 @@ triggerRead ix = do
       updateOnExistingWord Read ix lastUsed 0
     else do
       S.put (l1, countMiss Read m0, rng0)
-      propagateToNext $ triggerRead ix
+      snoopingWasSuccessful <- trySnooping Read ix m0
+      unless snoopingWasSuccessful $ propagateToNext $ triggerRead ix
       addToCurrentCache Read ix False -- notDirty, just loaded
 
 triggerFetchInstruction :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
@@ -81,8 +84,52 @@ triggerFetchInstruction ix = do
       updateOnExistingWord InstrFetch ix lastUsed 0
     else do
       S.put (l1, countMiss InstrFetch m0, rng0)
-      propagateToNext $ triggerFetchInstruction ix
+      snoopingWasSuccessful <- trySnooping InstrFetch ix m0
+      unless snoopingWasSuccessful $
+        propagateToNext $ triggerFetchInstruction ix
       addToCurrentCache InstrFetch ix False -- notDirty, just loaded
+
+removeFromInstructionCache :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
+removeFromInstructionCache ix = do
+  mem <- use _2
+  case mem of
+    SplitCache {} -> assign _2 mem'
+      where cm = mem ^?! (instUnit % cacheMap)
+            nInt = fromEnum ix
+            block = lineNumber ix cm
+            way = getWay block cm
+            withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
+            hasAddress v = (v ^. address) == withoutOffset
+            maybeIdx = V.findIndex (maybe False hasAddress) way
+            newWay =
+              if isJust maybeIdx
+                then way V.// [(fromJust maybeIdx, Nothing)]
+                else way
+            mem' =
+              over
+                (instUnit % cacheMap % addresses)
+                (IM.insert block newWay)
+                mem
+    _ -> return ()
+
+trySnooping ::
+     Enum i
+  => MemoryAccessType
+  -> i
+  -> Memory
+  -> S.State (Latency, Memory, [Int]) Bool
+trySnooping mat ix c@SplitCache {} = do
+  return successful
+  where
+    successful = isJust $ V.findIndex (maybe False hasAddress) way
+      where
+        cm = c ^?! (getOtherUnit mat % cacheMap)
+        nInt = fromEnum ix
+        block = lineNumber ix cm
+        way = getWay block cm
+        withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
+        hasAddress v = (v ^. address) == withoutOffset
+trySnooping mat ix _ = return False
 
 updateOnExistingWord ::
      Enum i
@@ -211,4 +258,18 @@ getUnit mat =
       if mat == InstrFetch
         then instUnit
         else dataUnit
-    l RAM {} = undefined
+    l RAM {} = error "RAM does not have Unit, should never be called"
+
+getOtherUnit :: MemoryAccessType -> AffineTraversal' Memory CacheUnit
+getOtherUnit mat =
+  atraversal
+    (\mem -> Right (mem ^?! l mem))
+    (\mem mInfo -> set (l mem) mInfo mem)
+  where
+    l :: Memory -> AffineTraversal' Memory CacheUnit
+    l SplitCache {} =
+      if mat /= InstrFetch
+        then instUnit
+        else dataUnit
+    l RAM {} =
+      error "RAM/Unified does not have OtherUnit, should never be called"
