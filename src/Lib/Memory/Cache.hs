@@ -34,7 +34,7 @@ triggerInCache mat ix = do
     statefulFunction =
       case mat of
         Write      -> triggerWrite
-        Read       -> triggerFetch
+        Read       -> triggerRead
         InstrFetch -> triggerFetchInstruction
 
 addTrace :: Enum i => MemoryAccessType -> i -> Operation ()
@@ -53,11 +53,11 @@ triggerWrite ix = do
       updateOnExistingWord Write ix isDirty True
     else do
       S.put (l1, countMiss Write m0, rng0)
-      propagateToNext $ triggerFetch ix
+      propagateToNext $ triggerRead ix
       addToCurrentCache Write ix True -- dirty, just written
 
-triggerFetch :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
-triggerFetch ix = do
+triggerRead :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
+triggerRead ix = do
   (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
   if isHit Read ix m0
@@ -67,7 +67,7 @@ triggerFetch ix = do
       updateOnExistingWord Read ix lastUsed 0
     else do
       S.put (l1, countMiss Read m0, rng0)
-      propagateToNext $ triggerFetch ix
+      propagateToNext $ triggerRead ix
       addToCurrentCache Read ix False -- notDirty, just loaded
 
 triggerFetchInstruction :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
