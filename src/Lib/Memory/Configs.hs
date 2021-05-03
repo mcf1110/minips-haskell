@@ -4,10 +4,13 @@ import           Lib.Computer.Types
 import           Optics             (over, set, (.~))
 
 configs :: [Memory]
-configs = mkConfig <$> [config2]
+configs = mkConfig <$> [config3]
 
 config2 :: [Memory -> Memory]
 config2 = [mkUnifiedCache L1 Random 1024 1 32]
+
+config3 :: [Memory -> Memory]
+config3 = [mkSplitCache L1 Random 512 1 32]
 
 mkConfig :: [Memory -> Memory] -> Memory
 mkConfig = go

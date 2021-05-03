@@ -100,12 +100,22 @@ mkUnifiedCache lvl strat nbytes nways bytesPerLine = Cache unit lvl strat
     nLines = nbytes `div` bytesPerLine
     unit = CacheUnit emptyInfo $ mkCacheMap nLines nways wpl
 
+mkSplitCache ::
+     CacheLevel -> CacheStrategy -> Int -> NWays -> Int -> Memory -> Memory
+mkSplitCache lvl strat nbytes nways bytesPerLine =
+  SplitCache unit unit lvl strat
+  where
+    bytesPerWord = 4
+    wpl = bytesPerLine `div` bytesPerWord
+    nLines = nbytes `div` bytesPerLine
+    unit = CacheUnit emptyInfo $ mkCacheMap nLines nways wpl
+
 mkCacheMap :: NLines -> NWays -> WordsPerLine -> CacheMap
 mkCacheMap = CacheMap mempty
 
 getLatency :: Memory -> Int
 getLatency RAM {} = 100
-getLatency c@Cache {} =
+getLatency c =
   case _level c of
     L1 -> 1
     L2 -> 10

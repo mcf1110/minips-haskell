@@ -46,62 +46,69 @@ triggerWrite :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
 triggerWrite ix = do
   (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
-  if isHit ix m0
+  if isHit Write ix m0
     then do
-      S.put (l1, countHit m0, rng0)
-      updateOnExistingWord ix lastUsed 0
-      updateOnExistingWord ix isDirty True
+      S.put (l1, countHit Write m0, rng0)
+      updateOnExistingWord Write ix lastUsed 0
+      updateOnExistingWord Write ix isDirty True
     else do
-      S.put (l1, countMiss m0, rng0)
+      S.put (l1, countMiss Write m0, rng0)
       propagateToNext $ triggerFetch ix
-      addToCurrentCache ix True -- dirty, just written
+      addToCurrentCache Write ix True -- dirty, just written
 
 triggerFetch :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
 triggerFetch ix = do
   (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
-  if isHit ix m0
+  if isHit Read ix m0
       -- all done, just count a hit and go away
     then do
-      S.put (l1, countHit m0, rng0)
-      updateOnExistingWord ix lastUsed 0
+      S.put (l1, countHit Read m0, rng0)
+      updateOnExistingWord Read ix lastUsed 0
     else do
-      S.put (l1, countMiss m0, rng0)
+      S.put (l1, countMiss Read m0, rng0)
       propagateToNext $ triggerFetch ix
-      addToCurrentCache ix False -- notDirty, just loaded
+      addToCurrentCache Read ix False -- notDirty, just loaded
 
 triggerFetchInstruction :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
 triggerFetchInstruction ix = do
   (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
-  if isHit ix m0
+  if isHit InstrFetch ix m0
       -- all done, just count a hit and go away
     then do
-      S.put (l1, countHit m0, rng0)
-      updateOnExistingWord ix lastUsed 0
+      S.put (l1, countHit InstrFetch m0, rng0)
+      updateOnExistingWord InstrFetch ix lastUsed 0
     else do
-      S.put (l1, countMiss m0, rng0)
+      S.put (l1, countMiss InstrFetch m0, rng0)
       propagateToNext $ triggerFetchInstruction ix
-      addToCurrentCache ix False -- notDirty, just loaded
+      addToCurrentCache InstrFetch ix False -- notDirty, just loaded
 
 updateOnExistingWord ::
      Enum i
-  => i
+  => MemoryTraceType
+  -> i
   -> Lens' CacheLine a
   -> a
   -> S.State (Latency, Memory, [Int]) ()
-updateOnExistingWord addr lens val = do
+updateOnExistingWord mtt addr lens val = do
   mem <- use _2
-  let cm = mem ^?! (unit % cacheMap)
-      nInt = fromEnum addr
-      block = lineNumber addr cm
-      way = getWay block cm
-      withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
-      hasAddress v = (v ^. address) == withoutOffset
-      idx = fromJust $ V.findIndex (maybe False hasAddress) way
-      newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
-      mem' = over (unit % cacheMap % addresses) (IM.insert block newWay) mem
-  assign _2 mem'
+  case mem of
+    RAM {} -> return ()
+    _ -> assign _2 mem'
+      where cm = mem ^?! (getUnit mtt % cacheMap)
+            nInt = fromEnum addr
+            block = lineNumber addr cm
+            way = getWay block cm
+            withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
+            hasAddress v = (v ^. address) == withoutOffset
+            idx = fromJust $ V.findIndex (maybe False hasAddress) way
+            newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
+            mem' =
+              over
+                (getUnit mtt % cacheMap % addresses)
+                (IM.insert block newWay)
+                mem
 
 propagateToNext ::
      S.State (Latency, Memory, [Int]) () -> S.State (Latency, Memory, [Int]) ()
@@ -120,10 +127,15 @@ lineNumber ix cm = ifCacheWasInfinite `mod` linesInCache
     bytesInAWord = 4
     ifCacheWasInfinite = addr `div` (bytesInAWord * wordsInALine)
 
-addToCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory, [Int]) ()
-addToCurrentCache ix setDirty = do
+addToCurrentCache ::
+     Enum i
+  => MemoryTraceType
+  -> i
+  -> Bool
+  -> S.State (Latency, Memory, [Int]) ()
+addToCurrentCache mtt ix setDirty = do
   (lat, memory, rng) <- S.get
-  let cm = memory ^?! (unit % cacheMap)
+  let cm = memory ^?! (getUnit mtt % cacheMap)
       block = lineNumber ix cm
       w0 = getWay block cm
       firstEmptyIndex = V.findIndex isNothing w0
@@ -145,7 +157,7 @@ addToCurrentCache ix setDirty = do
         propagateToNext $
         triggerWrite
           (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
-  modifying _2 (over (unit % cacheMap % addresses) updateAddresses)
+  modifying _2 (over (getUnit mtt % cacheMap % addresses) updateAddresses)
   assign _3 rng'
   when shouldWriteBack writeBack
 
@@ -156,11 +168,11 @@ selectIndexThroughStrategy LRU ways rng =
   (V.maxIndex $ V.mapMaybe (fmap (^. lastUsed)) ways, rng)
     --mapMaybe is equivalent to map, because none of the positions will be empty anyway
 
-isHit :: Enum i => i -> Memory -> Bool
-isHit n RAM {} = True
-isHit n c@Cache {} = isJust $ V.findIndex (maybe False hasAddress) way
+isHit :: Enum i => MemoryTraceType -> i -> Memory -> Bool
+isHit mtt n RAM {} = True
+isHit mtt n c = isJust $ V.findIndex (maybe False hasAddress) way
   where
-    cm = c ^?! (unit % cacheMap)
+    cm = c ^?! (getUnit mtt % cacheMap)
     nInt = fromEnum n
     block = lineNumber n cm
     way = getWay block cm
@@ -171,19 +183,32 @@ getWay :: Int -> CacheMap -> V.Vector (Maybe CacheLine)
 getWay block cm =
   fromMaybe (V.replicate (cm ^. nWays) Nothing) $ (cm ^. addresses) IM.!? block
 
-countHit :: Memory -> Memory
-countHit = over (getInfo % hits) (+ 1) . countMiss
+countHit :: MemoryTraceType -> Memory -> Memory
+countHit mtt = over (getInfo mtt % hits) (+ 1) . countMiss mtt
 
-countMiss :: Memory -> Memory
-countMiss = over (getInfo % total) (+ 1)
+countMiss :: MemoryTraceType -> Memory -> Memory
+countMiss mtt = over (getInfo mtt % total) (+ 1)
 
-getInfo :: AffineTraversal' Memory MemInfo
-getInfo =
+getInfo :: MemoryTraceType -> AffineTraversal' Memory MemInfo
+getInfo mtt =
   atraversal
     (\mem -> Right (mem ^?! l mem))
     (\mem mInfo -> set (l mem) mInfo mem)
   where
     l :: Memory -> AffineTraversal' Memory MemInfo
-    l RAM {}        = ramInfo
-    l Cache {}      = unit % info
-    l SplitCache {} = dataUnit % info
+    l RAM {} = ramInfo
+    l _      = getUnit mtt % info
+
+getUnit :: MemoryTraceType -> AffineTraversal' Memory CacheUnit
+getUnit mtt =
+  atraversal
+    (\mem -> Right (mem ^?! l mem))
+    (\mem mInfo -> set (l mem) mInfo mem)
+  where
+    l :: Memory -> AffineTraversal' Memory CacheUnit
+    l Cache {} = unit
+    l SplitCache {} =
+      if mtt == InstrFetch
+        then instUnit
+        else dataUnit
+    l RAM {} = undefined

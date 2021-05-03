@@ -14,4 +14,4 @@ data MemoryTraceType
   = Read
   | InstrFetch
   | Write
-  deriving (Show)
+  deriving (Show, Eq)

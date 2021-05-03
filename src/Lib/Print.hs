@@ -226,27 +226,29 @@ printStats startTime c = do
 
 printMemoryInfo :: Memory -> IO ()
 printMemoryInfo mem = do
-  printf "%5s %13d %13d %13d %10.2f%%\n" (showMemoryName mem) h m t mRate
+  forM_ mInfos (showMemoryInfo (showMemoryName mem))
   forM_ (mem ^? nextMem) printMemoryInfo
   where
-    minfo =
+    mInfos =
       case mem of
-        RAM {}   -> mem ^?! ramInfo
-        Cache {} -> mem ^?! unit % info
-        _        -> emptyInfo
-    h = minfo ^. hits
-    t = minfo ^. total
+        RAM {} -> [("", mem ^?! ramInfo)]
+        Cache {} -> [("", mem ^?! unit % info)]
+        SplitCache {} ->
+          [("i", mem ^?! instUnit % info), ("d", mem ^?! dataUnit % info)]
+
+showMemoryInfo :: String -> (String, MemInfo) -> IO ()
+showMemoryInfo level (prefix, mInfo) =
+  printf "%5s %13d %13d %13d %10.2f%%\n" (level <> prefix) h m t mRate
+  where
+    h = mInfo ^. hits
+    t = mInfo ^. total
     m = t - h
     mRate :: Double
     mRate = 100 * fromIntegral m / fromIntegral t
 
 showMemoryName :: Memory -> String
 showMemoryName RAM {} = "RAM"
-showMemoryName c@Cache {} = show (_level c)
-  where
-    showCacheType _ = ""
-    -- showCacheType InstructionCache = "i"
-    -- showCacheType DataCache        = "d"
+showMemoryName c      = show (_level c)
 
 printEstimatedExecTime :: Stats -> Int -> Float -> IO ()
 printEstimatedExecTime st cyc freq = do
