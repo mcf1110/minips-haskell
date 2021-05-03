@@ -32,6 +32,7 @@ data Computer =
   Computer
     { _reg   :: Registers
     , _mem   :: Memory
+    , _ram   :: ActualMemory
     , _stats :: Stats
     , _rng   :: [Int]
     }

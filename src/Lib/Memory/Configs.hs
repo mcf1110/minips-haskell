@@ -1,19 +1,16 @@
-module Lib.MemoryConfigs where
+module Lib.Memory.Configs where
 
 import           Lib.Computer.Types
 import           Optics             (over, set, (.~))
 
-configs :: [RAMMap -> Memory]
+configs :: [Memory]
 configs = mkConfig <$> [config2]
 
 config2 :: [Memory -> Memory]
 config2 = [mkUnifiedCache L1 Random 1024 1 32]
 
-setRam :: Memory -> RAMMap -> Memory
-setRam = flip (ram .~)
-
-mkConfig :: [Memory -> Memory] -> RAMMap -> Memory
-mkConfig = setRam . go
+mkConfig :: [Memory -> Memory] -> Memory
+mkConfig = go
   where
     go :: [Memory -> Memory] -> Memory
     go []     = mkRam

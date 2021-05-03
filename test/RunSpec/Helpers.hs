@@ -5,7 +5,7 @@ import qualified Data.Word                as W
 import           Lib.Computer             (initialComputer)
 import           Lib.Computer.Types
 import           Lib.Decode               (Instr (Syscall))
-import qualified Lib.Memory               as M
+import           Lib.Memory.Pure          (pureGet)
 import           Lib.Operation            (SC (NoSC))
 import qualified Lib.Registers            as R
 import           Lib.Run                  (runInstruction, tick)
@@ -47,4 +47,4 @@ flagAt :: (Num a, Enum a) => a -> Computer -> Bool
 flagAt = R.getFlag
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt ix comp = S.evalState (M.fetchMemory ix) (0, comp ^. mem, comp ^. rng)
+memAt = pureGet

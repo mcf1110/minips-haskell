@@ -5,29 +5,29 @@ import qualified Data.IntMap.Lazy   as IM
 import qualified Data.Vector        as V
 import qualified Data.Word          as W
 import           Lib.Computer.Types
-import           Lib.MemoryConfigs  (configs)
+import           Lib.Memory.Configs (configs)
 import           Lib.Segment
 import           System.Random      (mkStdGen, randoms)
 
 initialComputer :: Int -> Segment -> Segment -> Segment -> Computer
 initialComputer conf dataSegment textSegment roDataSegment =
-  Computer initialRegisters initialMemory initialStats initialRng
+  Computer iRegisters iHierarchy iMemory iStats iRng
   where
-    initialMemory =
-      (configs !! conf) $
+    iMemory =
       IM.filter (/= 0) $
       loadSegment 0x00800000 roDataSegment <>
       loadSegment 0x10010000 dataSegment <> loadSegment 0x00400000 textSegment
-    initialRegisters :: Registers
-    initialRegisters = Registers gpr coprocessor flags
+    iHierarchy = configs !! conf
+    iRegisters :: Registers
+    iRegisters = Registers gpr coprocessor flags
       where
         gpr =
           V.replicate 35 0 V.//
           [(29, 0x7fffeffc), (28, 0x10008000), (32, 0x00400000)]
         coprocessor = V.replicate 32 0
         flags = V.replicate 8 False
-    initialStats :: Stats
-    initialStats = Stats counter [] 0
+    iStats :: Stats
+    iStats = Stats counter [] 0
       where
         counter = InstructionCounter 0 0 0 0 0
-    initialRng = randoms $ mkStdGen 42
+    iRng = randoms $ mkStdGen 42

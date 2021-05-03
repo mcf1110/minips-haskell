@@ -4,22 +4,23 @@ import           Lib.Decode
 import           Lib.Registers
 import           Lib.Segment
 
-import qualified Data.BitVector     as BV
-import qualified Data.IntMap.Lazy   as IM
-import qualified Data.Vector        as V
+import qualified Data.BitVector          as BV
+import qualified Data.IntMap.Lazy        as IM
+import qualified Data.Vector             as V
 
-import           Data.Char          (isUpper, toLower)
-import           Data.Foldable      (forM_)
-import           Data.List          (intercalate)
-import           Data.List.Split    (keepDelimsL, split, whenElt)
-import           Data.Maybe         (fromMaybe)
-import           Data.Time          (UTCTime, diffUTCTime, getCurrentTime)
+import           Data.Char               (isUpper, toLower)
+import           Data.Foldable           (forM_)
+import           Data.List               (intercalate)
+import           Data.List.Split         (keepDelimsL, split, whenElt)
+import           Data.Maybe              (fromMaybe)
+import           Data.Time               (UTCTime, diffUTCTime, getCurrentTime)
 import           Lib.Computer.Types
-import           Optics             (Lens', view, (^.), (^?))
-import           Text.Printf        (printf)
+import           Optics                  (Lens', view, (%), (^.), (^?))
+import           Optics.Operators.Unsafe ((^?!))
+import           Text.Printf             (printf)
 
 -- MEMORY
-showMemory :: Memory -> [String]
+showMemory :: ActualMemory -> [String]
 showMemory m =
   [ "┌─────────────────────────┐"
   , "│          Memory         │"
@@ -27,16 +28,12 @@ showMemory m =
   , "│    Addr    │    Code    │"
   , "╞════════════╪════════════╡"
   ] <>
-  map
-    line
-    (filter
-       (\(k, _) -> k >= 0x00800000 && k < 0x7fffef1c)
-       (IM.assocs (m ^. ram))) <>
+  map line (filter (\(k, _) -> k >= 0x00800000 && k < 0x7fffef1c) (IM.assocs m)) <>
   ["└────────────┴────────────┘"]
   where
     line (addr, val) = printf "│ 0x%08x │ 0x%08x │" addr val
 
-showFullMemory :: Memory -> [String]
+showFullMemory :: ActualMemory -> [String]
 showFullMemory m =
   [ "┌─────────────────────────┐"
   , "│          Memory         │"
@@ -44,11 +41,11 @@ showFullMemory m =
   , "│    Addr    │    Code    │"
   , "╞════════════╪════════════╡"
   ] <>
-  map line (IM.assocs (m ^. ram)) <> ["└────────────┴────────────┘"]
+  map line (IM.assocs m) <> ["└────────────┴────────────┘"]
   where
     line (addr, val) = printf "│ 0x%08x │ 0x%08x │" addr val
 
-printMemory :: Memory -> IO ()
+printMemory :: ActualMemory -> IO ()
 printMemory = mapM_ putStrLn . showMemory
 
 -- REGISTERS
@@ -124,7 +121,7 @@ printRegisters = mapM_ putStrLn . showRegisters
 printComputer :: Computer -> IO ()
 printComputer comp = do
   mapM_ putStrLn $
-    zipWithDefault (showMemory $ comp ^. mem) (showRegisters $ comp ^. reg)
+    zipWithDefault (showMemory $ comp ^. ram) (showRegisters $ comp ^. reg)
   -- based on https://stackoverflow.com/a/21350444
   where
     memSpacing = replicate 23 ' ' <> "\t"
@@ -229,22 +226,27 @@ printStats startTime c = do
 
 printMemoryInfo :: Memory -> IO ()
 printMemoryInfo mem = do
-  let minfo = mem ^. info
-      h = minfo ^. hits
-      t = minfo ^. total
-      m = t - h
-      mRate :: Double
-      mRate = 100 * fromIntegral m / fromIntegral t
   printf "%5s %13d %13d %13d %10.2f%%\n" (showMemoryName mem) h m t mRate
   forM_ (mem ^? nextMem) printMemoryInfo
+  where
+    minfo =
+      case mem of
+        RAM {}   -> mem ^?! ramInfo
+        Cache {} -> mem ^?! unit % info
+        _        -> emptyInfo
+    h = minfo ^. hits
+    t = minfo ^. total
+    m = t - h
+    mRate :: Double
+    mRate = 100 * fromIntegral m / fromIntegral t
 
 showMemoryName :: Memory -> String
 showMemoryName RAM {} = "RAM"
-showMemoryName c@Cache {} = show (_level c) <> showCacheType (_cacheType c)
+showMemoryName c@Cache {} = show (_level c)
   where
-    showCacheType Unified          = ""
-    showCacheType InstructionCache = "i"
-    showCacheType DataCache        = "d"
+    showCacheType _ = ""
+    -- showCacheType InstructionCache = "i"
+    -- showCacheType DataCache        = "d"
 
 printEstimatedExecTime :: Stats -> Int -> Float -> IO ()
 printEstimatedExecTime st cyc freq = do
