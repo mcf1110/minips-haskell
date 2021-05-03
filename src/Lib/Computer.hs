@@ -7,10 +7,11 @@ import qualified Data.Word          as W
 import           Lib.Computer.Types
 import           Lib.MemoryConfigs  (configs)
 import           Lib.Segment
+import           System.Random      (mkStdGen, randoms)
 
 initialComputer :: Int -> Segment -> Segment -> Segment -> Computer
 initialComputer conf dataSegment textSegment roDataSegment =
-  Computer initialRegisters initialMemory initialStats
+  Computer initialRegisters initialMemory initialStats initialRng
   where
     initialMemory =
       (configs !! conf) $
@@ -29,3 +30,4 @@ initialComputer conf dataSegment textSegment roDataSegment =
     initialStats = Stats counter [] 0
       where
         counter = InstructionCounter 0 0 0 0 0
+    initialRng = randoms $ mkStdGen 42

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b70bb276fd40dfc8ba84bffcc25742e6e66aa244c9c017b3f1e0cb5a51329230
+-- hash: 068ebd5c33dff4f06cb92b938c3379984822806003d6c3698f59a0e8ca7aada4
 
 name:           minips
 version:        0.1.0.0
@@ -62,6 +62,7 @@ library
     , data-binary-ieee754
     , mtl
     , optics
+    , random
     , split
     , time
     , vector
@@ -83,6 +84,7 @@ executable minips
     , minips
     , mtl
     , optics
+    , random
     , split
     , time
     , vector
@@ -113,6 +115,7 @@ test-suite minips-test
     , minips
     , mtl
     , optics
+    , random
     , split
     , tasty
     , tasty-hunit

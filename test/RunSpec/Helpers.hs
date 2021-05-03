@@ -47,4 +47,4 @@ flagAt :: (Num a, Enum a) => a -> Computer -> Bool
 flagAt = R.getFlag
 
 memAt :: Enum a => a -> Computer -> W.Word32
-memAt ix comp = S.evalState (M.fetchMemory ix) (0, comp ^. mem)
+memAt ix comp = S.evalState (M.fetchMemory ix) (0, comp ^. mem, comp ^. rng)

@@ -33,6 +33,7 @@ data Computer =
     { _reg   :: Registers
     , _mem   :: Memory
     , _stats :: Stats
+    , _rng   :: [Int]
     }
 
 makeLenses ''InstructionCounter

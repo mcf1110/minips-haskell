@@ -13,8 +13,9 @@ import           Data.Maybe               (fromJust, fromMaybe, isJust,
 import           Debug.Trace
 import           Lib.Computer.Types
 import           Lib.Operation.Types      (Operation)
-import           Optics                   (Field2 (_2), Lens', assign, lens,
-                                           modifying, over, (%), (.~), (^.))
+import           Optics                   (Field2 (_2), Field3 (_3), Lens',
+                                           assign, lens, modifying, over, use,
+                                           (%), (.~), (^.))
 import           Optics.Operators.Unsafe  ((^?!))
 
 get :: Enum i => i -> Operation W.Word32
@@ -53,14 +54,16 @@ set ix v = do
 updatingLatencyAndTrace ::
      Enum i
   => MemoryTraceType
-  -> (i -> S.State (Latency, Memory) a)
+  -> (i -> S.State (Latency, Memory, [Int]) a)
   -> i
   -> Operation a
 updatingLatencyAndTrace traceType statefulFunction ix = do
   comp <- S.get
   -- state within a state, yay!
-  let (val, (lat, newMem)) = S.runState (statefulFunction ix) (0, comp ^. mem)
+  let (val, (lat, newMem, newRng)) =
+        S.runState (statefulFunction ix) (0, comp ^. mem, comp ^. rng)
   assign mem newMem
+  assign rng newRng
   updateLatencyAndTrace traceType ix lat
   return val
 
@@ -73,32 +76,32 @@ updateLatencyAndTrace accessType n lat = do
     w32 = toEnum $ fromEnum n
 
 -- despite the name, does not actually write anything!!
-writeMemory :: Enum i => i -> S.State (Latency, Memory) ()
+writeMemory :: Enum i => i -> S.State (Latency, Memory, [Int]) ()
 writeMemory ix = do
-  (l0, m0) <- S.get
+  (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
   if isHit ix m0
     then do
-      S.put (l1, countHit m0)
+      S.put (l1, countHit m0, rng0)
       updateOnExistingWord ix lastUsed 0
       updateOnExistingWord ix isDirty True
     else do
-      S.put (l1, countMiss m0)
+      S.put (l1, countMiss m0, rng0)
       propagateToNext $ fetchMemory ix
       addToCurrentCache ix True -- dirty, just written
 
-fetchMemory :: Enum i => i -> S.State (Latency, Memory) W.Word32
+fetchMemory :: Enum i => i -> S.State (Latency, Memory, [Int]) W.Word32
 fetchMemory ix = do
-  (l0, m0) <- S.get
+  (l0, m0, rng0) <- S.get
   let l1 = l0 + getLatency m0
   if isHit ix m0
       -- all done, just count a hit and go away
     then do
-      S.put (l1, countHit m0)
+      S.put (l1, countHit m0, rng0)
       updateOnExistingWord ix lastUsed 0
       return $ readFromRam $ m0 ^. ram
     else do
-      S.put (l1, countMiss m0)
+      S.put (l1, countMiss m0, rng0)
       v <- propagateToNext $ fetchMemory ix
       addToCurrentCache ix False -- notDirty, just loaded
       return v
@@ -106,9 +109,13 @@ fetchMemory ix = do
     readFromRam im = fromMaybe 0 $ im IM.!? fromEnum ix
 
 updateOnExistingWord ::
-     Enum i => i -> Lens' CacheLine a -> a -> S.State (Latency, Memory) ()
+     Enum i
+  => i
+  -> Lens' CacheLine a
+  -> a
+  -> S.State (Latency, Memory, [Int]) ()
 updateOnExistingWord addr lens val = do
-  (l, mem) <- S.get
+  mem <- use _2
   let cm = mem ^?! cacheMap
       nInt = fromEnum addr
       block = lineNumber addr cm
@@ -118,14 +125,15 @@ updateOnExistingWord addr lens val = do
       idx = fromJust $ V.findIndex (maybe False hasAddress) way
       newWay = way V.// [(idx, (lens .~ val) <$> way V.! idx)]
       mem' = over (cacheMap % addresses) (IM.insert block newWay) mem
-  S.put (l, mem')
-  return ()
+  assign _2 mem'
 
-propagateToNext :: S.State (Latency, Memory) a -> S.State (Latency, Memory) a
+propagateToNext ::
+     S.State (Latency, Memory, [Int]) a -> S.State (Latency, Memory, [Int]) a
 propagateToNext statefulFunction = do
-  (l1, m1) <- S.get
-  let (v, (l2, m2)) = S.runState statefulFunction (l1, m1 ^?! nextMem) -- is safe because only Caches can have misses
-  S.put (l2, (nextMem .~ m2) m1)
+  (l1, m1, rng) <- S.get
+  let (v, (l2, m2, rng')) =
+        S.runState statefulFunction (l1, m1 ^?! nextMem, rng) -- is safe because only Caches can have misses
+  S.put (l2, (nextMem .~ m2) m1, rng')
   return v
 
 lineNumber :: Enum i => i -> CacheMap -> Int
@@ -137,17 +145,16 @@ lineNumber ix cm = ifCacheWasInfinite `mod` linesInCache
     bytesInAWord = 4
     ifCacheWasInfinite = addr `div` (bytesInAWord * wordsInALine)
 
--- TODO: consider policy
-addToCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory) ()
+addToCurrentCache :: Enum i => i -> Bool -> S.State (Latency, Memory, [Int]) ()
 addToCurrentCache ix setDirty = do
-  (lat, memory) <- S.get
+  (lat, memory, rng) <- S.get
   let cm = memory ^?! cacheMap
       block = lineNumber ix cm
       w0 = getWay block cm
       firstEmptyIndex = V.findIndex isNothing w0
-    --mapMaybe is equivalent to map, because none of the positions will be empty anyway
-      lruIndex = V.maxIndex $ V.mapMaybe (fmap (^. lastUsed)) w0
-      selectedIndex = fromMaybe lruIndex firstEmptyIndex
+      (strategyIndex, rng') =
+        selectIndexThroughStrategy (memory ^?! strategy) w0 rng
+      selectedIndex = fromMaybe strategyIndex firstEmptyIndex
       newCacheLine =
         CacheLine
           { _isDirty = setDirty
@@ -163,7 +170,15 @@ addToCurrentCache ix setDirty = do
         propagateToNext $
         writeMemory (fromJust justDeleted ^. address * (cm ^. wordsPerLine * 4))
   modifying _2 (over (cacheMap % addresses) updateAddresses)
+  assign _3 rng'
   when shouldWriteBack writeBack
+
+selectIndexThroughStrategy ::
+     CacheStrategy -> V.Vector (Maybe CacheLine) -> [Int] -> (Int, [Int])
+selectIndexThroughStrategy Random ways (r:rs) = (abs r `mod` V.length ways, rs)
+selectIndexThroughStrategy LRU ways rng =
+  (V.maxIndex $ V.mapMaybe (fmap (^. lastUsed)) ways, rng)
+    --mapMaybe is equivalent to map, because none of the positions will be empty anyway
 
 isHit :: Enum i => i -> Memory -> Bool
 isHit n RAM {} = True
@@ -186,7 +201,7 @@ countHit = over (info % hits) (+ 1) . countMiss
 countMiss :: Memory -> Memory
 countMiss = over (info % total) (+ 1)
 
-fetchQuarter :: Enum i => i -> S.State (Latency, Memory) W.Word8
+fetchQuarter :: Enum i => i -> S.State (Latency, Memory, [Int]) W.Word8
 fetchQuarter n = extractQuarter <$> fetchMemory s
   where
     s = 4 * div (fromEnum n) 4

@@ -30,6 +30,7 @@ dependencies:
 - data-binary-ieee754
 - optics
 - time
+- random
 
 library:
   source-dirs: src
