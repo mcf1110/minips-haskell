@@ -22,3 +22,4 @@ usage = do
 parseArgs :: [String] -> (String, Int, String)
 parseArgs [cmd, fileName]         = (cmd, 0, fileName)
 parseArgs [cmd, config, fileName] = (cmd, read config - 1, fileName)
+parseArgs _                       = ("", 0, "")
