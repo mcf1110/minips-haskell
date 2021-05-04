@@ -30,7 +30,7 @@ triggerInCache mat ix = do
   addTrace
   where
     w32 = toEnum $ fromEnum ix
-    addTrace = modifying (stats % memTrace) ((mat, w32, w32 `div` 32) :)
+    addTrace = modifying (stats % memTrace) (fmap ((mat, w32, w32 `div` 32) :))
 
 exec :: Enum i => MemoryAccessType -> i -> S.State (Latency, Memory, [Int]) ()
 exec mat ix = do

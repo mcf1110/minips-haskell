@@ -9,8 +9,9 @@ import           Lib.Memory.Configs  (configs)
 import           Lib.Segment
 import           System.Random       (mkStdGen, randoms)
 
-initialComputer :: Int -> Int -> Segment -> Segment -> Segment -> Computer
-initialComputer seed conf dataSegment textSegment roDataSegment =
+initialComputer ::
+     Bool -> Int -> Int -> Segment -> Segment -> Segment -> Computer
+initialComputer shouldTrace seed conf dataSegment textSegment roDataSegment =
   Computer iRegisters iHierarchy iMemory iStats iRng
   where
     iMemory =
@@ -27,7 +28,11 @@ initialComputer seed conf dataSegment textSegment roDataSegment =
         coprocessor = V.replicate 32 0
         flags = V.replicate 8 False
     iStats :: Stats
-    iStats = Stats counter [] 0
+    iStats = Stats counter trace 0
       where
+        trace =
+          if shouldTrace
+            then Just []
+            else Nothing
         counter = InstructionCounter 0 0 0 0 0
     iRng = randoms $ mkStdGen seed

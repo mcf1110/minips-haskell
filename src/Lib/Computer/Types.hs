@@ -24,7 +24,7 @@ data InstructionCounter =
 data Stats =
   Stats
     { _insCounter :: !InstructionCounter
-    , _memTrace   :: ![MemoryTrace]
+    , _memTrace   :: !(Maybe [MemoryTrace])
     , _nCycles    :: !Int
     }
 
