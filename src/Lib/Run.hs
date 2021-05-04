@@ -1,5 +1,6 @@
 module Lib.Run where
 
+import           Lib.Computer.Types       (Computer, memTrace, stats)
 import           Lib.Decode
 import qualified Lib.Memory               as M
 import           Lib.Operation
@@ -8,12 +9,12 @@ import qualified Lib.Registers            as R
 
 import           Control.Monad            (when)
 import           Control.Monad.State.Lazy (runState)
-import           System.IO
-import           Text.Printf              (printf)
-
+import           Data.Maybe               (fromJust, isJust)
 import           Data.Time                (NominalDiffTime)
 import qualified Data.Word                as W
-import           Lib.Computer.Types       (Computer)
+import           Optics                   (set, (%), (^.))
+import           System.IO
+import           Text.Printf              (printf)
 
 data SyscallInput
   = GotInt Int
@@ -21,25 +22,38 @@ data SyscallInput
   | GotDouble Double
   | GotNothing
 
-runComputer :: NominalDiffTime -> Computer -> IO Computer
-runComputer startTime = runWithBreakpoints startTime []
+runComputer :: Maybe Handle -> NominalDiffTime -> Computer -> IO Computer
+runComputer file startTime = runWithBreakpoints file startTime []
 
-runWithBreakpoints :: NominalDiffTime -> [W.Word32] -> Computer -> IO Computer
-runWithBreakpoints startTime bps c0 = do
+runWithBreakpoints ::
+     Maybe Handle -> NominalDiffTime -> [W.Word32] -> Computer -> IO Computer
+runWithBreakpoints file startTime bps c0 = do
   let (sc, c1) = tick c0
   syscallInput <- runSyscall sc
   let c2 = storeInput syscallInput c1
       pc = R.get 32 c2
+  c3 <- dumpTrace file c2
   when (pc `elem` bps) $ do
     putStrLn $ "pc: " <> printf "0x%08x" pc
-    printComputer c2
+    printComputer c3
     getLine
     putStrLn "---------"
   if sc /= Die
-    then runWithBreakpoints startTime bps c2
+    then runWithBreakpoints file startTime bps c3
     else do
-      printStats startTime c2
-      return c2
+      printStats startTime c3
+      return c3
+
+dumpTrace :: Maybe Handle -> Computer -> IO Computer
+dumpTrace Nothing c = return c
+dumpTrace (Just f) c = do
+  let trace = reverse <$> c ^. (stats % memTrace)
+  if isJust trace
+    then do
+      hPutStr f $ unlines $ printTrace <$> fromJust trace
+      return $ set (stats % memTrace) (Just []) c
+    else do
+      return c
 
 storeInput :: SyscallInput -> Computer -> Computer
 storeInput syscallInput c =

@@ -17,21 +17,23 @@ import           Control.Monad         (when, (>=>))
 import           Data.Either           (fromRight)
 import           Data.Maybe            (fromJust, fromMaybe, isJust)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
-import           Optics                ((%), (^.))
+import           System.IO             (IOMode (WriteMode), hClose, openFile)
 
 run :: Int -> FilePath -> IO ()
 run conf path = do
   startTime <- getPOSIXTime
   computer <- loadComputer False (floor startTime) conf path
-  runComputer startTime computer
+  runComputer Nothing startTime computer
   return ()
 
 runTrace :: Int -> FilePath -> IO ()
 runTrace conf path = do
   startTime <- getPOSIXTime
   computer <- loadComputer True (floor startTime) conf path
-  finalComputer <- runComputer startTime computer
-  writeTraceToFile finalComputer
+  f <- openFile "minips.trace" WriteMode
+  runComputer (Just f) startTime computer
+  hClose f
+  return ()
 
 loadComputer :: Bool -> Int -> Int -> FilePath -> IO Computer
 loadComputer shouldTrace seed conf fp = do
@@ -48,9 +50,3 @@ decode = readSegment >=> printProgramWithHexes
 
 readSegment :: FilePath -> IO Segment
 readSegment fp = F.readFile $ fp <> ".text"
-
-writeTraceToFile :: Computer -> IO ()
-writeTraceToFile c = do
-  let trace = reverse <$> c ^. (stats % memTrace)
-  when (isJust trace) $
-    writeFile "my-minips.trace" $ unlines $ printTrace <$> fromJust trace
