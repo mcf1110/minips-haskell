@@ -14,18 +14,18 @@ import           Optics                        (makeLenses, (^.))
 
 data InstructionCounter =
   InstructionCounter
-    { _rCounter  :: Int
-    , _iCounter  :: Int
-    , _jCounter  :: Int
-    , _frCounter :: Int
-    , _fiCounter :: Int
+    { _rCounter  :: !Int
+    , _iCounter  :: !Int
+    , _jCounter  :: !Int
+    , _frCounter :: !Int
+    , _fiCounter :: !Int
     }
 
 data Stats =
   Stats
-    { _insCounter :: InstructionCounter
-    , _memTrace   :: [MemoryTrace]
-    , _nCycles    :: Int
+    { _insCounter :: !InstructionCounter
+    , _memTrace   :: ![MemoryTrace]
+    , _nCycles    :: !Int
     }
 
 data Computer =
@@ -33,7 +33,7 @@ data Computer =
     { _reg   :: Registers
     , _mem   :: Memory
     , _ram   :: ActualMemory
-    , _stats :: Stats
+    , _stats :: !Stats
     , _rng   :: [Int]
     }
 
