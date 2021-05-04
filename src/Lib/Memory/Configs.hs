@@ -21,9 +21,4 @@ config3 :: [Memory -> Memory]
 config3 = [mkSplitCache L1 Random 512 1 32]
 
 mkConfig :: [Memory -> Memory] -> Memory
-mkConfig = go
-  where
-    go :: [Memory -> Memory] -> Memory
-    go []     = mkRam
-    go (m:ms) = m $ go ms
-    -- TODO: ^^^ clearly a fold
+mkConfig = foldr ($) mkRam
