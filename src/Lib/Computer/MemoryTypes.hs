@@ -28,7 +28,7 @@ data CacheStrategy
 data CacheUnit =
   CacheUnit
     { _info     :: !MemInfo
-    , _cacheMap :: CacheMap
+    , _cacheMap :: !CacheMap
     }
   deriving (Show)
 
@@ -42,17 +42,17 @@ data MemInfo =
 data CacheMap =
   CacheMap
     { _addresses    :: IM.IntMap (V.Vector (Maybe CacheLine))
-    , _nLines       :: NLines
-    , _nWays        :: NWays
-    , _wordsPerLine :: WordsPerLine
+    , _nLines       :: !NLines
+    , _nWays        :: !NWays
+    , _wordsPerLine :: !WordsPerLine
     }
   deriving (Show)
 
 data CacheLine =
   CacheLine
-    { _isDirty  :: Bool
-    , _lastUsed :: Int
-    , _address  :: Int
+    { _isDirty  :: !Bool
+    , _lastUsed :: !Int
+    , _address  :: !Int
     }
   deriving (Show)
 
@@ -61,14 +61,14 @@ data Memory
       { _ramInfo :: !MemInfo
       }
   | Cache
-      { _unit     :: CacheUnit
+      { _unit     :: !CacheUnit
       , _level    :: CacheLevel
       , _strategy :: CacheStrategy
       , _nextMem  :: Memory
       }
   | SplitCache
-      { _dataUnit :: CacheUnit
-      , _instUnit :: CacheUnit
+      { _dataUnit :: !CacheUnit
+      , _instUnit :: !CacheUnit
       , _level    :: CacheLevel
       , _strategy :: CacheStrategy
       , _nextMem  :: Memory
