@@ -1,13 +1,13 @@
 module Lib.Computer where
 
-import qualified Data.IntMap.Lazy   as IM
+import qualified Data.IntMap.Lazy    as IM
 
-import qualified Data.Vector        as V
-import qualified Data.Word          as W
+import qualified Data.Vector.Unboxed as V
+import qualified Data.Word           as W
 import           Lib.Computer.Types
-import           Lib.Memory.Configs (configs)
+import           Lib.Memory.Configs  (configs)
 import           Lib.Segment
-import           System.Random      (mkStdGen, randoms)
+import           System.Random       (mkStdGen, randoms)
 
 initialComputer :: Int -> Segment -> Segment -> Segment -> Computer
 initialComputer conf dataSegment textSegment roDataSegment =

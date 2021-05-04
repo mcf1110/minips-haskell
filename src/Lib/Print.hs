@@ -6,7 +6,7 @@ import           Lib.Segment
 
 import qualified Data.BitVector          as BV
 import qualified Data.IntMap.Lazy        as IM
-import qualified Data.Vector             as V
+import qualified Data.Vector.Unboxed     as V
 
 import           Data.Char               (isUpper, toLower)
 import           Data.Foldable           (forM_)

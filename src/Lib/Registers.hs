@@ -12,7 +12,7 @@ module Lib.Registers
   , Registers(..)
   ) where
 
-import qualified Data.Vector         as V
+import qualified Data.Vector.Unboxed as V
 import qualified Data.Word           as W
 
 import qualified Data.Bifunctor      as B
