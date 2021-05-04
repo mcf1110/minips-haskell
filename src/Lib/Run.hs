@@ -11,7 +11,7 @@ import           Control.Monad.State.Lazy (runState)
 import           System.IO
 import           Text.Printf              (printf)
 
-import           Data.Time                (UTCTime)
+import           Data.Time                (NominalDiffTime)
 import qualified Data.Word                as W
 import           Lib.Computer.Types       (Computer)
 
@@ -21,10 +21,10 @@ data SyscallInput
   | GotDouble Double
   | GotNothing
 
-runComputer :: UTCTime -> Computer -> IO Computer
+runComputer :: NominalDiffTime -> Computer -> IO Computer
 runComputer startTime = runWithBreakpoints startTime []
 
-runWithBreakpoints :: UTCTime -> [W.Word32] -> Computer -> IO Computer
+runWithBreakpoints :: NominalDiffTime -> [W.Word32] -> Computer -> IO Computer
 runWithBreakpoints startTime bps c0 = do
   let (sc, c1) = tick c0
   syscallInput <- runSyscall sc

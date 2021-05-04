@@ -13,7 +13,9 @@ import           Data.Foldable           (forM_)
 import           Data.List               (intercalate)
 import           Data.List.Split         (keepDelimsL, split, whenElt)
 import           Data.Maybe              (fromMaybe)
-import           Data.Time               (UTCTime, diffUTCTime, getCurrentTime)
+import           Data.Time               (NominalDiffTime, diffUTCTime,
+                                          getCurrentTime)
+import           Data.Time.Clock.POSIX   (getPOSIXTime)
 import           Lib.Computer.Types
 import           Optics                  (Lens', view, (%), (^.), (^?))
 import           Optics.Operators.Unsafe ((^?!))
@@ -193,10 +195,10 @@ showInstruction Nop = "nop"
 showInstruction Break = "break"
 showInstruction _ = "XXXXXXXXXXXXXXXXXX"
 
-printStats :: UTCTime -> Computer -> IO ()
+printStats :: NominalDiffTime -> Computer -> IO ()
 printStats startTime c = do
-  endTime <- getCurrentTime
-  let duration = diffUTCTime endTime startTime
+  endTime <- getPOSIXTime
+  let duration = endTime - startTime
       st = c ^. stats
       cyc = st ^. nCycles
       speedUp = (fromIntegral cyc / freqMono) / (fromIntegral (cyc + 4) / freq)

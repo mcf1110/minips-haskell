@@ -9,8 +9,8 @@ import           Lib.Memory.Configs  (configs)
 import           Lib.Segment
 import           System.Random       (mkStdGen, randoms)
 
-initialComputer :: Int -> Segment -> Segment -> Segment -> Computer
-initialComputer conf dataSegment textSegment roDataSegment =
+initialComputer :: Int -> Int -> Segment -> Segment -> Segment -> Computer
+initialComputer seed conf dataSegment textSegment roDataSegment =
   Computer iRegisters iHierarchy iMemory iStats iRng
   where
     iMemory =
@@ -30,4 +30,4 @@ initialComputer conf dataSegment textSegment roDataSegment =
     iStats = Stats counter [] 0
       where
         counter = InstructionCounter 0 0 0 0 0
-    iRng = randoms $ mkStdGen 42
+    iRng = randoms $ mkStdGen seed
