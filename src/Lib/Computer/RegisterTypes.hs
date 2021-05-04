@@ -14,9 +14,9 @@ type CCFlags = V.Vector Bool
 
 data Registers =
   Registers
-    { _gpr     :: GPR
-    , _fpr     :: FPR
-    , _ccFlags :: CCFlags
+    { _gpr     :: !GPR
+    , _fpr     :: !FPR
+    , _ccFlags :: !CCFlags
     }
 
 makeLenses ''Registers
