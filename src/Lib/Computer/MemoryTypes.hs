@@ -27,15 +27,15 @@ data CacheStrategy
 
 data CacheUnit =
   CacheUnit
-    { _info     :: MemInfo
+    { _info     :: !MemInfo
     , _cacheMap :: CacheMap
     }
   deriving (Show)
 
 data MemInfo =
   MemInfo
-    { _hits  :: Int
-    , _total :: Int
+    { _hits  :: !Int
+    , _total :: !Int
     }
   deriving (Show)
 
@@ -58,7 +58,7 @@ data CacheLine =
 
 data Memory
   = RAM
-      { _ramInfo :: MemInfo
+      { _ramInfo :: !MemInfo
       }
   | Cache
       { _unit     :: CacheUnit
