@@ -32,20 +32,15 @@ removeFromInstructionCache Write ix = do
     SplitCache {} -> assign _2 mem'
       where cm = mem ^?! (instUnit % cacheMap)
             nInt = fromEnum ix
-            block = lineNumber ix cm
-            way = getWaysAtLine block cm
-            withoutOffset = nInt `div` (cm ^. wordsPerLine * 4)
-            hasAddress v = (v ^. address) == withoutOffset
-            maybeIdx = V.findIndex (maybe False hasAddress) way
+            line = lineNumber ix cm
+            way = getWaysAtLine line cm
+            maybeIdx = getCacheMapIndex cm ix
             newWay =
               if isJust maybeIdx
                 then way V.// [(fromJust maybeIdx, Nothing)]
                 else way
             mem' =
-              over
-                (instUnit % cacheMap % addresses)
-                (IM.insert block newWay)
-                mem
+              over (instUnit % cacheMap % addresses) (IM.insert line newWay) mem
     _ -> return ()
 removeFromInstructionCache _ _ = return ()
 
