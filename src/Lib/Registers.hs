@@ -22,29 +22,37 @@ import           Data.Either         (fromRight)
 import           Lib.Computer.Types
 import           Optics              (Lens', over, (%), (^.))
 
--- TODO refactor using these
--- _getAt :: Enum a => Lens' Computer (V.Vector b) -> a -> Computer -> b
--- _getAt lens ix comp = (comp ^. lens) V.! fromEnum ix
--- _setAt :: Enum a => Lens' Computer (V.Vector b) -> a -> b -> Computer -> Computer
--- _setAt lens ix v = over lens (\regs -> regs V.// [(fromEnum ix, v)])
+_getAt ::
+     (Enum a, V.Unbox b) => Lens' Registers (V.Vector b) -> a -> Computer -> b
+_getAt lens ix comp = (comp ^. (reg % lens)) V.! fromEnum ix
+
+_setAt ::
+     (Enum a, V.Unbox b)
+  => Lens' Registers (V.Vector b)
+  -> a
+  -> b
+  -> Computer
+  -> Computer
+_setAt lens ix v = over (reg % lens) (\regs -> regs V.// [(fromEnum ix, v)])
+
 get :: Enum a => a -> Computer -> W.Word32
-get ix comp = (comp ^. reg % gpr) V.! fromEnum ix
+get = _getAt gpr
+
+getCop :: Enum a => a -> Computer -> W.Word32
+getCop = _getAt fpr
+
+getFlag :: Enum a => a -> Computer -> Bool
+getFlag = _getAt ccFlags
 
 set :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Computer -> Computer
 set 0 _  = id
-set ix v = over (reg % gpr) (\regs -> regs V.// [(fromEnum ix, v)])
-
-getCop :: Enum a => a -> Computer -> W.Word32
-getCop ix comp = (comp ^. reg % fpr) V.! fromEnum ix
+set ix v = _setAt gpr ix v
 
 setCop :: (Eq a, Num a, Enum a) => a -> W.Word32 -> Computer -> Computer
-setCop ix v = over (reg % fpr) (\regs -> regs V.// [(fromEnum ix, v)])
-
-getFlag :: (Enum a, Num a) => a -> Computer -> Bool
-getFlag ix comp = (comp ^. reg % ccFlags) V.! fromEnum ix
+setCop = _setAt fpr
 
 setFlag :: (Eq a, Num a, Enum a) => a -> Bool -> Computer -> Computer
-setFlag ix v = over (reg % ccFlags) (\cc -> cc V.// [(fromEnum ix, v)])
+setFlag = _setAt ccFlags
 
 getF :: Enum a => a -> Computer -> Float
 getF ix comp = F.wordToFloat $ getCop ix comp
