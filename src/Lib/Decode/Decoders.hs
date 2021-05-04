@@ -1,16 +1,17 @@
 module Lib.Decode.Decoders where
 
-import qualified Data.BitVector   as BV
-import qualified Data.Word        as W
+import qualified Data.BitVector        as BV
+import qualified Data.Word             as W
 
+import           Data.Function.Memoize (memoizeFinite)
 import           Lib.Decode.Types
-import           Lib.Segment      (Segment)
+import           Lib.Segment           (Segment)
 
 decodeProgram :: Segment -> Program
 decodeProgram = map decodeInstruction
 
 decodeInstruction :: W.Word32 -> Instr
-decodeInstruction = decode . wordToBV
+decodeInstruction = memoizeFinite (decode . wordToBV)
 
 wordToBV :: W.Word32 -> BV.BitVector
 wordToBV = BV.bitVec 32

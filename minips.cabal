@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d4f5b772e2118b4fd83a8c39ea4c8a88bf8b7b3a8a60ec926d2a8f18c106d503
+-- hash: 38dbc0ae76bafa18b6ddfedb7c47f84fe59f4fe4b1e591bf7b790a69aab3c8f6
 
 name:           minips
 version:        0.1.0.0
@@ -65,6 +65,7 @@ library
     , bytestring
     , containers
     , data-binary-ieee754
+    , memoize
     , mtl
     , optics
     , random
@@ -86,6 +87,7 @@ executable minips
     , bytestring
     , containers
     , data-binary-ieee754
+    , memoize
     , minips
     , mtl
     , optics
@@ -117,6 +119,7 @@ test-suite minips-test
     , bytestring
     , containers
     , data-binary-ieee754
+    , memoize
     , minips
     , mtl
     , optics

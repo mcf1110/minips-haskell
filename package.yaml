@@ -31,6 +31,7 @@ dependencies:
 - optics
 - time
 - random
+- memoize
 
 library:
   source-dirs: src
